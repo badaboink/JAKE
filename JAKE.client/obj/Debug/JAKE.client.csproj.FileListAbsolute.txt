@@ -1,0 +1,9 @@
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\bin\Debug\JAKE.client.exe.config
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\bin\Debug\JAKE.client.exe
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\bin\Debug\JAKE.client.pdb
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\obj\Debug\JAKE.client.csproj.AssemblyReference.cache
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\obj\Debug\JAKE.client.Properties.Resources.resources
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\obj\Debug\JAKE.client.csproj.GenerateResource.cache
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\obj\Debug\JAKE.client.csproj.CoreCompileInputs.cache
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\obj\Debug\JAKE.client.exe
+C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.client\obj\Debug\JAKE.client.pdb
