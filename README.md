@@ -1,0 +1,2 @@
+# JAKE
+Objektinis programų projektavimas
