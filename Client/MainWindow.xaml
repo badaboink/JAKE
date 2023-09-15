@@ -4,10 +4,9 @@
         Title="JAKE Client" xmlns:local="clr-namespace:JAKE.Client" Width="800" Height="600">
     <Grid>
         <ItemsControl x:Name="playersContainer">
-            <!-- Define the visual representation of PlayerVisual here -->
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Canvas />
+                    <Canvas x:Name="GameMap" Background="Gray" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>

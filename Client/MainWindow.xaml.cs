@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -10,6 +11,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Effects;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -24,12 +26,14 @@ namespace JAKE.client
         private TcpClient client;
         private NetworkStream stream;
         private Player currentPlayer;
-        private PlayerVisual currentPlayerVisuals;
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
+        private List<Obstacle> obstacles = new List<Obstacle>();
 
         public MainWindow()
         {
             InitializeComponent();
+            WindowState = WindowState.Maximized;
+            Loaded += MainWindow_Loaded;
             this.KeyDown += MainWindow_KeyDown;
         }
         protected override void OnInitialized(EventArgs e)
@@ -51,14 +55,14 @@ namespace JAKE.client
             var receiveThread = new System.Threading.Thread(ReceivePlayerData);
             receiveThread.Start();
         }
-        public String getFirstWordUsingSubString(String input)
+        public String getFirstInstanceUsingSubString(String input, string something)
         {
-            int index = input.Contains(" ") ? input.IndexOf(" ") : 0;
+            int index = input.Contains(something) ? input.IndexOf(something)+something.Length-1 : 0;
             return input.Substring(0, index);
         }
-        public string GetStringAfterFirstSpace(string input)
+        public string GetStringAfterFirstSpace(string input, string something)
         {
-            int index = input.Contains(" ") ? input.IndexOf(" ") + 1 : 0;
+            int index = input.Contains(something) ? input.IndexOf(something) + something.Length : 0;
             return input.Substring(index);
         }
         private void ReceivePlayerData()
@@ -67,14 +71,36 @@ namespace JAKE.client
             List<Player> playerInfoList = new List<Player>();
 
             while (true)
-            {
-                // Create a list to store information about all players
-                
+            {                
                 string message = ReceiveString(stream);
-
-                if (message.StartsWith("INIT:") && !initialized)
+                if (message.StartsWith("ObstacleData:"))
                 {
-                    string initMessage = getFirstWordUsingSubString(message);
+                    string obstaclemessage = getFirstInstanceUsingSubString(message, "I");
+                    if (obstaclemessage == "")
+                    {
+                        obstaclemessage = message;
+                    }
+                    obstaclemessage = obstaclemessage.Substring("ObstacleData:".Length);
+                    string[] obstaclemessages = obstaclemessage.Split(',');
+                    foreach(string obs in obstaclemessages)
+                    {
+                        string[] parts = obs.Split(':');
+                        if (parts.Length == 4)
+                        {
+                            double width = double.Parse(parts[0]);
+                            double height = double.Parse(parts[1]);
+                            double posX = double.Parse(parts[2]);
+                            double posY = double.Parse(parts[3]);
+
+                            Obstacle obstacle = new Obstacle(width, height, posX, posY);
+                            obstacles.Add(obstacle);
+                        }
+                    }
+                    message = message.Remove(0, "ObstacleData:".Length+obstaclemessage.Length-1);
+                }
+                if (message.Contains("INIT:") && !initialized)
+                {
+                    string initMessage = getFirstInstanceUsingSubString(message, " ");
                     // Parse and process the initialization message
                     string[] parts = initMessage.Split(':');
                     if (parts.Length == 6)
@@ -94,38 +120,41 @@ namespace JAKE.client
                         initialized = true;
                     }
                 }
-
-                string playerList = GetStringAfterFirstSpace(message);
-                // Assuming the player list format is "ID:Name:Color,ID:Name:Color,..."
-
-                // Split the player list into individual player entries
-                string[] playerEntries = playerList.Split(',');
-
-                foreach (string playerEntry in playerEntries)
+                if(initialized) 
                 {
-                    // Split each player entry into ID, Name, and Color parts
-                    string[] parts = playerEntry.Split(':');
+                    string playerList = GetStringAfterFirstSpace(message, " ");
+                    // Assuming the player list format is "ID:Name:Color,ID:Name:Color,..."
 
-                    if (parts.Length == 5)
+                    // Split the player list into individual player entries
+
+                    string[] playerEntries = playerList.Split(',');
+
+                    foreach (string playerEntry in playerEntries)
                     {
-                        int playerId = int.Parse(parts[0]);
-                        string playerName = parts[1];
-                        string playerColor = parts[2];
-                        int x = int.Parse(parts[3]);
-                        int y = int.Parse(parts[4]);
+                        //Split each player entry into ID, Name, and Color parts
+                        string[] parts = playerEntry.Split(':');
 
-                        // Create a PlayerInfo object to store player information
-                        Player playerInfo = new Player(playerId, playerName, playerColor);
-                        playerInfo.SetCurrentPosition(x, y);
-                        playerInfoList.Add(playerInfo);
+                        if (parts.Length == 5)
+                        {
+                            int playerId = int.Parse(parts[0]);
+                            string playerName = parts[1];
+                            string playerColor = parts[2];
+                            int x = int.Parse(parts[3]);
+                            int y = int.Parse(parts[4]);
+
+                            //Create a PlayerInfo object to store player information
+                            Player playerInfo = new Player(playerId, playerName, playerColor);
+                            playerInfo.SetCurrentPosition(x, y);
+                            playerInfoList.Add(playerInfo);
+                        }
                     }
                 }
+                UpdateClientView(playerInfoList);
 
                 // Update the client's view to display the players
-                UpdateClientView(playerInfoList);
+               
             }
         }
-        
         private void UpdateClientView(List<Player> playerInfoList)
         {
             Dispatcher.Invoke(() =>
@@ -161,27 +190,37 @@ namespace JAKE.client
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
             return Encoding.ASCII.GetString(buffer, 0, bytesRead);
         }
-
+        
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // Initialize the game loop (if needed)
-            //StartGameLoop();
-        }
-        private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            // Suppress arrow key events at the window level to prevent scrolling or other default behaviors.
-            if (e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Up || e.Key == Key.Down)
+            Random random = new Random();
+            Canvas gameMapCanvas = new Canvas();
+            gameMapCanvas.Name = "GameMap";
+            gameMapCanvas.Background = Brushes.Gray;
+
+            // Create a Rectangle (obstacle)
+            foreach (Obstacle obs in obstacles)
             {
-                e.Handled = true;
+                Rectangle obstacleRect = new Rectangle();
+                
+                obstacleRect.Width = obs.Width;
+                obstacleRect.Height = obs.Height;
+                obstacleRect.Fill = Brushes.LightGray;
+                Canvas.SetLeft(obstacleRect, obs.PositionX);
+                Canvas.SetTop(obstacleRect, obs.PositionY);
+
+                // Add the Rectangle to the Canvas
+                gameMapCanvas.Children.Add(obstacleRect);
             }
+
+            // Replace the existing Canvas with the new one
+            playersContainer.Items.Add(gameMapCanvas);
         }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             int deltaX = 0;
             int deltaY = 0;
-
-            Console.WriteLine($"Key pressed: {e.Key}");
 
             // Handle arrow key presses here and update the player's position
             // based on the arrow key input.
@@ -201,14 +240,31 @@ namespace JAKE.client
             {
                 deltaY = 1; // Move down
             }
-            UpdatePlayer(playerVisuals[currentPlayer], deltaX, deltaY);
 
-            string movementUpdateMessage = UpdatePlayerPosition(playerVisuals[currentPlayer]);
+            double newX = currentPlayer.GetCurrentX() + deltaX * 10;
+            double newY = currentPlayer.GetCurrentY() + deltaY * 10;
 
-            // Send the movement update message to the server using the client's network stream
-            byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
-            stream.Write(updateData, 0, updateData.Length);
-            stream.Flush();
+            bool overlap = false;
+            // TO DO: jei overlapina bet yra kelio iki to obstacle padaryt, kad galetu nueit, dbr tng
+            foreach (Obstacle obstacle in obstacles)
+            {
+                if (obstacle.WouldOverlap(newX, newY, 50, 50))
+                {
+                    overlap = true;
+                    break;
+                }
+            }
+            if (!overlap)
+            {
+                UpdatePlayer(playerVisuals[currentPlayer], deltaX, deltaY);
+
+                string movementUpdateMessage = $"MOVE:{currentPlayer.GetId()}:{newX}:{newY}";
+
+                // Send the movement update message to the server using the client's network stream
+                byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
+                stream.Write(updateData, 0, updateData.Length);
+                stream.Flush();
+            }
 
         }
         private void UpdatePlayer(PlayerVisual playerVisual, int deltaX, int deltaY)

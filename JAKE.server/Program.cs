@@ -13,6 +13,7 @@ class Server
     private List<Player> players = new List<Player>();
     private TcpListener listener;
     private Dictionary<int, NetworkStream> playerStreams = new Dictionary<int, NetworkStream>();
+    private List<Obstacle> obstacles = new List<Obstacle>();
 
     public Server()
     {
@@ -22,6 +23,7 @@ class Server
     public void Start()
     {
         listener.Start();
+        GenerateObstacles();
         Console.WriteLine("Server started. Waiting for connections...");
 
         while (true)
@@ -50,11 +52,16 @@ class Server
         Player newPlayer = new Player(playerId, "a", tempColor);
 
         Random random = new Random();
-        newPlayer.SetCurrentPosition(random.Next(50, 400), random.Next(50, 400));
+        newPlayer.SetCurrentPosition(0, 0);
         players.Add(newPlayer);
         playerStreams.Add(playerId, stream);
 
         // Send new player their player info separately
+        string obstacleData = string.Join(",", obstacles.Select(obstacle => obstacle.ToString()));
+        string fullObstacleData = $"ObstacleData:{obstacleData}";
+        Console.WriteLine(fullObstacleData);
+        byte[] obstacleBytes = Encoding.UTF8.GetBytes(fullObstacleData);
+        stream.Write(obstacleBytes, 0, obstacleBytes.Length);
 
         string initializationMessage = $"INIT:{newPlayer.GetId()}:{newPlayer.GetName()}:{newPlayer.GetColor()}:{newPlayer.GetCurrentX()}:{newPlayer.GetCurrentY()} ";
         Console.Write(initializationMessage);
@@ -87,6 +94,23 @@ class Server
         //client.Close();
     }
 
+    private void GenerateObstacles()
+    {
+        Random random = new Random();
+        for (int i = 0; i < random.Next(10, 14); i++)
+        {
+            int widthTemp = random.Next(50, 300);
+            int heightTemp = (widthTemp < 150) ? random.Next(200, 300) : random.Next(50, 100);
+
+            // TO DO: atsisakau daryti packing algoritma
+
+            int xtemp = random.Next(0, 1936 - widthTemp);
+            int ytemp = random.Next(0, 1056 - heightTemp);
+
+            Obstacle obstacle = new Obstacle(widthTemp, heightTemp, xtemp, ytemp);
+            obstacles.Add(obstacle);
+        }
+    }
     private void HandleMovementUpdate(string message)
     {
         // Parse the movement update message
