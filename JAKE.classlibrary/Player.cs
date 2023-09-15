@@ -12,8 +12,8 @@ namespace JAKE.classlibrary
         private int _id;
         private string _name;
         private string _color;
-        private int _currentX;
-        private int _currentY;
+        private double _currentX;
+        private double _currentY;
         public string Ability { get; set; }
 
         public Player(int id, string name, string color)
@@ -47,17 +47,17 @@ namespace JAKE.classlibrary
             return _color;
         }
 
-        public int GetCurrentX()
+        public double GetCurrentX()
         {
             return _currentX;
         }
 
-        public int GetCurrentY()
+        public double GetCurrentY()
         {
             return _currentY;
         }
 
-        public void SetCurrentPosition(int x, int y)
+        public void SetCurrentPosition(double x, double y)
         {
             _currentX = x;
             _currentY = y;

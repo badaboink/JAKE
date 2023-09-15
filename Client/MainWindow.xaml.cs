@@ -135,6 +135,7 @@ namespace JAKE.client
                     if (playerVisuals.ContainsKey(playerInfo))
                     {
                         PlayerVisual playerVisual = playerVisuals[playerInfo];
+                        double x = Canvas.GetLeft(playerVisual);
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
                     }
@@ -200,9 +201,9 @@ namespace JAKE.client
             {
                 deltaY = 1; // Move down
             }
-            //UpdatePlayerPosition(playerVisuals[currentPlayer], deltaX, deltaY);
+            UpdatePlayer(playerVisuals[currentPlayer], deltaX, deltaY);
 
-            string movementUpdateMessage = UpdatePlayerPosition(playerVisuals[currentPlayer], deltaX, deltaY);
+            string movementUpdateMessage = UpdatePlayerPosition(playerVisuals[currentPlayer]);
 
             // Send the movement update message to the server using the client's network stream
             byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
@@ -210,20 +211,27 @@ namespace JAKE.client
             stream.Flush();
 
         }
-        private string UpdatePlayerPosition(PlayerVisual playerVisual, int deltaX, int deltaY)
+        private void UpdatePlayer(PlayerVisual playerVisual, int deltaX, int deltaY)
         {
             double currentX = Canvas.GetLeft(playerVisual);
             double currentY = Canvas.GetTop(playerVisual);
 
             // Calculate the new position
-            double newX = currentX + deltaX * 100; // Adjust 'moveSpeed' as needed
-            double newY = currentY + deltaY * 100;
+            double newX = currentX + deltaX * 10;
+            double newY = currentY + deltaY * 10;
 
             // Set the new position
             Canvas.SetLeft(playerVisual, newX);
             Canvas.SetTop(playerVisual, newY);
 
-            return $"MOVE:{currentPlayer.GetId()}:{newX}:{newY}";
+            currentPlayer.SetCurrentPosition(newX, newY);
+        }
+        private string UpdatePlayerPosition(PlayerVisual playerVisual)
+        {
+            double currentX = Canvas.GetLeft(playerVisual);
+            double currentY = Canvas.GetTop(playerVisual);
+
+            return $"MOVE:{currentPlayer.GetId()}:{currentX}:{currentY}";
         }
     }
 }
