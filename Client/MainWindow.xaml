@@ -10,5 +10,6 @@
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
+        <Canvas x:Name="ShotContainer" Background="Transparent"/>
     </Grid>
 </Window>
