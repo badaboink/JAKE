@@ -1,0 +1,6 @@
+﻿<UserControl x:Class="JAKE.Client.PlayerVisual"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="50" Width="50">
+    <Rectangle x:Name="playerRectangle" Width="50" Height="50"/>
+</UserControl>
