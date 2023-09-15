@@ -1,18 +1,18 @@
-﻿JAKE.Client
+﻿JAKE.client
 1.0.0.0
 
 winexe
 C#
 .cs
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\
-JAKE.Client
+JAKE.client
 none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\App.xaml
 3904201246
 
-8427720631
+7-507893484
 195342223234
 ColorChoiceForm.xaml;MainWindow.xaml;PlayerVisual.xaml;
 

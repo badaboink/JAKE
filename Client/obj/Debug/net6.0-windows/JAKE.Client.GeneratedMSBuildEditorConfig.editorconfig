@@ -7,5 +7,5 @@ build_property.InvariantGlobalization =
 build_property.PlatformNeutralAssembly = 
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
-build_property.RootNamespace = JAKE.Client
+build_property.RootNamespace = JAKE.client
 build_property.ProjectDir = C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\

@@ -6,12 +6,12 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v6.0": {
-      "JAKE.Client/1.0.0": {
+      "JAKE.client/1.0.0": {
         "dependencies": {
           "JAKE.classlibrary": "1.0.0"
         },
         "runtime": {
-          "JAKE.Client.dll": {}
+          "JAKE.client.dll": {}
         }
       },
       "JAKE.classlibrary/1.0.0": {
@@ -22,7 +22,7 @@
     }
   },
   "libraries": {
-    "JAKE.Client/1.0.0": {
+    "JAKE.client/1.0.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

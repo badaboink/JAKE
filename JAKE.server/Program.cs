@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Text;
 using System.Threading;
 using JAKE.classlibrary;
@@ -45,17 +46,39 @@ class Server
         {
             playerId = players.Count + 1;
         }
-        Console.WriteLine($"{playerId} {tempColor}");
-        //Color playerColor = Color.FromName(tempColor);
-        // Create a new player with a random color
+
         Player newPlayer = new Player(playerId, "a", tempColor);
+
+        Random random = new Random();
+        newPlayer.SetCurrentPosition(random.Next(50, 400), random.Next(50, 400));
         players.Add(newPlayer);
         playerStreams.Add(playerId, stream);
+
+        // Send new player their player info separately
+
+        string initializationMessage = $"INIT:{newPlayer.GetId()}:{newPlayer.GetName()}:{newPlayer.GetColor()}:{newPlayer.GetCurrentX()}:{newPlayer.GetCurrentY()} ";
+        Console.Write(initializationMessage);
+        byte[] initBytes = Encoding.UTF8.GetBytes(initializationMessage);
+        stream.Write(initBytes, 0, initBytes.Length);
+        stream.Flush();
 
         // Broadcast the updated player list to all clients
         BroadcastPlayerList();
 
         // Handle player input, gameplay, etc., here...
+        while (true)
+        {
+            string message = ReceiveString(stream);
+
+            // Handle movement updates
+            if (message.StartsWith("MOVE:"))
+            {
+                HandleMovementUpdate(message);
+            }
+
+            // Handle other types of messages as needed
+            // ...
+        }
 
         // When the player disconnects, remove them from the player list and broadcast the updated list
         //players.Remove(newPlayer);
@@ -64,12 +87,38 @@ class Server
         //client.Close();
     }
 
+    private void HandleMovementUpdate(string message)
+    {
+        // Parse the movement update message
+        string[] parts = message.Split(':');
+        if (parts.Length == 4 && parts[0] == "MOVE")
+        {
+            int playerId = int.Parse(parts[1]);
+            int deltaX = int.Parse(parts[2]);
+            int deltaY = int.Parse(parts[3]);
+
+            // Find the player by ID and update their position
+            Player playerToUpdate = players.FirstOrDefault(p => p.GetId() == playerId);
+            if (playerToUpdate != null)
+            {
+                playerToUpdate.SetCurrentPosition(deltaX, deltaY);
+            }
+
+            // Broadcast the updated player positions to all clients
+            BroadcastPlayerList();
+        }
+    }
+
     private void BroadcastPlayerList()
     {
-        string playerList = string.Join(",", players.Select(player => $"{player.GetId()}:{player.GetName()}:{player.GetColor()}"));
-        Console.WriteLine($"{playerList}");
         foreach (Player player in players)
         {
+            string playerList = string.Join(",", players
+                .Where(p => p.GetId() != player.GetId()) // Exclude the current player
+                .Select(p => $"{p.GetId()}:{p.GetName()}:{p.GetColor()}:{p.GetCurrentX()}:{p.GetCurrentY()}"));
+
+            Console.WriteLine($"{playerList}");
+
             NetworkStream stream = GetStreamForPlayer(player);
             SendString(stream, playerList);
         }

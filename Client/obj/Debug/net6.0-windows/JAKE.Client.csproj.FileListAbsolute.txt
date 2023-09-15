@@ -25,5 +25,4 @@ C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Cl
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\ColorChoiceForm.g.cs
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\PlayerVisual.baml
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\PlayerVisual.g.cs
-C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\ColorChoiceForm.baml

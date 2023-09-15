@@ -20,11 +20,13 @@ namespace JAKE.Client
     /// </summary>
     public partial class PlayerVisual : UserControl
     {
-        public static readonly DependencyProperty PlayerColorProperty = DependencyProperty.Register(
-            "PlayerColor",
-            typeof(Brush),
-            typeof(PlayerVisual),
-            new PropertyMetadata(Brushes.Transparent));
+        public PlayerVisual()
+        {
+            InitializeComponent();
+        }
+
+        public static readonly DependencyProperty PlayerColorProperty =
+            DependencyProperty.Register("PlayerColor", typeof(Brush), typeof(PlayerVisual), new PropertyMetadata(Brushes.Red));
 
         public Brush PlayerColor
         {
@@ -32,9 +34,9 @@ namespace JAKE.Client
             set { SetValue(PlayerColorProperty, value); }
         }
 
-        public PlayerVisual()
+        public void UpdateColor(Brush newColor)
         {
-            InitializeComponent();
+            playerRectangle.Fill = newColor;
         }
     }
 }
