@@ -28,7 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.gameCanvas = new System.Windows.Forms.Panel();
             this.SuspendLayout();
+            // 
+            // gameCanvas
+            // 
+            this.gameCanvas.Location = new System.Drawing.Point(-2, -1);
+            this.gameCanvas.Name = "gameCanvas";
+            this.gameCanvas.Size = new System.Drawing.Size(803, 452);
+            this.gameCanvas.TabIndex = 0;
             // 
             // Form1
             // 
@@ -36,6 +44,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.GrayText;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.gameCanvas);
             this.Name = "Form1";
             this.Text = "Form1";
             this.ResumeLayout(false);
@@ -43,6 +52,8 @@
         }
 
         #endregion
+
+        private System.Windows.Forms.Panel gameCanvas;
     }
 }
 

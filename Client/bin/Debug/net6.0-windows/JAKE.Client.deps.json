@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v6.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v6.0": {
+      "JAKE.Client/1.0.0": {
+        "dependencies": {
+          "JAKE.classlibrary": "1.0.0"
+        },
+        "runtime": {
+          "JAKE.Client.dll": {}
+        }
+      },
+      "JAKE.classlibrary/1.0.0": {
+        "runtime": {
+          "JAKE.classlibrary.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "JAKE.Client/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "JAKE.classlibrary/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
