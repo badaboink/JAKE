@@ -26,3 +26,31 @@ C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Cl
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\PlayerVisual.baml
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\PlayerVisual.g.cs
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\Client\obj\Debug\net6.0-windows\ColorChoiceForm.baml
+C:\Users\Namai\Downloads\JAKE\Client\bin\Debug\net6.0-windows\JAKE.client.exe
+C:\Users\Namai\Downloads\JAKE\Client\bin\Debug\net6.0-windows\JAKE.client.deps.json
+C:\Users\Namai\Downloads\JAKE\Client\bin\Debug\net6.0-windows\JAKE.client.runtimeconfig.json
+C:\Users\Namai\Downloads\JAKE\Client\bin\Debug\net6.0-windows\JAKE.client.dll
+C:\Users\Namai\Downloads\JAKE\Client\bin\Debug\net6.0-windows\JAKE.client.pdb
+C:\Users\Namai\Downloads\JAKE\Client\bin\Debug\net6.0-windows\JAKE.classlibrary.dll
+C:\Users\Namai\Downloads\JAKE\Client\bin\Debug\net6.0-windows\JAKE.classlibrary.pdb
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.csproj.AssemblyReference.cache
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\PlayerVisual.baml
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\ColorChoiceForm.g.cs
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\MainWindow.g.cs
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\PlayerVisual.g.cs
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\App.g.cs
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client_MarkupCompile.cache
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client_MarkupCompile.lref
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\ColorChoiceForm.baml
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\MainWindow.baml
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.g.resources
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.AssemblyInfoInputs.cache
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.AssemblyInfo.cs
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.csproj.CoreCompileInputs.cache
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.csproj.CopyComplete
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.dll
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\refint\JAKE.client.dll
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.pdb
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\JAKE.client.genruntimeconfig.cache
+C:\Users\Namai\Downloads\JAKE\Client\obj\Debug\net6.0-windows\ref\JAKE.client.dll

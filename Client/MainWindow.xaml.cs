@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
@@ -176,6 +177,8 @@ namespace JAKE.client
             }
         }
 
+        private int playerDirectionX = 0;
+        private int playerDirectionY = 0;
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             int deltaX = 0;
@@ -187,30 +190,100 @@ namespace JAKE.client
             // based on the arrow key input.
             if (e.Key == Key.Left)
             {
-                deltaX = -1; // Move left
+                deltaX = -1;
+                playerDirectionX = deltaX; // Store the player's direction
+                playerDirectionY = 0;
             }
             else if (e.Key == Key.Right)
             {
-                deltaX = 1; // Move right
+                deltaX = 1;
+                playerDirectionX = deltaX; // Store the player's direction
+                playerDirectionY = 0;
             }
             else if (e.Key == Key.Up)
             {
-                deltaY = -1; // Move up
+                deltaY = -1;
+                playerDirectionY = deltaY; // Store the player's direction
+                playerDirectionX = 0;
             }
             else if (e.Key == Key.Down)
             {
-                deltaY = 1; // Move down
+                deltaY = 1;
+                playerDirectionY = deltaY; // Store the player's direction
+                playerDirectionX = 0;
             }
-            UpdatePlayer(playerVisuals[currentPlayer], deltaX, deltaY);
 
-            string movementUpdateMessage = UpdatePlayerPosition(playerVisuals[currentPlayer]);
+            if (e.Key == Key.Space)
+            {
+                // Use the stored direction for shooting
+                Shoot(playerDirectionX, playerDirectionY);
+                
+            }
+            else
+            {
+                UpdatePlayer(playerVisuals[currentPlayer], deltaX, deltaY);
 
-            // Send the movement update message to the server using the client's network stream
-            byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
-            stream.Write(updateData, 0, updateData.Length);
-            stream.Flush();
+                string movementUpdateMessage = UpdatePlayerPosition(playerVisuals[currentPlayer]);
 
+                // Send the movement update message to the server using the client's network stream
+                byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
+                stream.Write(updateData, 0, updateData.Length);
+                stream.Flush();
+            }
         }
+
+        private void Shoot(int deltaX, int deltaY)
+        {
+            CreateShot(playerVisuals[currentPlayer], deltaX, deltaY);
+        }
+
+        private void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
+        {
+            // Create a new shot visual element (e.g., a bullet or projectile)
+            Ellipse shotVisual = new Ellipse
+            {
+                Width = 10,
+                Height = 10,
+                Fill = Brushes.Red // You can customize the shot appearance
+            };
+
+            // Set the initial position of the shot to match the player's position
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
+            Canvas.SetLeft(shotVisual, playerX);
+            Canvas.SetTop(shotVisual, playerY);
+
+            // Add the shot to the ShotContainer (Canvas)
+            ShotContainer.Children.Add(shotVisual);
+
+            // Define the speed of the shot (you can adjust this value)
+            double shotSpeed = 5;
+
+            // Update the shot's position based on the direction and speed
+            CompositionTarget.Rendering += (sender, e) =>
+            {
+                double currentX = Canvas.GetLeft(shotVisual);
+                double currentY = Canvas.GetTop(shotVisual);
+
+                double newX = currentX + directionX * shotSpeed;
+                double newY = currentY + directionY * shotSpeed;
+
+                Canvas.SetLeft(shotVisual, newX);
+                Canvas.SetTop(shotVisual, newY);
+
+                // Example: Remove the shot if it goes out of bounds
+                if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
+                {
+                    ShotContainer.Children.Remove(shotVisual);
+                }
+
+                //TODO: remove jeigu i siena pataiko
+                //TODO: skaiciuot taskus jei i enemy pataiko
+            };
+        }
+
+
+
         private void UpdatePlayer(PlayerVisual playerVisual, int deltaX, int deltaY)
         {
             double currentX = Canvas.GetLeft(playerVisual);

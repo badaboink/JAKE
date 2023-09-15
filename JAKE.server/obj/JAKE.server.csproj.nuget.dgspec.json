@@ -1,25 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.server\\JAKE.server.csproj": {}
+    "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.server\\JAKE.server.csproj": {}
   },
   "projects": {
-    "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj": {
+    "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj",
+        "projectUniqueName": "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj",
         "projectName": "JAKE.classlibrary",
-        "projectPath": "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj",
-        "packagesPath": "C:\\Users\\eglej\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.classlibrary\\obj\\",
+        "projectPath": "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj",
+        "packagesPath": "C:\\Users\\Namai\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.classlibrary\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\eglej\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Users\\Namai\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
@@ -49,8 +49,7 @@
             "net47",
             "net471",
             "net472",
-            "net48",
-            "net481"
+            "net48"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -59,26 +58,26 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.202\\RuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.server\\JAKE.server.csproj": {
+    "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.server\\JAKE.server.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.server\\JAKE.server.csproj",
+        "projectUniqueName": "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.server\\JAKE.server.csproj",
         "projectName": "JAKE.server",
-        "projectPath": "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.server\\JAKE.server.csproj",
-        "packagesPath": "C:\\Users\\eglej\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.server\\obj\\",
+        "projectPath": "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.server\\JAKE.server.csproj",
+        "packagesPath": "C:\\Users\\Namai\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.server\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\"
+          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\eglej\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Users\\Namai\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "net6.0"
@@ -91,8 +90,8 @@
           "net6.0": {
             "targetAlias": "net6.0",
             "projectReferences": {
-              "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj": {
-                "projectPath": "C:\\Users\\eglej\\OneDrive\\Documents\\uni\\objektinis programų projektavimas\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj"
+              "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj": {
+                "projectPath": "C:\\Users\\Namai\\Downloads\\JAKE\\JAKE.classlibrary\\JAKE.classlibrary.csproj"
               }
             }
           }
@@ -112,8 +111,7 @@
             "net47",
             "net471",
             "net472",
-            "net48",
-            "net481"
+            "net48"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -122,7 +120,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\7.0.400\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.202\\RuntimeIdentifierGraph.json"
         }
       }
     }

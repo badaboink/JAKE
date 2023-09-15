@@ -9,3 +9,15 @@ C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JA
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.classlibrary\obj\Debug\net6.0\refint\JAKE.classlibrary.dll
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.classlibrary\obj\Debug\net6.0\JAKE.classlibrary.pdb
 C:\Users\eglej\OneDrive\Documents\uni\objektinis programų projektavimas\JAKE\JAKE.classlibrary\obj\Debug\net6.0\ref\JAKE.classlibrary.dll
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\bin\Debug\net6.0\JAKE.classlibrary.deps.json
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\bin\Debug\net6.0\JAKE.classlibrary.dll
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\bin\Debug\net6.0\JAKE.classlibrary.pdb
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\JAKE.classlibrary.csproj.AssemblyReference.cache
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\JAKE.classlibrary.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\JAKE.classlibrary.AssemblyInfoInputs.cache
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\JAKE.classlibrary.AssemblyInfo.cs
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\JAKE.classlibrary.csproj.CoreCompileInputs.cache
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\JAKE.classlibrary.dll
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\refint\JAKE.classlibrary.dll
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\JAKE.classlibrary.pdb
+C:\Users\Namai\Downloads\JAKE\JAKE.classlibrary\obj\Debug\net6.0\ref\JAKE.classlibrary.dll
