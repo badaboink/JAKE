@@ -11,5 +11,6 @@
             </ItemsControl.ItemsPanel>
         </ItemsControl>
         <Canvas x:Name="ShotContainer" Background="Transparent"/>
+        <Canvas x:Name="EnemyContainer" Background="Transparent"/>
     </Grid>
 </Window>
