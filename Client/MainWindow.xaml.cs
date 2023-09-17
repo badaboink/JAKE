@@ -28,8 +28,8 @@ namespace JAKE.client
         private NetworkStream stream;
         private Player currentPlayer;
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
+        private Dictionary<Enemy, Rectangle> enemyVisuals = new Dictionary<Enemy, Rectangle>();
         private List<Obstacle> obstacles = new List<Obstacle>();
-        //Enemies
         private List<Enemy> enemies = new List<Enemy>();
 
         public MainWindow()
@@ -76,33 +76,50 @@ namespace JAKE.client
             while (true)
             {                
                 string message = ReceiveString(stream);
-                if (message.StartsWith("ENEMY_SPAWN:"))
+                if (message.Contains("ENEMY_POSITIONS;"))
                 {
-                    string[] parts = message.Split(':');
-                    if (parts.Length == 5)
+                    // Extract enemy positions from the message
+                    string[] parts = message.Split(';');
+                    if (parts.Length >= 2)
                     {
-                        int enemyId = int.Parse(parts[1]);
-                        string enemyColor = parts[2];
-                        double enemyX = double.Parse(parts[3]);
-                        double enemyY = double.Parse(parts[4]);
-                        Enemy enemy = new Enemy(enemyId, enemyColor);
-                        enemy.SetCurrentPosition(enemyX, enemyY);
-                        enemies.Add(enemy);
-                        // Create and add a new enemy visual
-                        Dispatcher.Invoke(() =>
+                        string[] enemyInfo = parts[1].Split(',');
+                        foreach (var enemyData in enemyInfo)
                         {
-                            Rectangle enemyRect = new Rectangle
+                            string[] enemyDetails = enemyData.Split(':');
+                            if (enemyDetails.Length == 4)
                             {
-                                Width = 20,
-                                Height = 20,
-                                Fill = Brushes.Red, // Set the enemy's color
-                            };
+                                int enemyId = int.Parse(enemyDetails[0]);
+                                string enemyColor = enemyDetails[1];
+                                double enemyX = double.Parse(enemyDetails[2]);
+                                double enemyY = double.Parse(enemyDetails[3]);
+                                Enemy enemy = new Enemy(enemyId, enemyColor);
+                                enemy.SetCurrentPosition(enemyX, enemyY);
+                                if (!enemies.Contains(enemy)) 
+                                {
+                                    Debug.WriteLine("Enemy spawned");
+                                    enemies.Add(enemy); 
+                                    Dispatcher.Invoke(() =>
+                                    {
+                                        Rectangle enemyRect = new Rectangle
+                                        {
+                                            Width = 20,
+                                            Height = 20,
+                                            Fill = Brushes.Red, // Set the enemy's color
+                                        };
+                                        enemyVisuals[enemy] = enemyRect;
+                                        Canvas.SetLeft(enemyRect, enemyX);
+                                        Canvas.SetTop(enemyRect, enemyY);
 
-                            Canvas.SetLeft(enemyRect, enemyX);
-                            Canvas.SetTop(enemyRect, enemyY);
-
-                            playersContainer.Items.Add(enemyRect);
-                        });
+                                        // Add the enemy to the canvas or container where you want to display them
+                                        EnemyContainer.Children.Add(enemyRect);
+                                    });
+                                }
+                                else
+                                {
+                                    enemies.Find(n => n.Equals(enemy)).SetCurrentPosition(enemyX, enemyY);
+                                }
+                            }
+                        }
                     }
                 }
                 if (message.StartsWith("ObstacleData:"))
@@ -155,7 +172,7 @@ namespace JAKE.client
                 if(message.Contains("PLAYER_LIST;") && initialized) 
                 {
                     string playerList = GetStringAfterFirstSpace(message, " ").Split(';')[1];
-                    // Assuming the player list format is "ID:Name:Color,ID:Name:Color,..."
+                    // Assuming the player list format is "PLAYER_LIST;ID:Name:Color,ID:Name:Color,..."
 
                     // Split the player list into individual player entries
 
@@ -213,6 +230,12 @@ namespace JAKE.client
                         playerVisuals[playerInfo] = playerVisual;
                         playersContainer.Items.Add(playerVisual);
                     }
+                }
+                foreach (Enemy enemy in enemies)
+                {
+                    Rectangle enemyRect = enemyVisuals[enemy];
+                    Canvas.SetLeft(enemyRect, enemy.GetCurrentX());
+                    Canvas.SetTop(enemyRect, enemy.GetCurrentY());
                 }
             });
         }

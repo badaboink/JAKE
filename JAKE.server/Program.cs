@@ -17,14 +17,17 @@ class Server
     //Enemies
     private List<Enemy> enemies = new List<Enemy>();
     private int enemySpawnIntervalInSeconds = 10;
+    private int enemyUpdateIntervalInMilliseconds = 200;
 
     public Server()
     {
         listener = new TcpListener(IPAddress.Any, 12345);
+        StartEnemySpawnTimer();
+        StartEnemyUpdateTimer();
     }
     private void StartEnemySpawnTimer()
     {
-        Timer enemySpawnTimer = new Timer(EnemySpawnCallback, null, TimeSpan.Zero, TimeSpan.FromSeconds(enemySpawnIntervalInSeconds));
+        Timer enemySpawnTimer = new Timer(EnemySpawnCallback, null, TimeSpan.FromSeconds(30), TimeSpan.FromSeconds(enemySpawnIntervalInSeconds));
     }
 
     private void EnemySpawnCallback(object state)
@@ -32,31 +35,36 @@ class Server
         // Create and add a new enemy
         Random random = new Random();
         Enemy enemy = new Enemy(enemies.Count + 1, "Red", 2); // Initialize with appropriate parameters
-        double spawnX = random.Next(0, 1920); // Adjust the spawn area
-        double spawnY = random.Next(0, 1080); // Adjust the spawn area
+        double spawnX = random.Next(0, 300); // Adjust the spawn area
+        double spawnY = random.Next(0, 300); // Adjust the spawn area
         enemy.SetCurrentPosition(spawnX, spawnY);
-        enemies.Add(enemy);
+        lock (enemies)
+        {
+            enemies.Add(enemy);
+        }
 
         // Broadcast the new enemy information to connected clients
-        BroadcastEnemySpawn(enemy);
+        Console.WriteLine("Enemy spawned");
+        BroadcastEnemyPositions();
     }
 
-    private void BroadcastEnemySpawn(Enemy enemy)
-    {
-        string enemySpawnMessage = $"ENEMY_SPAWN:{enemy}";
-        Console.WriteLine(enemySpawnMessage);
-        foreach (var stream in playerStreams.Values)
-        {
-            SendString(stream, enemySpawnMessage);
-        }
-    }
+    //private void BroadcastEnemySpawn(Enemy enemy)
+    //{
+    //    string enemySpawnMessage = $"ENEMY_SPAWN:{enemy}";
+    //    Console.WriteLine(enemySpawnMessage);
+    //    foreach (var stream in playerStreams.Values)
+    //    {
+    //        SendString(stream, enemySpawnMessage);
+    //    }
+    //}
+
+    
 
     public void Start()
     {
         listener.Start();
         GenerateObstacles();
         Console.WriteLine("Server started. Waiting for connections...");
-        StartEnemySpawnTimer();
         while (true)
         {
             TcpClient client = listener.AcceptTcpClient();
@@ -206,6 +214,92 @@ class Server
         int bytesRead = stream.Read(buffer, 0, buffer.Length);
         return Encoding.ASCII.GetString(buffer, 0, bytesRead);
     }
+
+    private void UpdateEnemyPositions()
+    {
+        lock (enemies)
+        {
+            foreach (var enemy in enemies)
+            {
+                // Find the closest player
+                Player closestPlayer = FindClosestPlayer(enemy);
+
+                if (closestPlayer != null)
+                {
+                    // Calculate direction vector from enemy to closest player
+                    double directionX = closestPlayer.GetCurrentX() - enemy.GetCurrentX();
+                    double directionY = closestPlayer.GetCurrentY() - enemy.GetCurrentY();
+
+                    // Normalize the direction vector
+                    double length = Math.Sqrt(directionX * directionX + directionY * directionY);
+                    if (length > 0)
+                    {
+                        directionX /= length;
+                        directionY /= length;
+                    }
+
+                    // Define enemy movement speed
+                    double enemySpeed = enemy.GetSpeed();
+
+                    // Update enemy position based on direction and speed
+                    double newX = enemy.GetCurrentX() + directionX * enemySpeed;
+                    double newY = enemy.GetCurrentY() + directionY * enemySpeed;
+
+                    enemy.SetCurrentPosition(newX, newY);
+                }
+            }
+        }
+    }
+
+    private Player FindClosestPlayer(Enemy enemy)
+    {
+        Player closestPlayer = null;
+        double closestDistance = double.MaxValue;
+
+        foreach (var player in players)
+        {
+            // Calculate the distance between enemy and player
+            double distance = Math.Sqrt(
+                Math.Pow(player.GetCurrentX() - enemy.GetCurrentX(), 2) +
+                Math.Pow(player.GetCurrentY() - enemy.GetCurrentY(), 2));
+
+            if (distance < closestDistance)
+            {
+                closestDistance = distance;
+                closestPlayer = player;
+            }
+        }
+
+        return closestPlayer;
+    }
+
+    private void StartEnemyUpdateTimer()
+    {
+        Timer enemyUpdateTimer = new Timer(EnemyUpdateCallback, null, TimeSpan.Zero, TimeSpan.FromMilliseconds(enemyUpdateIntervalInMilliseconds));
+    }
+
+    private void EnemyUpdateCallback(object state)
+    {
+        UpdateEnemyPositions();
+        BroadcastEnemyPositions();
+    }
+
+    private void BroadcastEnemyPositions()
+    {
+        string message;
+        lock (enemies)
+        {
+            string enemyPositions = string.Join(",", enemies.Select(enemy =>
+                $"{enemy.GetId()}:{enemy.GetColor()}:{enemy.GetCurrentX()}:{enemy.GetCurrentY()}"));
+            message = $"ENEMY_POSITIONS;{enemyPositions}";
+        }
+        Console.WriteLine(message);
+        foreach (var stream in playerStreams.Values)
+        {
+            SendString(stream, message);
+        }
+    }
+
 }
 
 class Program
@@ -216,3 +310,5 @@ class Program
         server.Start();
     }
 }
+
+
