@@ -29,6 +29,8 @@ namespace JAKE.client
         private Player currentPlayer;
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private List<Obstacle> obstacles = new List<Obstacle>();
+        //Enemies
+        private List<Enemy> enemies = new List<Enemy>();
 
         public MainWindow()
         {
@@ -74,6 +76,35 @@ namespace JAKE.client
             while (true)
             {                
                 string message = ReceiveString(stream);
+                if (message.StartsWith("ENEMY_SPAWN:"))
+                {
+                    string[] parts = message.Split(':');
+                    if (parts.Length == 5)
+                    {
+                        int enemyId = int.Parse(parts[1]);
+                        string enemyColor = parts[2];
+                        double enemyX = double.Parse(parts[3]);
+                        double enemyY = double.Parse(parts[4]);
+                        Enemy enemy = new Enemy(enemyId, enemyColor);
+                        enemy.SetCurrentPosition(enemyX, enemyY);
+                        enemies.Add(enemy);
+                        // Create and add a new enemy visual
+                        Dispatcher.Invoke(() =>
+                        {
+                            Rectangle enemyRect = new Rectangle
+                            {
+                                Width = 20,
+                                Height = 20,
+                                Fill = Brushes.Red, // Set the enemy's color
+                            };
+
+                            Canvas.SetLeft(enemyRect, enemyX);
+                            Canvas.SetTop(enemyRect, enemyY);
+
+                            playersContainer.Items.Add(enemyRect);
+                        });
+                    }
+                }
                 if (message.StartsWith("ObstacleData:"))
                 {
                     string obstaclemessage = getFirstInstanceUsingSubString(message, "I");
@@ -121,9 +152,9 @@ namespace JAKE.client
                         initialized = true;
                     }
                 }
-                if(initialized) 
+                if(message.Contains("PLAYER_LIST;") && initialized) 
                 {
-                    string playerList = GetStringAfterFirstSpace(message, " ");
+                    string playerList = GetStringAfterFirstSpace(message, " ").Split(';')[1];
                     // Assuming the player list format is "ID:Name:Color,ID:Name:Color,..."
 
                     // Split the player list into individual player entries
@@ -213,7 +244,6 @@ namespace JAKE.client
                 // Add the Rectangle to the Canvas
                 gameMapCanvas.Children.Add(obstacleRect);
             }
-
             // Replace the existing Canvas with the new one
             playersContainer.Items.Add(gameMapCanvas);
         }
@@ -334,8 +364,6 @@ namespace JAKE.client
                 //TODO: skaiciuot taskus jei i enemy pataiko
             };
         }
-
-
 
         private void UpdatePlayer(PlayerVisual playerVisual, int deltaX, int deltaY)
         {

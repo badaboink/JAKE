@@ -14,10 +14,41 @@ class Server
     private TcpListener listener;
     private Dictionary<int, NetworkStream> playerStreams = new Dictionary<int, NetworkStream>();
     private List<Obstacle> obstacles = new List<Obstacle>();
+    //Enemies
+    private List<Enemy> enemies = new List<Enemy>();
+    private int enemySpawnIntervalInSeconds = 10;
 
     public Server()
     {
         listener = new TcpListener(IPAddress.Any, 12345);
+    }
+    private void StartEnemySpawnTimer()
+    {
+        Timer enemySpawnTimer = new Timer(EnemySpawnCallback, null, TimeSpan.Zero, TimeSpan.FromSeconds(enemySpawnIntervalInSeconds));
+    }
+
+    private void EnemySpawnCallback(object state)
+    {
+        // Create and add a new enemy
+        Random random = new Random();
+        Enemy enemy = new Enemy(enemies.Count + 1, "Red", 2); // Initialize with appropriate parameters
+        double spawnX = random.Next(0, 1920); // Adjust the spawn area
+        double spawnY = random.Next(0, 1080); // Adjust the spawn area
+        enemy.SetCurrentPosition(spawnX, spawnY);
+        enemies.Add(enemy);
+
+        // Broadcast the new enemy information to connected clients
+        BroadcastEnemySpawn(enemy);
+    }
+
+    private void BroadcastEnemySpawn(Enemy enemy)
+    {
+        string enemySpawnMessage = $"ENEMY_SPAWN:{enemy}";
+        Console.WriteLine(enemySpawnMessage);
+        foreach (var stream in playerStreams.Values)
+        {
+            SendString(stream, enemySpawnMessage);
+        }
     }
 
     public void Start()
@@ -25,7 +56,7 @@ class Server
         listener.Start();
         GenerateObstacles();
         Console.WriteLine("Server started. Waiting for connections...");
-
+        StartEnemySpawnTimer();
         while (true)
         {
             TcpClient client = listener.AcceptTcpClient();
@@ -117,6 +148,7 @@ class Server
         string[] parts = message.Split(':');
         if (parts.Length == 4 && parts[0] == "MOVE")
         {
+            Console.WriteLine(message);
             int playerId = int.Parse(parts[1]);
             int deltaX = int.Parse(parts[2]);
             int deltaY = int.Parse(parts[3]);
@@ -137,11 +169,11 @@ class Server
     {
         foreach (Player player in players)
         {
-            string playerList = string.Join(",", players
+            string playerList = "PLAYER_LIST;" + string.Join(",", players
                 .Where(p => p.GetId() != player.GetId()) // Exclude the current player
                 .Select(p => $"{p.GetId()}:{p.GetName()}:{p.GetColor()}:{p.GetCurrentX()}:{p.GetCurrentY()}"));
 
-            Console.WriteLine($"{playerList}");
+            if (playerList.Length > "PLAYER_LIST;".Length) { Console.WriteLine($"{playerList}"); }
 
             NetworkStream stream = GetStreamForPlayer(player);
             SendString(stream, playerList);
