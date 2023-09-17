@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -311,31 +312,43 @@ namespace JAKE.client
                 Shoot(playerDirectionX, playerDirectionY);
 
             }
-
-            double newX = currentPlayer.GetCurrentX() + deltaX * 10;
-            double newY = currentPlayer.GetCurrentY() + deltaY * 10;
+            double playerCurrentX = currentPlayer.GetCurrentX();
+            double playerCurrentY = currentPlayer.GetCurrentY();
+            int stepSize = 10;
+            double newX = playerCurrentX + deltaX * stepSize;
+            double newY = playerCurrentY + deltaY * stepSize;
 
             bool overlap = false;
-            // TO DO: jei overlapina bet yra kelio iki to obstacle padaryt, kad galetu nueit, dbr tng
             foreach (Obstacle obstacle in obstacles)
             {
                 if (obstacle.WouldOverlap(newX, newY, 50, 50))
                 {
                     overlap = true;
+                    double distance = obstacle.DistanceFromObstacle(deltaX, deltaY, playerCurrentX, playerCurrentY, 50, 50);
+                    if (distance != 0)
+                    {
+                        deltaX = deltaX == 0 ? deltaX : (int)distance;
+                        deltaY = deltaY == 0 ? deltaY : (int)distance;
+                        Move(deltaX, deltaY, newX, newY);
+                    }
                     break;
                 }
             }
             if (!overlap)
             {
-                UpdatePlayer(playerVisuals[currentPlayer], deltaX, deltaY);
-
-                string movementUpdateMessage = $"MOVE:{currentPlayer.GetId()}:{newX}:{newY}";
-
-                // Send the movement update message to the server using the client's network stream
-                byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
-                stream.Write(updateData, 0, updateData.Length);
-                stream.Flush();
+                Move(deltaX*10, deltaY*10, newX, newY);
             }
+        }
+        private void Move(int deltaX, int deltaY, double newX, double newY)
+        {
+            UpdatePlayer(playerVisuals[currentPlayer], deltaX, deltaY);
+
+            string movementUpdateMessage = $"MOVE:{currentPlayer.GetId()}:{newX}:{newY}";
+
+            // Send the movement update message to the server using the client's network stream
+            byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
+            stream.Write(updateData, 0, updateData.Length);
+            stream.Flush();
         }
 
         private void Shoot(int deltaX, int deltaY)
@@ -388,14 +401,14 @@ namespace JAKE.client
             };
         }
 
-        private void UpdatePlayer(PlayerVisual playerVisual, int deltaX, int deltaY)
+        private void UpdatePlayer(PlayerVisual playerVisual, int moveX, int moveY)
         {
             double currentX = Canvas.GetLeft(playerVisual);
             double currentY = Canvas.GetTop(playerVisual);
 
             // Calculate the new position
-            double newX = currentX + deltaX * 10;
-            double newY = currentY + deltaY * 10;
+            double newX = currentX + moveX;
+            double newY = currentY + moveY;
 
             // Set the new position
             Canvas.SetLeft(playerVisual, newX);

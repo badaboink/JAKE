@@ -41,6 +41,24 @@ namespace JAKE.classlibrary
 
             return overlapX && overlapY;
         }
+
+        public double DistanceFromObstacle(int x, int y, double playerX, double playerY, double playerWidth, double playerHeight)
+        {
+            double distance = 0;
+            if(x!=0)
+            {
+                double Distance_X_Left = x == -1 ? PositionX + Width - playerX : double.MaxValue;
+                double Distance_X_Right = x == 1 ? playerX + playerWidth - PositionX : double.MaxValue;
+                distance = Distance_X_Left != double.MaxValue ? Distance_X_Left : Distance_X_Right;
+            }
+            else
+            {
+                double Distance_Y_Top = y == -1 ? PositionY + Height - playerY : double.MaxValue;
+                double Distance_Y_Bottom = y == 1 ? playerY + playerHeight - PositionY : double.MaxValue;
+                distance = Distance_Y_Top != double.MaxValue ? Distance_Y_Top : Distance_Y_Bottom;
+            }
+            return distance;
+        }
         public override string ToString()
         {
             return $"{Width}:{Height}:{PositionX}:{PositionY}";
