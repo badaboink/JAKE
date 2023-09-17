@@ -324,24 +324,26 @@ namespace JAKE.client
                 if (obstacle.WouldOverlap(newX, newY, 50, 50))
                 {
                     overlap = true;
-                    double distance = obstacle.DistanceFromObstacle(deltaX, deltaY, playerCurrentX, playerCurrentY, 50, 50);
-                    if (distance != 0)
+                    double distance = obstacle.DistanceFromObstacle(playerDirectionX, playerDirectionY, playerCurrentX, playerCurrentY, 50, 50);
+                    if (distance!=0)
                     {
-                        deltaX = deltaX == 0 ? deltaX : (int)distance;
-                        deltaY = deltaY == 0 ? deltaY : (int)distance;
-                        Move(deltaX, deltaY, newX, newY);
+                        newX = playerDirectionX == 0 ? playerCurrentX : playerCurrentX + distance;
+                        // something is wrong??? idk yet
+                        newY = playerDirectionY == 0 ? playerCurrentY : playerCurrentY + distance;
+
+                        Move(newX, newY);
                     }
                     break;
                 }
             }
             if (!overlap)
             {
-                Move(deltaX*10, deltaY*10, newX, newY);
+                Move(newX, newY);
             }
         }
-        private void Move(int deltaX, int deltaY, double newX, double newY)
+        private void Move(double newX, double newY)
         {
-            UpdatePlayer(playerVisuals[currentPlayer], deltaX, deltaY);
+            UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
 
             string movementUpdateMessage = $"MOVE:{currentPlayer.GetId()}:{newX}:{newY}";
 
@@ -401,20 +403,14 @@ namespace JAKE.client
             };
         }
 
-        private void UpdatePlayer(PlayerVisual playerVisual, int moveX, int moveY)
+        private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
         {
-            double currentX = Canvas.GetLeft(playerVisual);
-            double currentY = Canvas.GetTop(playerVisual);
-
-            // Calculate the new position
-            double newX = currentX + moveX;
-            double newY = currentY + moveY;
 
             // Set the new position
-            Canvas.SetLeft(playerVisual, newX);
-            Canvas.SetTop(playerVisual, newY);
+            Canvas.SetLeft(playerVisual, moveX);
+            Canvas.SetTop(playerVisual, moveY);
 
-            currentPlayer.SetCurrentPosition(newX, newY);
+            currentPlayer.SetCurrentPosition(moveX, moveY);
         }
         private string UpdatePlayerPosition(PlayerVisual playerVisual)
         {

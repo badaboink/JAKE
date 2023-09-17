@@ -47,14 +47,14 @@ namespace JAKE.classlibrary
             double distance = 0;
             if(x!=0)
             {
-                double Distance_X_Left = x == -1 ? PositionX + Width - playerX : double.MaxValue;
-                double Distance_X_Right = x == 1 ? playerX + playerWidth - PositionX : double.MaxValue;
+                double Distance_X_Left = x == -1 ? (playerX - Width - PositionX)*-1 : double.MaxValue;
+                double Distance_X_Right = x == 1 ? PositionX - playerWidth - playerX : double.MaxValue;
                 distance = Distance_X_Left != double.MaxValue ? Distance_X_Left : Distance_X_Right;
             }
             else
             {
-                double Distance_Y_Top = y == -1 ? PositionY + Height - playerY : double.MaxValue;
-                double Distance_Y_Bottom = y == 1 ? playerY + playerHeight - PositionY : double.MaxValue;
+                double Distance_Y_Top = y == -1 ? (playerY - PositionY - Height) *-1 : double.MaxValue;
+                double Distance_Y_Bottom = y == 1 ? PositionY - playerY - playerHeight : double.MaxValue;
                 distance = Distance_Y_Top != double.MaxValue ? Distance_Y_Top : Distance_Y_Bottom;
             }
             return distance;
