@@ -35,8 +35,8 @@ class Server
         // Create and add a new enemy
         Random random = new Random();
         Enemy enemy = new Enemy(enemies.Count + 1, "Red", 2); // Initialize with appropriate parameters
-        double spawnX = random.Next(0, 300); // Adjust the spawn area
-        double spawnY = random.Next(0, 300); // Adjust the spawn area
+        double spawnX = random.Next(0, 1936); // Adjust the spawn area
+        double spawnY = random.Next(0, 1056); // Adjust the spawn area
         enemy.SetCurrentPosition(spawnX, spawnY);
         lock (enemies)
         {
@@ -293,7 +293,7 @@ class Server
                 $"{enemy.GetId()}:{enemy.GetColor()}:{enemy.GetCurrentX()}:{enemy.GetCurrentY()}"));
             message = $"ENEMY_POSITIONS;{enemyPositions}";
         }
-        Console.WriteLine(message);
+        //Console.WriteLine(message);
         foreach (var stream in playerStreams.Values)
         {
             SendString(stream, message);
