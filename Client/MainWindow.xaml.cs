@@ -20,6 +20,8 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using JAKE.classlibrary;
 using JAKE.Client;
+using Microsoft.AspNet.SignalR.Client;
+using Microsoft.AspNetCore.SignalR.Client;
 
 namespace JAKE.client
 {
@@ -32,33 +34,105 @@ namespace JAKE.client
         private Dictionary<Enemy, Rectangle> enemyVisuals = new Dictionary<Enemy, Rectangle>();
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Enemy> enemies = new List<Enemy>();
+        private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
 
         public MainWindow()
         {
+            connection = new HubConnectionBuilder()
+                .WithUrl("https://localhost:7039/gamehub")
+                .Build();
             InitializeComponent();
             WindowState = WindowState.Maximized;
-            Loaded += MainWindow_Loaded;
-            this.KeyDown += MainWindow_KeyDown;
-        }
-        protected override void OnInitialized(EventArgs e)
-        {
-            base.OnInitialized(e);
 
+            // Start the SignalR connection when the window loads
+            Loaded += MainWindow_Loaded;
+        }
+
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            await StartSignalRConnection();
+        }
+
+        private async Task StartSignalRConnection()
+        {
+            try
+            {
+                while (connection.State != HubConnectionState.Connected)
+                {
+                    await connection.StartAsync();
+                    await Task.Delay(1000); // Delay and retry if the connection is not established
+                }
+
+                // Once connected, call the game initialization logic
+                await GameStart();
+            }
+            catch (Exception ex)
+            {
+                // Handle connection errors
+                MessageBox.Show($"SignalR connection error: {ex.Message}");
+            }
+        }
+
+        private async Task GameStart()
+        {
             // Create and show the ColorChoiceForm as a pop-up
             ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
             colorChoiceForm.ShowDialog();
             string selectedColor = colorChoiceForm.SelectedColor;
 
-            client = new TcpClient("localhost", 12345);
-            stream = client.GetStream();
+            // Connect to signalr
+            await connection.InvokeAsync("SendColor", selectedColor);
 
-            byte[] colorBytes = Encoding.UTF8.GetBytes(selectedColor);
-            stream.Write(colorBytes, 0, colorBytes.Length);
-            stream.Flush();
-
-            var receiveThread = new System.Threading.Thread(ReceivePlayerData);
-            receiveThread.Start();
+            // Now, wait for player info
+            await WaitForPlayerInfo();
         }
+
+        private async Task WaitForPlayerInfo()
+        {
+            var playerInfoReceived = new TaskCompletionSource<bool>();
+
+            connection.On<int, string, string>("YourPlayerInfo", (id, name, color) =>
+            {
+                currentPlayer = new Player(id, name, color);
+                playerInfoReceived.SetResult(true);
+            });
+
+            // Wait for "YourPlayerInfo" message to be received
+            await playerInfoReceived.Task;
+
+            PlayerVisual playerVisual = new PlayerVisual();
+            ColorConverter converter = new ColorConverter();
+            Color playerColor = (Color)ColorConverter.ConvertFromString(currentPlayer.GetColor());
+            SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
+            playerVisual.PlayerColor = solidColorBrush;
+            playerVisual.UpdateColor(solidColorBrush);
+            Canvas.SetLeft(playerVisual, currentPlayer.GetCurrentX());
+            Canvas.SetTop(playerVisual, currentPlayer.GetCurrentY());
+            playerVisuals[currentPlayer] = playerVisual;
+            playersContainer.Items.Add(playerVisual);
+
+            // Now you can proceed with game logic
+        }
+
+        //protected override void OnInitialized(EventArgs e)
+        //{
+        //    base.OnInitialized(e);
+
+        //    // Create and show the ColorChoiceForm as a pop-up
+        //    ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
+        //    colorChoiceForm.ShowDialog();
+        //    string selectedColor = colorChoiceForm.SelectedColor;
+
+        //    client = new TcpClient("localhost", 12345);
+        //    stream = client.GetStream();
+
+        //    byte[] colorBytes = Encoding.UTF8.GetBytes(selectedColor);
+        //    stream.Write(colorBytes, 0, colorBytes.Length);
+        //    stream.Flush();
+
+        //    var receiveThread = new System.Threading.Thread(ReceivePlayerData);
+        //    receiveThread.Start();
+        //}
         public String getFirstInstanceUsingSubString(String input, string something)
         {
             int index = input.Contains(something) ? input.IndexOf(something)+something.Length-1 : 0;
@@ -247,30 +321,29 @@ namespace JAKE.client
             return Encoding.ASCII.GetString(buffer, 0, bytesRead);
         }
         
-        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        {
-            Random random = new Random();
-            Canvas gameMapCanvas = new Canvas();
-            gameMapCanvas.Name = "GameMap";
-            gameMapCanvas.Background = Brushes.Gray;
+        //private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        //{
+        //    Canvas gameMapCanvas = new Canvas();
+        //    gameMapCanvas.Name = "GameMap";
+        //    gameMapCanvas.Background = Brushes.Gray;
 
-            // Create a Rectangle (obstacle)
-            foreach (Obstacle obs in obstacles)
-            {
-                Rectangle obstacleRect = new Rectangle();
+        //    // Create a Rectangle (obstacle)
+        //    foreach (Obstacle obs in obstacles)
+        //    {
+        //        Rectangle obstacleRect = new Rectangle();
                 
-                obstacleRect.Width = obs.Width;
-                obstacleRect.Height = obs.Height;
-                obstacleRect.Fill = Brushes.LightGray;
-                Canvas.SetLeft(obstacleRect, obs.PositionX);
-                Canvas.SetTop(obstacleRect, obs.PositionY);
+        //        obstacleRect.Width = obs.Width;
+        //        obstacleRect.Height = obs.Height;
+        //        obstacleRect.Fill = Brushes.LightGray;
+        //        Canvas.SetLeft(obstacleRect, obs.PositionX);
+        //        Canvas.SetTop(obstacleRect, obs.PositionY);
 
-                // Add the Rectangle to the Canvas
-                gameMapCanvas.Children.Add(obstacleRect);
-            }
-            // Replace the existing Canvas with the new one
-            playersContainer.Items.Add(gameMapCanvas);
-        }
+        //        // Add the Rectangle to the Canvas
+        //        gameMapCanvas.Children.Add(obstacleRect);
+        //    }
+        //    // Replace the existing Canvas with the new one
+        //    playersContainer.Items.Add(gameMapCanvas);
+        //}
 
         private int playerDirectionX = 0;
         private int playerDirectionY = 0;

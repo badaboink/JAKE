@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace JAKE.classlibrary
 {
@@ -30,6 +32,12 @@ namespace JAKE.classlibrary
             {
                 Ability = "unknown";
             }
+        }
+        public Player()
+        {
+            _id = -1;
+            _name = "";
+            _color = "red";
         }
 
         public int GetId()
