@@ -274,6 +274,7 @@ namespace JAKE.client
 
         private int playerDirectionX = 0;
         private int playerDirectionY = 0;
+        private int score = 0;
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             int deltaX = 0;
@@ -368,11 +369,17 @@ namespace JAKE.client
                 Fill = Brushes.Red // You can customize the shot appearance
             };
 
-            // Set the initial position of the shot to match the player's position
+            // Get the player's position
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-            Canvas.SetLeft(shotVisual, playerX);
-            Canvas.SetTop(shotVisual, playerY);
+
+            // Calculate the center of the player
+            double playerCenterX = playerX + playerVisual.Width / 2;
+            double playerCenterY = playerY + playerVisual.Height / 2;
+
+            // Set the initial position of the shot at the center of the player
+            Canvas.SetLeft(shotVisual, playerCenterX - shotVisual.Width / 2);
+            Canvas.SetTop(shotVisual, playerCenterY - shotVisual.Height / 2);
 
             // Add the shot to the ShotContainer (Canvas)
             ShotContainer.Children.Add(shotVisual);
@@ -381,27 +388,93 @@ namespace JAKE.client
             double shotSpeed = 5;
 
             // Update the shot's position based on the direction and speed
+            bool shouldRender = true;
             CompositionTarget.Rendering += (sender, e) =>
             {
+                if (!shouldRender) return;
                 double currentX = Canvas.GetLeft(shotVisual);
                 double currentY = Canvas.GetTop(shotVisual);
 
                 double newX = currentX + directionX * shotSpeed;
                 double newY = currentY + directionY * shotSpeed;
 
-                Canvas.SetLeft(shotVisual, newX);
-                Canvas.SetTop(shotVisual, newY);
-
-                // Example: Remove the shot if it goes out of bounds
-                if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
+                // Check for collisions with obstacles
+                foreach (Obstacle obstacle in obstacles)
                 {
-                    ShotContainer.Children.Remove(shotVisual);
+                    if (obstacle.WouldOverlap(newX, newY, shotVisual.Width, shotVisual.Height))
+                    {
+                        // Remove the shot and break out of the loop
+                        ShotContainer.Children.Remove(shotVisual);
+                        shouldRender = false;
+                        return;
+                    }
                 }
 
-                //TODO: remove jeigu i siena pataiko
-                //TODO: skaiciuot taskus jei i enemy pataiko
+                List<Enemy> enemiesToRemove = new List<Enemy>(); // Create a list to store enemies to be removed
+
+    
+                bool shotHitEnemy = false;
+                foreach (Enemy enemy in enemies)
+                {
+
+                    if (enemyVisuals.ContainsKey(enemy))
+                    {
+                        Rectangle enemyRect = enemyVisuals[enemy];
+                        double enemyX = Canvas.GetLeft(enemyRect);
+                        double enemyY = Canvas.GetTop(enemyRect);
+
+                        if (newX + shotVisual.Width >= enemyX &&
+                            newX <= enemyX + enemyRect.Width &&
+                            newY + shotVisual.Height >= enemyY &&
+                            newY <= enemyY + enemyRect.Height)
+                        {
+                            enemy.SetHealth(enemy.GetHealth() - 5); // Reduce the enemy's health
+                            score += 5;
+                            Debug.WriteLine("score: " + score);
+                            scoreLabel.Text = $"Score: {score}";
+                            Debug.WriteLine("pataike i enemy");
+                            ShotContainer.Children.Remove(shotVisual);
+                            shotHitEnemy = true;
+                            shouldRender = false;
+
+                            if (enemy.GetHealth() <= 0)
+                            {
+                                enemiesToRemove.Add(enemy); // Add the enemy to the removal list
+                                enemyVisuals.Remove(enemy);
+                                EnemyContainer.Children.Remove(enemyRect);
+                                Debug.WriteLine("mire enemy");
+                            }
+                            break;
+                        }
+                    }
+                    
+                }
+                //Debug.WriteLine("po break"); //lygiai du praeina tarp shots
+                // Remove the enemies that need to be removed
+                foreach (Enemy enemyToRemove in enemiesToRemove)
+                {
+                    enemies.Remove(enemyToRemove);
+                    Debug.WriteLine("removed enemy");
+                }
+
+
+                // Update the shot's position
+                if (!shotHitEnemy)
+                {
+                    //Debug.WriteLine("paskutinis if");
+                    Canvas.SetLeft(shotVisual, newX);
+                    Canvas.SetTop(shotVisual, newY);
+
+                    // Remove the shot if it goes out of bounds
+                    if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
+                    {
+                        ShotContainer.Children.Remove(shotVisual);
+                    }
+                }
             };
         }
+
+
 
         private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
         {

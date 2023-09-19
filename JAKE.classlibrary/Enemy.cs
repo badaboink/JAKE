@@ -14,12 +14,14 @@ namespace JAKE.classlibrary
         private string _color;
         private double _currentX;
         private double _currentY;
+        public int _health; 
 
-        public Enemy(int id, string color, double speed = 2)
+        public Enemy(int id, string color, double speed = 2, int health = 20)
         {
             _id = id;
             _color = color;
             _speed = speed;
+            _health = health;
             SetCurrentPosition(0, 0);
             
         }
@@ -53,6 +55,16 @@ namespace JAKE.classlibrary
         {
             _currentX = x;
             _currentY = y;
+        }
+
+        public int GetHealth()
+        {
+            return _health;
+        }
+
+        public void SetHealth(int health)
+        {
+            _health = health;
         }
         //private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
         //{

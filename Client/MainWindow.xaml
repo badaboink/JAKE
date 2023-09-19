@@ -3,6 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="JAKE Client" xmlns:local="clr-namespace:JAKE.Client" Width="800" Height="600">
     <Grid>
+        <TextBlock x:Name="scoreLabel" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="24" Foreground="White" Text="Score: 0"/>
         <ItemsControl x:Name="playersContainer">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
