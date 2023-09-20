@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Numerics;
 using System.Text;
@@ -7,13 +8,35 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary
 {
-    public class Player
+    public class Player : INotifyPropertyChanged
     {
         private int _id;
         private string _name;
         private string _color;
         private double _currentX;
         private double _currentY;
+        private int _score = 0; // Initialize score to zero
+
+        public int Score
+        {
+            get { return _score; }
+            set
+            {
+                _score = value;
+                OnPropertyChanged(nameof(Score));
+            }
+        }
+        private int _health = 100;
+
+        public int Health
+        {
+            get { return _health; }
+            set
+            {
+                _health = value;
+                OnPropertyChanged(nameof(Health));
+            }
+        }
         public string Ability { get; set; }
 
         public Player(int id, string name, string color)
@@ -30,6 +53,8 @@ namespace JAKE.classlibrary
             {
                 Ability = "unknown";
             }
+            _score = 0;
+            _health = 100;
         }
 
         public int GetId()
@@ -57,10 +82,32 @@ namespace JAKE.classlibrary
             return _currentY;
         }
 
+        public int GetHealth()
+        {
+            return _health;
+        }
+
+        public void SetScore(int score)
+        {
+            _score = score;
+        }
+
+        public void SetHealth(int health)
+        {
+            _health = health;
+        }
+
         public void SetCurrentPosition(double x, double y)
         {
             _currentX = x;
             _currentY = y;
+        }
+        // INotifyPropertyChanged implementation
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
         private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
         {

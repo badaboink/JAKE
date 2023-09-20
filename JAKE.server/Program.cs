@@ -122,8 +122,6 @@ class Server
                 HandleMovementUpdate(message);
             }
 
-            // Handle other types of messages as needed
-            // ...
         }
 
         // When the player disconnects, remove them from the player list and broadcast the updated list
@@ -132,6 +130,8 @@ class Server
 
         //client.Close();
     }
+
+
 
     private void GenerateObstacles()
     {
@@ -315,6 +315,10 @@ class Program
         Server server = new Server();
         server.Start();
     }
+<<<<<<< Updated upstream
 }
 
 
+=======
+}
+>>>>>>> Stashed changes

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -31,7 +32,10 @@ namespace JAKE.client
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private Dictionary<Enemy, Rectangle> enemyVisuals = new Dictionary<Enemy, Rectangle>();
         private List<Obstacle> obstacles = new List<Obstacle>();
+        private Dictionary<int, int> playerScores = new Dictionary<int, int>();
+        private Dictionary<int, int> playerHealth = new Dictionary<int, int>();
         private List<Enemy> enemies = new List<Enemy>();
+
 
         public MainWindow()
         {
@@ -39,6 +43,11 @@ namespace JAKE.client
             WindowState = WindowState.Maximized;
             Loaded += MainWindow_Loaded;
             this.KeyDown += MainWindow_KeyDown;
+
+            // Bind the player's score to the PlayerScoreTextBlock
+            this.DataContext = currentPlayer;
+            
+
         }
         protected override void OnInitialized(EventArgs e)
         {
@@ -61,7 +70,7 @@ namespace JAKE.client
         }
         public String getFirstInstanceUsingSubString(String input, string something)
         {
-            int index = input.Contains(something) ? input.IndexOf(something)+something.Length-1 : 0;
+            int index = input.Contains(something) ? input.IndexOf(something) + something.Length - 1 : 0;
             return input.Substring(0, index);
         }
         public string GetStringAfterFirstSpace(string input, string something)
@@ -69,13 +78,14 @@ namespace JAKE.client
             int index = input.Contains(something) ? input.IndexOf(something) + something.Length : 0;
             return input.Substring(index);
         }
+
         private void ReceivePlayerData()
         {
             bool initialized = false;
             List<Player> playerInfoList = new List<Player>();
 
             while (true)
-            {                
+            {
                 string message = ReceiveString(stream);
                 if (message.Contains("ENEMY_POSITIONS;"))
                 {
@@ -132,7 +142,7 @@ namespace JAKE.client
                     }
                     obstaclemessage = obstaclemessage.Substring("ObstacleData:".Length);
                     string[] obstaclemessages = obstaclemessage.Split(',');
-                    foreach(string obs in obstaclemessages)
+                    foreach (string obs in obstaclemessages)
                     {
                         string[] parts = obs.Split(':');
                         if (parts.Length == 4)
@@ -146,7 +156,7 @@ namespace JAKE.client
                             obstacles.Add(obstacle);
                         }
                     }
-                    message = message.Remove(0, "ObstacleData:".Length+obstaclemessage.Length-1);
+                    message = message.Remove(0, "ObstacleData:".Length + obstaclemessage.Length - 1);
                 }
                 if (message.Contains("INIT:") && !initialized)
                 {
@@ -169,6 +179,26 @@ namespace JAKE.client
 
                         initialized = true;
                     }
+                }
+                if (message.StartsWith("SCORE:") && initialized)
+                {
+                    // Handle SCORE messages
+                    string[] scoreParts = message.Split(':');
+                    if (scoreParts.Length == 3)
+                    {
+                        int playerId = int.Parse(scoreParts[1]);
+                        int newScore = int.Parse(scoreParts[2]);
+
+                        // Update the player's score on the UI thread using the Dispatcher
+                        Dispatcher.Invoke(() =>
+                        {
+                            PlayerScoreText.Text = $"Score: {0}";
+                        });
+
+                        // Update the player's score in your playerScores dictionary
+                        playerScores[playerId] = newScore;
+                    }
+                    Console.WriteLine("AAAAAAAAAAAAAAAAAAA");
                 }
                 if(message.Contains("PLAYER_LIST;") && initialized) 
                 {
@@ -202,7 +232,7 @@ namespace JAKE.client
                 UpdateClientView(playerInfoList);
 
                 // Update the client's view to display the players
-               
+
             }
         }
         private void UpdateClientView(List<Player> playerInfoList)
@@ -246,7 +276,7 @@ namespace JAKE.client
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
             return Encoding.ASCII.GetString(buffer, 0, bytesRead);
         }
-        
+
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             Random random = new Random();
@@ -258,7 +288,7 @@ namespace JAKE.client
             foreach (Obstacle obs in obstacles)
             {
                 Rectangle obstacleRect = new Rectangle();
-                
+
                 obstacleRect.Width = obs.Width;
                 obstacleRect.Height = obs.Height;
                 obstacleRect.Fill = Brushes.LightGray;
@@ -492,5 +522,36 @@ namespace JAKE.client
 
             return $"MOVE:{currentPlayer.GetId()}:{currentX}:{currentY}";
         }
+
+
+
+
+        // You may need to modify SendString to make it accessible here.
+        private void SendString(NetworkStream stream, string data)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(data);
+            stream.Write(bytes, 0, bytes.Length);
+        }
+
+        // sita naudot kai jau saudymas i priesus bus
+        /*private void UpdatePlayerScore(int newScore)
+        {
+            currentPlayer.SetScore(newScore);
+            scoreLabel.Content = $"Score: {currentPlayer.GetScore()}";
+        }
+
+        // o cia kai priesai bus papildysiu
+        private void AddHealth(int healthAmount)
+        {
+
+            currentPlayer.SetHealth(healthAmount + currentPlayer.GetHealth());
+            healthLabel.Content = $"Health: {currentPlayer.GetHealth()}";
+        }
+
+        private void LooseHealth(int healthAmount)
+        {
+            currentPlayer.SetHealth(currentPlayer.GetHealth() - healthAmount);
+            healthLabel.Content = $"Health: {currentPlayer.GetHealth()}";
+        }*/
     }
 }

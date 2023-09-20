@@ -12,6 +12,12 @@
             </ItemsControl.ItemsPanel>
         </ItemsControl>
         <Canvas x:Name="ShotContainer" Background="Transparent"/>
+<<<<<<< Updated upstream
         <Canvas x:Name="EnemyContainer" Background="Transparent"/>
+=======
+        <!-- Display only the current player's score -->
+        <TextBlock x:Name="PlayerScoreText" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,10,0,0"/>
+        <TextBlock x:Name="PlayerHealthText" Text="Health: 100" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,30,0,0"/>
+>>>>>>> Stashed changes
     </Grid>
 </Window>
