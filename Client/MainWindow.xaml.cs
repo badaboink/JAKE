@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -55,22 +56,13 @@ namespace JAKE.client
 
         private async Task StartSignalRConnection()
         {
-            try
+            while (connection.State != HubConnectionState.Connected)
             {
-                while (connection.State != HubConnectionState.Connected)
-                {
-                    await connection.StartAsync();
-                    await Task.Delay(1000); // Delay and retry if the connection is not established
-                }
+                await connection.StartAsync();
+                await Task.Delay(1000);
+            }
 
-                // Once connected, call the game initialization logic
-                await GameStart();
-            }
-            catch (Exception ex)
-            {
-                // Handle connection errors
-                MessageBox.Show($"SignalR connection error: {ex.Message}");
-            }
+            await GameStart();
         }
 
         private async Task GameStart()
@@ -80,10 +72,8 @@ namespace JAKE.client
             colorChoiceForm.ShowDialog();
             string selectedColor = colorChoiceForm.SelectedColor;
 
-            // Connect to signalr
             await connection.InvokeAsync("SendColor", selectedColor);
 
-            // Now, wait for player info
             await WaitForPlayerInfo();
         }
 
@@ -97,19 +87,7 @@ namespace JAKE.client
                 playerInfoReceived.SetResult(true);
             });
 
-            // Wait for "YourPlayerInfo" message to be received
             await playerInfoReceived.Task;
-
-            PlayerVisual playerVisual = new PlayerVisual();
-            ColorConverter converter = new ColorConverter();
-            Color playerColor = (Color)ColorConverter.ConvertFromString(currentPlayer.GetColor());
-            SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
-            playerVisual.PlayerColor = solidColorBrush;
-            playerVisual.UpdateColor(solidColorBrush);
-            Canvas.SetLeft(playerVisual, currentPlayer.GetCurrentX());
-            Canvas.SetTop(playerVisual, currentPlayer.GetCurrentY());
-            playerVisuals[currentPlayer] = playerVisual;
-            playersContainer.Items.Add(playerVisual);
 
             // Now you can proceed with game logic
         }
