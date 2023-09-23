@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.SignalR;
 using Server.GameData;
 using System.Drawing;
 using System.Net.Sockets;
+using System.Timers;
 using System.Numerics;
 using System.Threading.Tasks;
 using System.Xml.Linq;
@@ -34,10 +35,6 @@ namespace Server.Hubs
             _gameDataService = gameDataService;
         }
 
-        // TODO PERKELT ENEMIES
-        //private List<Enemy> enemies = new List<Enemy>();
-        private int enemySpawnIntervalInSeconds = 10;
-        private int enemyUpdateIntervalInMilliseconds = 200;
         public async Task SendColor(string color)
         {
             Player newPlayer = _gameDataService.AddPlayer("a", color);

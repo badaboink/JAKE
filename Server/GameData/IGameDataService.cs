@@ -15,5 +15,7 @@ namespace Server.GameData
 
         // Get obstacle data as a list of strings
         string GetObstacleData();
+        Enemy AddEnemies();
+        List<string> GetEnemies();
     }
 }

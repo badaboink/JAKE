@@ -6,6 +6,7 @@ namespace Server.GameData
     {
         private List<Player> players = new List<Player>();
         private List<Obstacle> obstacles = new List<Obstacle>();
+        private List<Enemy> enemies = new List<Enemy>();
 
         public InMemoryGameDataService()
         {
@@ -38,6 +39,16 @@ namespace Server.GameData
         public string GetObstacleData()
         {
             return string.Join(",", obstacles.Select(obstacle => obstacle.ToString()));
+        }
+        public Enemy AddEnemies()
+        {
+            Enemy newEnemy = GameFunctions.GenerateEnemy(enemies.Count + 1);
+            enemies.Add(newEnemy);
+            return newEnemy;
+        }
+        public List<string> GetEnemies()
+        {
+            return enemies.Select(enemy => enemy.ToString()).ToList();
         }
     }
 }

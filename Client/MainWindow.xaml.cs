@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
+using System.Numerics;
 using System.Reflection.Metadata;
 using System.Text;
 using System.Threading;
@@ -371,30 +372,6 @@ namespace JAKE.client
             int bytesRead = stream.Read(buffer, 0, buffer.Length);
             return Encoding.ASCII.GetString(buffer, 0, bytesRead);
         }
-        
-        //private void MainWindow_Loaded(object sender, RoutedEventArgs e)
-        //{
-        //    Canvas gameMapCanvas = new Canvas();
-        //    gameMapCanvas.Name = "GameMap";
-        //    gameMapCanvas.Background = Brushes.Gray;
-
-        //    // Create a Rectangle (obstacle)
-        //    foreach (Obstacle obs in obstacles)
-        //    {
-        //        Rectangle obstacleRect = new Rectangle();
-                
-        //        obstacleRect.Width = obs.Width;
-        //        obstacleRect.Height = obs.Height;
-        //        obstacleRect.Fill = Brushes.LightGray;
-        //        Canvas.SetLeft(obstacleRect, obs.PositionX);
-        //        Canvas.SetTop(obstacleRect, obs.PositionY);
-
-        //        // Add the Rectangle to the Canvas
-        //        gameMapCanvas.Children.Add(obstacleRect);
-        //    }
-        //    // Replace the existing Canvas with the new one
-        //    playersContainer.Items.Add(gameMapCanvas);
-        //}
 
         private int playerDirectionX = 0;
         private int playerDirectionY = 0;
@@ -468,13 +445,6 @@ namespace JAKE.client
         private async void Move(double newX, double newY)
         {
             UpdatePlayer(playerVisuals[currentPlayer.GetId() - 1], newX, newY);
-
-            string movementUpdateMessage = $"MOVE:{currentPlayer.GetId()}:{newX}:{newY}";
-
-            //// Send the movement update message to the server using the client's network stream
-            //byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
-            //stream.Write(updateData, 0, updateData.Length);
-            //stream.Flush();
             await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
         }
 
