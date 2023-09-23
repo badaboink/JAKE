@@ -1,6 +1,9 @@
+using Server.GameData;
 using Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSingleton<IGameDataService, InMemoryGameDataService>();
 
 // Add services to the container.
 builder.Services.AddSignalR();

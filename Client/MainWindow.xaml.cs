@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -21,7 +22,6 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using JAKE.classlibrary;
 using JAKE.Client;
-using Microsoft.AspNet.SignalR.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 
 namespace JAKE.client
@@ -31,7 +31,8 @@ namespace JAKE.client
         private TcpClient client;
         private NetworkStream stream;
         private Player currentPlayer;
-        private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
+        private List<Player> playerInfoList = new List<Player>();
+        private List<PlayerVisual> playerVisuals = new List<PlayerVisual>();
         private Dictionary<Enemy, Rectangle> enemyVisuals = new Dictionary<Enemy, Rectangle>();
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Enemy> enemies = new List<Enemy>();
@@ -47,11 +48,13 @@ namespace JAKE.client
 
             // Start the SignalR connection when the window loads
             Loaded += MainWindow_Loaded;
+            this.KeyDown += MainWindow_KeyDown;
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             await StartSignalRConnection();
+            Task.Run(() => ListenForGameUpdates());
         }
 
         private async Task StartSignalRConnection()
@@ -72,46 +75,116 @@ namespace JAKE.client
             colorChoiceForm.ShowDialog();
             string selectedColor = colorChoiceForm.SelectedColor;
 
-            await connection.InvokeAsync("SendColor", selectedColor);
-
-            await WaitForPlayerInfo();
-        }
-
-        private async Task WaitForPlayerInfo()
-        {
-            var playerInfoReceived = new TaskCompletionSource<bool>();
-
-            connection.On<int, string, string>("YourPlayerInfo", (id, name, color) =>
+            await connection.SendAsync("SendColor", selectedColor);
+            connection.On<int, string, string>("YourPlayerInfo", (id, name, color)=>
             {
                 currentPlayer = new Player(id, name, color);
-                playerInfoReceived.SetResult(true);
             });
+            connection.On<string>("ObstacleInfo", (obstacleData) =>
+            {
+                string[] obstaclemessages = obstacleData.Split(',');
+                foreach (string obs in obstaclemessages)
+                {
+                    string[] parts = obs.Split(':');
+                    if (parts.Length == 4)
+                    {
+                        double width = double.Parse(parts[0]);
+                        double height = double.Parse(parts[1]);
+                        double posX = double.Parse(parts[2]);
+                        double posY = double.Parse(parts[3]);
 
-            await playerInfoReceived.Task;
+                        Obstacle obstacle = new Obstacle(width, height, posX, posY);
+                        obstacles.Add(obstacle);
+                        LoadGameMap();
+                    }
+                }
+            });
+            connection.On<List<string>>("PlayerList", (userData) =>
+            {
+                foreach (string playerEntry in userData)
+                {
+                    // Split: ID, Name, Color, X, Y
+                    string[] parts = playerEntry.Split(':');
 
-            // Now you can proceed with game logic
+                    if (parts.Length == 5)
+                    {
+                        int playerId = int.Parse(parts[0]);
+                        string playerName = parts[1];
+                        string playerColor = parts[2];
+                        int x = int.Parse(parts[3]);
+                        int y = int.Parse(parts[4]);
+
+                        //Create a PlayerInfo object to store player information
+                        if (playerId-1>=0 && playerId-1 < playerInfoList.Count)
+                        {
+                            playerInfoList[playerId-1].SetCurrentPosition(x, y);
+                        }
+                        else
+                        {
+                            Player playerInfo = new Player(playerId, playerName, playerColor);
+                            playerInfo.SetCurrentPosition(x, y);
+                            playerInfoList.Add(playerInfo);
+                        }
+                    }
+                }
+                UpdateClientView(playerInfoList);
+            });
         }
+        private async Task ListenForGameUpdates()
+        {
+            connection.On<string>("UpdateUsers", (player) =>
+            {
+                string[] parts = player.Split(':');
 
-        //protected override void OnInitialized(EventArgs e)
-        //{
-        //    base.OnInitialized(e);
+                if (parts.Length == 5)
+                {
+                    int playerId = int.Parse(parts[0]);
+                    string playerName = parts[1];
+                    string playerColor = parts[2];
+                    int x = int.Parse(parts[3]);
+                    int y = int.Parse(parts[4]);
 
-        //    // Create and show the ColorChoiceForm as a pop-up
-        //    ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
-        //    colorChoiceForm.ShowDialog();
-        //    string selectedColor = colorChoiceForm.SelectedColor;
+                    playerInfoList[playerId - 1].SetCurrentPosition(x, y);
 
-        //    client = new TcpClient("localhost", 12345);
-        //    stream = client.GetStream();
+                    Dispatcher.Invoke(() =>
+                    {
+                        playerInfoList[playerId - 1].SetCurrentPosition(x, y);
 
-        //    byte[] colorBytes = Encoding.UTF8.GetBytes(selectedColor);
-        //    stream.Write(colorBytes, 0, colorBytes.Length);
-        //    stream.Flush();
+                        Player playerInfo = playerInfoList[playerId - 1];
+                        PlayerVisual playerVisual = playerVisuals[playerId - 1];
+                        Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
+                        Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
+                    });
+                }
+            });
+        }
+        private void LoadGameMap()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Canvas gameMapCanvas = new Canvas();
+                gameMapCanvas.Name = "GameMap";
+                gameMapCanvas.Background = Brushes.Gray;
 
-        //    var receiveThread = new System.Threading.Thread(ReceivePlayerData);
-        //    receiveThread.Start();
-        //}
-        public String getFirstInstanceUsingSubString(String input, string something)
+                // Create a Rectangle (obstacle)
+                foreach (Obstacle obs in obstacles)
+                {
+                    Rectangle obstacleRect = new Rectangle();
+
+                    obstacleRect.Width = obs.Width;
+                    obstacleRect.Height = obs.Height;
+                    obstacleRect.Fill = Brushes.LightGray;
+                    Canvas.SetLeft(obstacleRect, obs.PositionX);
+                    Canvas.SetTop(obstacleRect, obs.PositionY);
+
+                    // Add the Rectangle to the Canvas
+                    gameMapCanvas.Children.Add(obstacleRect);
+                }
+                // Replace the existing Canvas with the new one
+                playersContainer.Items.Add(gameMapCanvas);
+            });
+        }
+        public string getFirstInstanceUsingSubString(string input, string something)
         {
             int index = input.Contains(something) ? input.IndexOf(something)+something.Length-1 : 0;
             return input.Substring(0, index);
@@ -263,9 +336,9 @@ namespace JAKE.client
             {
                 foreach (Player playerInfo in playerInfoList)
                 {
-                    if (playerVisuals.ContainsKey(playerInfo))
+                    if (playerInfo.GetId()-1>=0 && playerInfo.GetId() - 1 < playerVisuals.Count)
                     {
-                        PlayerVisual playerVisual = playerVisuals[playerInfo];
+                        PlayerVisual playerVisual = playerVisuals[playerInfo.GetId()-1];
                         double x = Canvas.GetLeft(playerVisual);
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
@@ -280,7 +353,7 @@ namespace JAKE.client
                         playerVisual.UpdateColor(solidColorBrush);
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
-                        playerVisuals[playerInfo] = playerVisual;
+                        playerVisuals.Add(playerVisual);
                         playersContainer.Items.Add(playerVisual);
                     }
                 }
@@ -380,7 +453,6 @@ namespace JAKE.client
                     if (distance!=0)
                     {
                         newX = playerDirectionX == 0 ? playerCurrentX : playerCurrentX + distance;
-                        // something is wrong??? idk yet
                         newY = playerDirectionY == 0 ? playerCurrentY : playerCurrentY + distance;
 
                         Move(newX, newY);
@@ -393,21 +465,22 @@ namespace JAKE.client
                 Move(newX, newY);
             }
         }
-        private void Move(double newX, double newY)
+        private async void Move(double newX, double newY)
         {
-            UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
+            UpdatePlayer(playerVisuals[currentPlayer.GetId() - 1], newX, newY);
 
             string movementUpdateMessage = $"MOVE:{currentPlayer.GetId()}:{newX}:{newY}";
 
-            // Send the movement update message to the server using the client's network stream
-            byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
-            stream.Write(updateData, 0, updateData.Length);
-            stream.Flush();
+            //// Send the movement update message to the server using the client's network stream
+            //byte[] updateData = Encoding.UTF8.GetBytes(movementUpdateMessage);
+            //stream.Write(updateData, 0, updateData.Length);
+            //stream.Flush();
+            await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
         }
 
         private void Shoot(int deltaX, int deltaY)
         {
-            CreateShot(playerVisuals[currentPlayer], deltaX, deltaY);
+            CreateShot(playerVisuals[currentPlayer.GetId()-1], deltaX, deltaY);
         }
 
         private void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
@@ -525,23 +598,12 @@ namespace JAKE.client
             };
         }
 
-
-
         private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
         {
-
-            // Set the new position
             Canvas.SetLeft(playerVisual, moveX);
             Canvas.SetTop(playerVisual, moveY);
 
             currentPlayer.SetCurrentPosition(moveX, moveY);
-        }
-        private string UpdatePlayerPosition(PlayerVisual playerVisual)
-        {
-            double currentX = Canvas.GetLeft(playerVisual);
-            double currentY = Canvas.GetTop(playerVisual);
-
-            return $"MOVE:{currentPlayer.GetId()}:{currentX}:{currentY}";
         }
     }
 }

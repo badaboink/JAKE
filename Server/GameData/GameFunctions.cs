@@ -1,6 +1,6 @@
 ﻿using JAKE.classlibrary;
 
-namespace Server.Hubs
+namespace Server.GameData
 {
     public class GameFunctions
     {
@@ -19,7 +19,6 @@ namespace Server.Hubs
                 double heightTemp = widthTemp < 150 ? random.Next(200, 300) : random.Next(50, 100);
 
                 // TO DO: atsisakau daryti packing algoritma
-
 
                 double xtemp = random.Next(60, (int)(1920 - widthTemp));
                 double ytemp = random.Next(60, (int)(1080 - heightTemp));
