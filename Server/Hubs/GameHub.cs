@@ -29,11 +29,18 @@ namespace Server.Hubs
         {
             return ConnectedClients.ContainsKey(userId);
         }
-
         public GameHub(IGameDataService gameDataService)
         {
             _gameDataService = gameDataService;
         }
+
+        //private async Task SendSpawnedEnemyAsync()
+        //{
+        //    Enemy enemy = _gameDataService.AddEnemies();
+        //    Console.WriteLine($"{_gameDataService.GetEnemies().Count} {enemy.ToString()}");
+        //    await Clients.All.SendAsync("SpawnedEnemy", enemy.ToString());
+        //    Console.WriteLine("Timer restarted.");
+        //}
 
         public async Task SendColor(string color)
         {
@@ -47,6 +54,8 @@ namespace Server.Hubs
                 await Clients.Caller.SendAsync("ObstacleInfo", _gameDataService.GetObstacleData());
 
                 await Clients.All.SendAsync("PlayerList", _gameDataService.GetPlayerList());
+
+                // send existing enemy list
             }
             catch (Exception ex)
             {

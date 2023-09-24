@@ -130,6 +130,7 @@ namespace JAKE.client
                 }
                 UpdateClientView(playerInfoList);
             });
+            // get already existing enemy list and update view
         }
         private async Task ListenForGameUpdates()
         {
@@ -158,6 +159,35 @@ namespace JAKE.client
                     });
                 }
             });
+            // list for new enemies and their movement
+            //connection.On<string>("SpawnedEnemy", (enemydata) =>
+            //{
+            //    string[] parts = enemydata.Split(':');
+
+            //    if (parts.Length == 4)
+            //    {
+            //        int enemyId = int.Parse(parts[0]);
+            //        string enemyColor = parts[1];
+            //        double enemyX = double.Parse(parts[2]);
+            //        double enemyY = double.Parse(parts[3]);
+            //        Enemy enemy = new Enemy(enemyId, enemyColor);
+            //        enemy.SetCurrentPosition(enemyX, enemyY);
+            //        enemies.Add(enemy);
+            //        Dispatcher.Invoke(() =>
+            //        {
+            //            Rectangle enemyRect = new Rectangle
+            //            {
+            //                Width = 20,
+            //                Height = 20,
+            //                Fill = Brushes.Red, // Set the enemy's color
+            //            };
+            //            enemyVisuals[enemy] = enemyRect;
+            //            Canvas.SetLeft(enemyRect, enemyX);
+            //            Canvas.SetTop(enemyRect, enemyY);
+            //            EnemyContainer.Children.Add(enemyRect);
+            //        });
+            //    }
+            //});
         }
         private void LoadGameMap()
         {

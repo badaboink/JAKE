@@ -50,5 +50,59 @@ namespace Server.GameData
         {
             return enemies.Select(enemy => enemy.ToString()).ToList();
         }
+        public List<string> UpdateEnemyPositions()
+        {
+            foreach (var enemy in enemies)
+            {
+                // Find the closest player
+                Player closestPlayer = FindClosestPlayer(enemy);
+
+                if (closestPlayer != null)
+                {
+                    // Calculate direction vector from enemy to closest player
+                    double directionX = closestPlayer.GetCurrentX() - enemy.GetCurrentX();
+                    double directionY = closestPlayer.GetCurrentY() - enemy.GetCurrentY();
+
+                    // Normalize the direction vector
+                    double length = Math.Sqrt(directionX * directionX + directionY * directionY);
+                    if (length > 0)
+                    {
+                        directionX /= length;
+                        directionY /= length;
+                    }
+
+                    // Define enemy movement speed
+                    double enemySpeed = enemy.GetSpeed();
+
+                    // Update enemy position based on direction and speed
+                    double newX = enemy.GetCurrentX() + directionX * enemySpeed;
+                    double newY = enemy.GetCurrentY() + directionY * enemySpeed;
+
+                    enemy.SetCurrentPosition(newX, newY);
+                }
+            }
+            return enemies.Select(enemy => enemy.ToString()).ToList();
+        }
+        public Player FindClosestPlayer(Enemy enemy)
+        {
+            Player closestPlayer = null;
+            double closestDistance = double.MaxValue;
+
+            foreach (var player in players)
+            {
+                // Calculate the distance between enemy and player
+                double distance = Math.Sqrt(
+                    Math.Pow(player.GetCurrentX() - enemy.GetCurrentX(), 2) +
+                    Math.Pow(player.GetCurrentY() - enemy.GetCurrentY(), 2));
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestPlayer = player;
+                }
+            }
+
+            return closestPlayer;
+        }
     }
 }

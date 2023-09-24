@@ -17,5 +17,7 @@ namespace Server.GameData
         string GetObstacleData();
         Enemy AddEnemies();
         List<string> GetEnemies();
+        List<string> UpdateEnemyPositions();
+        Player FindClosestPlayer(Enemy enemy);
     }
 }

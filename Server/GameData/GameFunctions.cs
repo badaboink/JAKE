@@ -37,5 +37,6 @@ namespace Server.GameData
             enemy.SetCurrentPosition(spawnX, spawnY);
             return enemy;
         }
+        
     }
 }
