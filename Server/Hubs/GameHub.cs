@@ -38,6 +38,7 @@ namespace Server.Hubs
             gameTimer = new Timer(CheckGameTime, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         }
         private object syncLock = new object();
+        private Random random = new Random();
         private void CheckGameTime(object state)
         {
             // neveikia synclock AKKK
@@ -46,13 +47,12 @@ namespace Server.Hubs
                 DateTime startTime = _gameDataService.GetCurrentGameTime();
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
-                Random random = new Random();
-                if (_gameDataService.GetEnemies().Count != 0 && random.Next(1,3)==2)
+                if (_gameDataService.GetEnemies().Count != 0 && random.Next(1,5)==2)
                 {
                     Console.WriteLine($"Moving enemy {startTime} - {DateTime.Now}");
                     _gameDataService.UpdateEnemyPositions();
                 }
-                if (elapsedTime.TotalSeconds >= 10)
+                if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
                 {
                     _gameDataService.AddEnemies();
                     Console.WriteLine($"Spawning enemy {startTime} - {DateTime.Now}. {_gameDataService.GetEnemies().Count}");
