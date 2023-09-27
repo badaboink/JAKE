@@ -34,10 +34,12 @@ namespace JAKE.client
         private Player currentPlayer;
         private List<Player> playerInfoList = new List<Player>();
         private List<PlayerVisual> playerVisuals = new List<PlayerVisual>();
+        //private List<Rectangle> enemyVisuals = new List<Rectangle>();
         private Dictionary<Enemy, Rectangle> enemyVisuals = new Dictionary<Enemy, Rectangle>();
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Enemy> enemies = new List<Enemy>();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
+        private DateTime lastGameTime = DateTime.MinValue;
 
         public MainWindow()
         {
@@ -130,8 +132,13 @@ namespace JAKE.client
                 }
                 UpdateClientView(playerInfoList);
             });
+            connection.On<DateTime>("GameTime", (GameTime) =>
+            {
+                lastGameTime = GameTime;
+            });
             // get already existing enemy list and update view
         }
+        private Timer timer;
         private async Task ListenForGameUpdates()
         {
             connection.On<string>("UpdateUsers", (player) =>
@@ -159,35 +166,60 @@ namespace JAKE.client
                     });
                 }
             });
-            // list for new enemies and their movement
-            //connection.On<string>("SpawnedEnemy", (enemydata) =>
-            //{
-            //    string[] parts = enemydata.Split(':');
+            timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
+            timer = new Timer(CheckElapsedTimeSpawn, null, 0, 10000);
 
-            //    if (parts.Length == 4)
-            //    {
-            //        int enemyId = int.Parse(parts[0]);
-            //        string enemyColor = parts[1];
-            //        double enemyX = double.Parse(parts[2]);
-            //        double enemyY = double.Parse(parts[3]);
-            //        Enemy enemy = new Enemy(enemyId, enemyColor);
-            //        enemy.SetCurrentPosition(enemyX, enemyY);
-            //        enemies.Add(enemy);
-            //        Dispatcher.Invoke(() =>
-            //        {
-            //            Rectangle enemyRect = new Rectangle
-            //            {
-            //                Width = 20,
-            //                Height = 20,
-            //                Fill = Brushes.Red, // Set the enemy's color
-            //            };
-            //            enemyVisuals[enemy] = enemyRect;
-            //            Canvas.SetLeft(enemyRect, enemyX);
-            //            Canvas.SetTop(enemyRect, enemyY);
-            //            EnemyContainer.Children.Add(enemyRect);
-            //        });
-            //    }
-            //});
+            connection.On<List<string>>("SendingEnemies", (enemydata) =>
+            {
+                foreach(string enemystring in enemydata)
+                {
+                    string[] parts = enemystring.Split(':');
+                    if (parts.Length == 4)
+                    {
+                        int enemyId = int.Parse(parts[0]);
+                        string enemyColor = parts[1];
+                        double enemyX = double.Parse(parts[2]);
+                        double enemyY = double.Parse(parts[3]);
+                        Enemy enemy = new Enemy(enemyId, enemyColor);
+                        if (!enemies.Contains(enemy))
+                        {
+                            enemy.SetCurrentPosition(enemyX, enemyY);
+                            enemies.Add(enemy);
+                            Dispatcher.Invoke(() =>
+                            {
+                                Rectangle enemyRect = new Rectangle
+                                {
+                                    Width = 20,
+                                    Height = 20,
+                                    Fill = Brushes.Red, // Set the enemy's color
+                                };
+                                enemyVisuals[enemy] = enemyRect;
+                                Canvas.SetLeft(enemyRect, enemyX);
+                                Canvas.SetTop(enemyRect, enemyY);
+                                EnemyContainer.Children.Add(enemyRect);
+                            });
+                        }
+                        else
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                Rectangle enemyRect = enemyVisuals[enemy];
+                                enemy.SetCurrentPosition(enemyX, enemyY);
+                                Canvas.SetLeft(enemyRect, enemyX);
+                                Canvas.SetTop(enemyRect, enemyY);
+                            });
+                        }
+                    }
+                }
+            });
+        }
+        private async void CheckElapsedTimeSpawn(object state)
+        {
+            await connection.SendAsync("SendEnemies");
+        }
+        private async void CheckElapsedTimeMove(object state)
+        {
+            await connection.SendAsync("SendEnemies");
         }
         private void LoadGameMap()
         {
@@ -225,142 +257,6 @@ namespace JAKE.client
             int index = input.Contains(something) ? input.IndexOf(something) + something.Length : 0;
             return input.Substring(index);
         }
-        private void ReceivePlayerData()
-        {
-            bool initialized = false;
-            List<Player> playerInfoList = new List<Player>();
-
-            while (true)
-            {                
-                string message = ReceiveString(stream);
-                if (message.Contains("ENEMY_POSITIONS;"))
-                {
-                    // Extract enemy positions from the message
-                    string[] parts = message.Split(';');
-                    if (parts.Length >= 2)
-                    {
-                        string[] enemyInfo = parts[1].Split(',');
-                        foreach (var enemyData in enemyInfo)
-                        {
-                            string[] enemyDetails = enemyData.Split(':');
-                            if (enemyDetails.Length == 4)
-                            {
-                                int enemyId = int.Parse(enemyDetails[0]);
-                                string enemyColor = enemyDetails[1];
-                                double enemyX = double.Parse(enemyDetails[2]);
-                                double enemyY = double.Parse(enemyDetails[3]);
-                                Enemy enemy = new Enemy(enemyId, enemyColor);
-                                enemy.SetCurrentPosition(enemyX, enemyY);
-                                if (!enemies.Contains(enemy)) 
-                                {
-                                    Debug.WriteLine("Enemy spawned");
-                                    enemies.Add(enemy); 
-                                    Dispatcher.Invoke(() =>
-                                    {
-                                        Rectangle enemyRect = new Rectangle
-                                        {
-                                            Width = 20,
-                                            Height = 20,
-                                            Fill = Brushes.Red, // Set the enemy's color
-                                        };
-                                        enemyVisuals[enemy] = enemyRect;
-                                        Canvas.SetLeft(enemyRect, enemyX);
-                                        Canvas.SetTop(enemyRect, enemyY);
-
-                                        // Add the enemy to the canvas or container where you want to display them
-                                        EnemyContainer.Children.Add(enemyRect);
-                                    });
-                                }
-                                else
-                                {
-                                    enemies.Find(n => n.Equals(enemy)).SetCurrentPosition(enemyX, enemyY);
-                                }
-                            }
-                        }
-                    }
-                }
-                if (message.StartsWith("ObstacleData:"))
-                {
-                    string obstaclemessage = getFirstInstanceUsingSubString(message, "I");
-                    if (obstaclemessage == "")
-                    {
-                        obstaclemessage = message;
-                    }
-                    obstaclemessage = obstaclemessage.Substring("ObstacleData:".Length);
-                    string[] obstaclemessages = obstaclemessage.Split(',');
-                    foreach(string obs in obstaclemessages)
-                    {
-                        string[] parts = obs.Split(':');
-                        if (parts.Length == 4)
-                        {
-                            double width = double.Parse(parts[0]);
-                            double height = double.Parse(parts[1]);
-                            double posX = double.Parse(parts[2]);
-                            double posY = double.Parse(parts[3]);
-
-                            Obstacle obstacle = new Obstacle(width, height, posX, posY);
-                            obstacles.Add(obstacle);
-                        }
-                    }
-                    message = message.Remove(0, "ObstacleData:".Length+obstaclemessage.Length-1);
-                }
-                if (message.Contains("INIT:") && !initialized)
-                {
-                    string initMessage = getFirstInstanceUsingSubString(message, " ");
-                    // Parse and process the initialization message
-                    string[] parts = initMessage.Split(':');
-                    if (parts.Length == 6)
-                    {
-                        int playerId = int.Parse(parts[1]);
-                        string playerName = parts[2];
-                        string playerColor = parts[3];
-                        int x = int.Parse(parts[4]);
-                        int y = int.Parse(parts[5]);
-
-                        // Create a Player object or update the current player's information
-                        currentPlayer = new Player(playerId, playerName, playerColor);
-                        currentPlayer.SetCurrentPosition(x, y);
-
-                        playerInfoList.Add(currentPlayer);
-
-                        initialized = true;
-                    }
-                }
-                if(message.Contains("PLAYER_LIST;") && initialized) 
-                {
-                    string playerList = GetStringAfterFirstSpace(message, " ").Split(';')[1];
-                    // Assuming the player list format is "PLAYER_LIST;ID:Name:Color,ID:Name:Color,..."
-
-                    // Split the player list into individual player entries
-
-                    string[] playerEntries = playerList.Split(',');
-
-                    foreach (string playerEntry in playerEntries)
-                    {
-                        //Split each player entry into ID, Name, and Color parts
-                        string[] parts = playerEntry.Split(':');
-
-                        if (parts.Length == 5)
-                        {
-                            int playerId = int.Parse(parts[0]);
-                            string playerName = parts[1];
-                            string playerColor = parts[2];
-                            int x = int.Parse(parts[3]);
-                            int y = int.Parse(parts[4]);
-
-                            //Create a PlayerInfo object to store player information
-                            Player playerInfo = new Player(playerId, playerName, playerColor);
-                            playerInfo.SetCurrentPosition(x, y);
-                            playerInfoList.Add(playerInfo);
-                        }
-                    }
-                }
-                UpdateClientView(playerInfoList);
-
-                // Update the client's view to display the players
-               
-            }
-        }
         private void UpdateClientView(List<Player> playerInfoList)
         {
             Dispatcher.Invoke(() =>
@@ -395,12 +291,6 @@ namespace JAKE.client
                     Canvas.SetTop(enemyRect, enemy.GetCurrentY());
                 }
             });
-        }
-        private string ReceiveString(NetworkStream stream)
-        {
-            byte[] buffer = new byte[1024]; // Adjust the buffer size as needed
-            int bytesRead = stream.Read(buffer, 0, buffer.Length);
-            return Encoding.ASCII.GetString(buffer, 0, bytesRead);
         }
 
         private int playerDirectionX = 0;

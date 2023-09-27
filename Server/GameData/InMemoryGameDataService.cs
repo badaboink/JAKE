@@ -7,6 +7,7 @@ namespace Server.GameData
         private List<Player> players = new List<Player>();
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Enemy> enemies = new List<Enemy>();
+        private DateTime gametime = DateTime.Now;
 
         public InMemoryGameDataService()
         {
@@ -103,6 +104,14 @@ namespace Server.GameData
             }
 
             return closestPlayer;
+        }
+        public DateTime GetCurrentGameTime()
+        {
+            return gametime;
+        }
+        public void SetGameTime(DateTime gametime)
+        {
+            this.gametime = gametime;
         }
     }
 }

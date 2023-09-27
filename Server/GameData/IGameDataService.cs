@@ -19,5 +19,7 @@ namespace Server.GameData
         List<string> GetEnemies();
         List<string> UpdateEnemyPositions();
         Player FindClosestPlayer(Enemy enemy);
+        DateTime GetCurrentGameTime();
+        void SetGameTime(DateTime gametime);
     }
 }
