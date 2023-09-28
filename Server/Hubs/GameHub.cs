@@ -35,23 +35,17 @@ namespace Server.Hubs
         public GameHub(IGameDataService gameDataService)
         {
             _gameDataService = gameDataService;
-            gameTimer = new Timer(CheckGameTime, null, TimeSpan.Zero, TimeSpan.FromSeconds(1));
         }
         private object syncLock = new object();
         private Random random = new Random();
-        private void CheckGameTime(object state)
+        public async Task SendEnemies()
         {
-            // neveikia synclock AKKK
-            lock (syncLock)
+            lock(syncLock)
             {
                 DateTime startTime = _gameDataService.GetCurrentGameTime();
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
-                if (_gameDataService.GetEnemies().Count != 0 && random.Next(1,5)==2)
-                {
-                    Console.WriteLine($"Moving enemy {startTime} - {DateTime.Now}");
-                    _gameDataService.UpdateEnemyPositions();
-                }
+                _gameDataService.UpdateEnemyPositions();
                 if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
                 {
                     _gameDataService.AddEnemies();
@@ -59,10 +53,7 @@ namespace Server.Hubs
                     _gameDataService.SetGameTime(DateTime.Now);
                 }
             }
-        }
-        public async Task SendEnemies()
-        {
-            if(_gameDataService.GetEnemies().Count > 0)
+            if (_gameDataService.GetEnemies().Count > 0)
             {
                 Console.WriteLine($"Sending Enemies {Context.ConnectionId}");
                 await Clients.Caller.SendAsync("SendingEnemies", _gameDataService.GetEnemies());
