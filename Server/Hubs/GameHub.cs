@@ -59,9 +59,9 @@ namespace Server.Hubs
                 await Clients.Caller.SendAsync("SendingEnemies", _gameDataService.GetEnemies());
             }
         }
-        public async Task SendColor(string color)
+        public async Task SendColor(string color, string name)
         {
-            Player newPlayer = _gameDataService.AddPlayer("a", color);
+            Player newPlayer = _gameDataService.AddPlayer(name, color);
             try
             {
                 Console.WriteLine($"Player {newPlayer.ToString()}");

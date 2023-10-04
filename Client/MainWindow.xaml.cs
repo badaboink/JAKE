@@ -77,8 +77,9 @@ namespace JAKE.client
             ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
             colorChoiceForm.ShowDialog();
             string selectedColor = colorChoiceForm.SelectedColor;
+            string name = colorChoiceForm.Name;
 
-            await connection.SendAsync("SendColor", selectedColor);
+            await connection.SendAsync("SendColor", selectedColor, name);
             connection.On<int, string, string>("YourPlayerInfo", (id, name, color)=>
             {
                 currentPlayer = new Player(id, name, color);
@@ -276,6 +277,7 @@ namespace JAKE.client
                         ColorConverter converter = new ColorConverter();
                         Color playerColor = (Color)ColorConverter.ConvertFromString(playerInfo.GetColor());
                         SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
+                        playerVisual.PlayerName = playerInfo.GetName();
                         playerVisual.PlayerColor = solidColorBrush;
                         playerVisual.UpdateColor(solidColorBrush);
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());

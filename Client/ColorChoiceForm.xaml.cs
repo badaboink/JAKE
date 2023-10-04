@@ -23,6 +23,7 @@ namespace JAKE.Client
     public partial class ColorChoiceForm : Window
     {
         public string SelectedColor { get; private set; }
+        public string Name { get; private set; }
 
         public ColorChoiceForm()
         {
@@ -31,20 +32,27 @@ namespace JAKE.Client
 
         private void GreenButton_Click(object sender, RoutedEventArgs e)
         {
+            UpdateName();
             SelectedColor = "Green";
             this.Close();
         }
 
         private void BlueButton_Click(object sender, RoutedEventArgs e)
         {
+            UpdateName();
             SelectedColor = "Blue";
             this.Close();
         }
 
         private void RedButton_Click(object sender, RoutedEventArgs e)
         {
+            UpdateName();
             SelectedColor = "Red";
             this.Close();
+        }
+        private void UpdateName()
+        {
+            Name = string.IsNullOrEmpty(NameTextBox.Text) ? "Unnamed" : NameTextBox.Text;
         }
     }
 }
