@@ -31,7 +31,7 @@ namespace Server.GameData
         public static Enemy GenerateEnemy(int id)
         {
             Random random = new Random();
-            Enemy enemy = new Enemy(id, "Red", 2);
+            Enemy enemy = new Enemy(id, "Red", 10);
             double spawnX = random.Next(0, 1936);
             double spawnY = random.Next(0, 1056);
             enemy.SetCurrentPosition(spawnX, spawnY);

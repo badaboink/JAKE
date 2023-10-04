@@ -75,11 +75,36 @@ namespace Server.GameData
                     // Define enemy movement speed
                     double enemySpeed = enemy.GetSpeed();
 
-                    // Update enemy position based on direction and speed
                     double newX = enemy.GetCurrentX() + directionX * enemySpeed;
                     double newY = enemy.GetCurrentY() + directionY * enemySpeed;
 
-                    enemy.SetCurrentPosition(newX, newY);
+                    bool CantMove = false;
+                    foreach (Obstacle obstacle in obstacles)
+                    {
+                        if (obstacle.WouldOverlap(newX, newY, 20, 20))
+                        {
+                            CantMove = true;
+
+                            // Stops at a the wall of the direction that its moving towards most
+                            directionX = (Math.Abs(directionX) > Math.Abs(directionY)) ? (directionX < 0 ? -1 : 1) : 0;
+                            directionY = (Math.Abs(directionY) > Math.Abs(directionX)) ? (directionY < 0 ? -1 : 1) : 0;
+
+                            double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), 20, 20);
+                            if (distance != 0)
+                            {
+                                newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
+                                newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentX() + distance;
+
+                                enemy.SetCurrentPosition(newX, newY);
+                            }
+                            break;
+                        }
+                    }
+                    // Update enemy position based on direction and speed
+                    if (!CantMove)
+                    {
+                        enemy.SetCurrentPosition(newX, newY);
+                    }
                 }
             }
             return enemies.Select(enemy => enemy.ToString()).ToList();

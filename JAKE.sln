@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34003.232
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JAKE.server", "JAKE.server\JAKE.server.csproj", "{7F12444B-419E-432C-A418-931E7445B260}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JAKE.classlibrary", "JAKE.classlibrary\JAKE.classlibrary.csproj", "{A9D7057B-6EB1-4274-AD19-7264BDA94432}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "JAKE.client", "Client\JAKE.client.csproj", "{E7F48FB2-1C48-4E62-89F0-31F0A3E374B8}"
@@ -17,10 +15,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{7F12444B-419E-432C-A418-931E7445B260}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7F12444B-419E-432C-A418-931E7445B260}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7F12444B-419E-432C-A418-931E7445B260}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7F12444B-419E-432C-A418-931E7445B260}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A9D7057B-6EB1-4274-AD19-7264BDA94432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A9D7057B-6EB1-4274-AD19-7264BDA94432}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9D7057B-6EB1-4274-AD19-7264BDA94432}.Release|Any CPU.ActiveCfg = Release|Any CPU
