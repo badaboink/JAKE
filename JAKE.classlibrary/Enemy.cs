@@ -100,7 +100,7 @@ namespace JAKE.classlibrary
         }
         public override string ToString()
         {
-            return $"{GetId()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetHealth()}";
+            return $"{GetId()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetHealth()}:{GetSize()}";
         }
     }
 }

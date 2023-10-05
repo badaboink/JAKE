@@ -15,7 +15,6 @@ namespace Server.Hubs
     {
         private static readonly Dictionary<string, string> ConnectedClients = new Dictionary<string, string>();
         private readonly IGameDataService _gameDataService;
-        private Timer gameTimer;
         public override async Task OnConnectedAsync()
         {
             string connectionId = Context.ConnectionId;
@@ -25,6 +24,9 @@ namespace Server.Hubs
         {
             string connectionId = Context.ConnectionId;
             Console.WriteLine($"Disconnected: {connectionId}");
+            Player playertoremove = _gameDataService.RemovePlayer(connectionId);
+            Console.WriteLine(_gameDataService.GetPlayerList().Count);
+            await Clients.All.SendAsync("DisconnectedPlayer", playertoremove.ToString());
             await base.OnDisconnectedAsync(exception);
         }
 
@@ -37,7 +39,6 @@ namespace Server.Hubs
             _gameDataService = gameDataService;
         }
         private object syncLock = new object();
-        private Random random = new Random();
         public async Task SendEnemies()
         {
             lock(syncLock)
@@ -62,7 +63,7 @@ namespace Server.Hubs
         }
         public async Task SendColor(string color, string name)
         {
-            Player newPlayer = _gameDataService.AddPlayer(name, color);
+            Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId);
             try
             {
                 Console.WriteLine($"Player {newPlayer.ToString()}");
@@ -96,7 +97,7 @@ namespace Server.Hubs
         public async Task SendEnemyUpdate(string enemy)
         {
             string[] parts = enemy.Split(':');
-            if (parts.Length == 5)
+            if (parts.Length == 6)
             {
                 int id = int.Parse(parts[0]);
                 string color = parts[1];
@@ -108,7 +109,7 @@ namespace Server.Hubs
         public async Task SendDeadEnemy(string enemy)
         {
             string[] parts = enemy.Split(':');
-            if (parts.Length == 5)
+            if (parts.Length == 6)
             {
                 int id = int.Parse(parts[0]);
                 string color = parts[1];

@@ -31,7 +31,7 @@ namespace Server.GameData
         public static Enemy GenerateEnemy(int id, List<Obstacle> obstacles)
         {
             Random random = new Random();
-            Enemy enemy = new Enemy(id, "Red", 10);
+            Enemy enemy = new Enemy(id, "Blue", 10);
             int maxAttempts = 100;
             for (int attempt = 0; attempt < maxAttempts; attempt++)
             {

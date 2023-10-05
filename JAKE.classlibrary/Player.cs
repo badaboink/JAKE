@@ -11,6 +11,7 @@ namespace JAKE.classlibrary
 {
     public class Player
     {
+        private string? _connectionid;
         private int _id;
         private string _name;
         private string _color;
@@ -33,6 +34,8 @@ namespace JAKE.classlibrary
                 Ability = "unknown";
             }
         }
+        
+        
         public Player()
         {
             _id = -1;
@@ -64,11 +67,19 @@ namespace JAKE.classlibrary
         {
             return _currentY;
         }
+        public string GetConnectionId()
+        {
+            return _connectionid;
+        }
 
         public void SetCurrentPosition(double x, double y)
         {
             _currentX = x;
             _currentY = y;
+        }
+        public void SetConnectionId(string id)
+        {
+            _connectionid = id;
         }
         private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
         {

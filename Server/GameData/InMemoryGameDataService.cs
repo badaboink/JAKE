@@ -14,12 +14,19 @@ namespace Server.GameData
             // Generate obstacles when the service is created
             obstacles = GameFunctions.GenerateObstacles();
         }
-        public Player AddPlayer(string playerName, string playerColor)
+        public Player AddPlayer(string playerName, string playerColor, string connectionID)
         {
             int playerId = players.Count + 1;
             Player newPlayer = new Player(playerId, playerName, playerColor);
+            newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);
             return newPlayer;
+        }
+        public Player RemovePlayer(string connectionID)
+        {
+            Player playerToRemove = players.FirstOrDefault(player => player.GetConnectionId() == connectionID);
+            players.Remove(playerToRemove);
+            return playerToRemove;
         }
 
         public void EditPlayerPosition(int id, double x, double y)

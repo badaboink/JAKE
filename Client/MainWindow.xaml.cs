@@ -33,10 +33,11 @@ namespace JAKE.client
         private TcpClient client;
         private NetworkStream stream;
         private Player currentPlayer;
+        private bool gamestarted = false;
         private List<Player> playerInfoList = new List<Player>();
-        private List<PlayerVisual> playerVisuals = new List<PlayerVisual>();
-        //private List<Rectangle> enemyVisuals = new List<Rectangle>();
-        private Dictionary<Enemy, Rectangle> enemyVisuals = new Dictionary<Enemy, Rectangle>();
+        //private List<PlayerVisual> playerVisuals = new List<PlayerVisual>();
+        private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
+        private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Enemy> enemies = new List<Enemy>();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
@@ -84,6 +85,7 @@ namespace JAKE.client
             connection.On<int, string, string>("YourPlayerInfo", (id, name, color)=>
             {
                 currentPlayer = new Player(id, name, color);
+                gamestarted = true;
             });
             connection.On<string>("ObstacleInfo", (obstacleData) =>
             {
@@ -108,7 +110,6 @@ namespace JAKE.client
             {
                 foreach (string playerEntry in userData)
                 {
-                    // Split: ID, Name, Color, X, Y
                     string[] parts = playerEntry.Split(':');
 
                     if (parts.Length == 5)
@@ -118,27 +119,46 @@ namespace JAKE.client
                         string playerColor = parts[2];
                         int x = int.Parse(parts[3]);
                         int y = int.Parse(parts[4]);
+                        Player playerInfo = new Player(playerId, playerName, playerColor);
+                        playerInfo.SetCurrentPosition(x, y);
 
-                        //Create a PlayerInfo object to store player information
-                        if (playerId-1>=0 && playerId-1 < playerInfoList.Count)
+                        if (!playerInfoList.Contains(playerInfo))
                         {
-                            playerInfoList[playerId-1].SetCurrentPosition(x, y);
+                            playerInfo.SetCurrentPosition(x, y);
+                            playerInfoList.Add(playerInfo);
+                            Dispatcher.Invoke(() =>
+                            {
+                                PlayerVisual playerVisual = new PlayerVisual();
+                                ColorConverter converter = new ColorConverter();
+                                Color playerColor = (Color)ColorConverter.ConvertFromString(playerInfo.GetColor());
+                                SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
+                                playerVisual.PlayerName = playerInfo.GetName();
+                                playerVisual.PlayerColor = solidColorBrush;
+                                playerVisual.UpdateColor(solidColorBrush);
+
+                                playerVisuals[playerInfo] = playerVisual;
+                                Canvas.SetLeft(playerVisual, x);
+                                Canvas.SetTop(playerVisual, y);
+                                playersContainer.Items.Add(playerVisual);
+                            });
                         }
                         else
                         {
-                            Player playerInfo = new Player(playerId, playerName, playerColor);
-                            playerInfo.SetCurrentPosition(x, y);
-                            playerInfoList.Add(playerInfo);
+                            Dispatcher.Invoke(() =>
+                            {
+                                PlayerVisual playerVisual = playerVisuals[playerInfo];
+                                playerInfo.SetCurrentPosition(x, y);
+                                Canvas.SetLeft(playerVisual, x);
+                                Canvas.SetTop(playerVisual, y);
+                            });
                         }
                     }
                 }
-                UpdateClientView(playerInfoList);
             });
             connection.On<DateTime>("GameTime", (GameTime) =>
             {
                 lastGameTime = GameTime;
             });
-            // get already existing enemy list and update view
         }
         private Timer timer;
         private async Task ListenForGameUpdates()
@@ -162,7 +182,7 @@ namespace JAKE.client
                         playerInfoList[playerId - 1].SetCurrentPosition(x, y);
 
                         Player playerInfo = playerInfoList[playerId - 1];
-                        PlayerVisual playerVisual = playerVisuals[playerId - 1];
+                        PlayerVisual playerVisual = playerVisuals[playerInfo];
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
                     });
@@ -175,42 +195,45 @@ namespace JAKE.client
                 foreach(string enemystring in enemydata)
                 {
                     string[] parts = enemystring.Split(':');
-                    if (parts.Length == 5)
+                    if (parts.Length == 6)
                     {
                         int enemyId = int.Parse(parts[0]);
                         string enemyColor = parts[1];
                         double enemyX = double.Parse(parts[2]);
                         double enemyY = double.Parse(parts[3]);
                         int health = int.Parse(parts[4]);
+                        int size = int.Parse(parts[5]);
                         Enemy enemy = new Enemy(enemyId, enemyColor);
-                        enemy.SetHealth(health);
+                        enemy.SetHealth(health); enemy.SetSize(size);
                         if (!enemies.Contains(enemy))
                         {
                             enemy.SetCurrentPosition(enemyX, enemyY);
                             enemies.Add(enemy);
                             Dispatcher.Invoke(() =>
                             {
-                                Rectangle enemyRect = new Rectangle
-                                {
-                                    Width = 20,
-                                    Height = 20,
-                                    Fill = Brushes.Red, // Set the enemy's color
-                                };
-                                enemyVisuals[enemy] = enemyRect;
-                                Canvas.SetLeft(enemyRect, enemyX);
-                                Canvas.SetTop(enemyRect, enemyY);
-                                EnemyContainer.Children.Add(enemyRect);
+                                EnemyVisual enemyVisual = new EnemyVisual();
+                                ColorConverter converter = new ColorConverter();
+                                Color enemyColor = (Color)ColorConverter.ConvertFromString(enemy.GetColor());
+                                SolidColorBrush solidColorBrush = new SolidColorBrush(enemyColor);
+                                enemyVisual.FillColor = solidColorBrush;
+                                enemyVisual.EllipseSize = enemy.GetSize();
+                                enemyVisual.UpdateEnemy(solidColorBrush);
+                                
+                                enemyVisuals[enemy] = enemyVisual;
+                                Canvas.SetLeft(enemyVisual, enemyX);
+                                Canvas.SetTop(enemyVisual, enemyY);
+                                EnemyContainer.Children.Add(enemyVisual);
                             });
                         }
                         else
                         {
                             Dispatcher.Invoke(() =>
                             {
-                                Rectangle enemyRect = enemyVisuals[enemy];
+                                EnemyVisual enemyVisual = enemyVisuals[enemy];
                                 enemy.SetHealth(health);
                                 enemy.SetCurrentPosition(enemyX, enemyY);
-                                Canvas.SetLeft(enemyRect, enemyX);
-                                Canvas.SetTop(enemyRect, enemyY);
+                                Canvas.SetLeft(enemyVisual, enemyX);
+                                Canvas.SetTop(enemyVisual, enemyY);
                             });
                         }
                     }
@@ -221,7 +244,7 @@ namespace JAKE.client
                 Dispatcher.Invoke(() =>
                 {
                     Enemy enemy = new Enemy(enemyid, enemycolor);
-                    Rectangle enemyRect = enemyVisuals[enemy];
+                    EnemyVisual enemyRect = enemyVisuals[enemy];
                     enemies.Remove(enemy);
                     enemyVisuals.Remove(enemy);
                     EnemyContainer.Children.Remove(enemyRect);
@@ -230,7 +253,30 @@ namespace JAKE.client
             connection.On<int, string, int>("UpdateEnemyHealth", (enemyid, enemycolor, enemyhealth) =>
             {
                 Enemy enemyToUpdate = enemies.FirstOrDefault(enemy => enemy.MatchesId(enemyid));
-                enemyToUpdate?.SetHealth(enemyhealth);
+                if (enemyToUpdate != null)
+                {
+                    enemyToUpdate.SetHealth(enemyhealth);
+                }
+            });
+            connection.On<string>("DisconnectedPlayer", (player) =>
+            {
+                string[] parts = player.Split(':');
+                if (parts.Length == 5)
+                {
+                    int playerId = int.Parse(parts[0]);
+                    string playerName = parts[1];
+                    string playerColor = parts[2];
+                    int x = int.Parse(parts[3]);
+                    int y = int.Parse(parts[4]);
+                    Player playerToDelete = new Player(playerId, playerName, playerColor);
+                    Dispatcher.Invoke(() =>
+                    {
+                        PlayerVisual playerVisual = playerVisuals[playerToDelete];
+                        playerVisuals.Remove(playerToDelete);
+                        playerInfoList.Remove(playerToDelete);
+                        playersContainer.Items.Remove(playerVisual);
+                    });
+                }
             });
         }
         private async void CheckElapsedTimeMove(object state)
@@ -273,121 +319,95 @@ namespace JAKE.client
             int index = input.Contains(something) ? input.IndexOf(something) + something.Length : 0;
             return input.Substring(index);
         }
-        private void UpdateClientView(List<Player> playerInfoList)
-        {
-            Dispatcher.Invoke(() =>
-            {
-                foreach (Player playerInfo in playerInfoList)
-                {
-                    if (playerInfo.GetId()-1>=0 && playerInfo.GetId() - 1 < playerVisuals.Count)
-                    {
-                        PlayerVisual playerVisual = playerVisuals[playerInfo.GetId()-1];
-                        double x = Canvas.GetLeft(playerVisual);
-                        Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
-                        Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
-                    }
-                    else
-                    {
-                        PlayerVisual playerVisual = new PlayerVisual();
-                        ColorConverter converter = new ColorConverter();
-                        Color playerColor = (Color)ColorConverter.ConvertFromString(playerInfo.GetColor());
-                        SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
-                        playerVisual.PlayerName = playerInfo.GetName();
-                        playerVisual.PlayerColor = solidColorBrush;
-                        playerVisual.UpdateColor(solidColorBrush);
-                        Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
-                        Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
-                        playerVisuals.Add(playerVisual);
-                        playersContainer.Items.Add(playerVisual);
-                    }
-                }
-                foreach (Enemy enemy in enemies)
-                {
-                    Rectangle enemyRect = enemyVisuals[enemy];
-                    Canvas.SetLeft(enemyRect, enemy.GetCurrentX());
-                    Canvas.SetTop(enemyRect, enemy.GetCurrentY());
-                }
-            });
-        }
 
         private int playerDirectionX = 0;
         private int playerDirectionY = 0;
         private int score = 0;
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            int deltaX = 0;
-            int deltaY = 0;
+            if (gamestarted)
+            {
+                int deltaX = 0;
+                int deltaY = 0;
 
-            // Handle arrow key presses here and update the player's position
-            // based on the arrow key input.
-            if (e.Key == Key.Left)
-            {
-                deltaX = -1;
-                playerDirectionX = deltaX; // Store the player's direction
-                playerDirectionY = 0;
-            }
-            else if (e.Key == Key.Right)
-            {
-                deltaX = 1;
-                playerDirectionX = deltaX; // Store the player's direction
-                playerDirectionY = 0;
-            }
-            else if (e.Key == Key.Up)
-            {
-                deltaY = -1;
-                playerDirectionY = deltaY; // Store the player's direction
-                playerDirectionX = 0;
-            }
-            else if (e.Key == Key.Down)
-            {
-                deltaY = 1;
-                playerDirectionY = deltaY; // Store the player's direction
-                playerDirectionX = 0;
-            }
-
-            if (e.Key == Key.Space)
-            {
-                // Use the stored direction for shooting
-                Shoot(playerDirectionX, playerDirectionY);
-
-            }
-            double playerCurrentX = currentPlayer.GetCurrentX();
-            double playerCurrentY = currentPlayer.GetCurrentY();
-            int stepSize = 10;
-            double newX = playerCurrentX + deltaX * stepSize;
-            double newY = playerCurrentY + deltaY * stepSize;
-
-            bool overlap = false;
-            foreach (Obstacle obstacle in obstacles)
-            {
-                if (obstacle.WouldOverlap(newX, newY, 50, 50))
+                // Handle arrow key presses here and update the player's position
+                // based on the arrow key input.
+                if (e.Key == Key.Left)
                 {
-                    overlap = true;
-                    double distance = obstacle.DistanceFromObstacle(playerDirectionX, playerDirectionY, playerCurrentX, playerCurrentY, 50, 50);
-                    if (distance!=0)
-                    {
-                        newX = playerDirectionX == 0 ? playerCurrentX : playerCurrentX + distance;
-                        newY = playerDirectionY == 0 ? playerCurrentY : playerCurrentY + distance;
-
-                        Move(newX, newY);
-                    }
-                    break;
+                    deltaX = -1;
+                    playerDirectionX = deltaX; // Store the player's direction
+                    playerDirectionY = 0;
                 }
-            }
-            if (!overlap)
-            {
-                Move(newX, newY);
+                else if (e.Key == Key.Right)
+                {
+                    deltaX = 1;
+                    playerDirectionX = deltaX; // Store the player's direction
+                    playerDirectionY = 0;
+                }
+                else if (e.Key == Key.Up)
+                {
+                    deltaY = -1;
+                    playerDirectionY = deltaY; // Store the player's direction
+                    playerDirectionX = 0;
+                }
+                else if (e.Key == Key.Down)
+                {
+                    deltaY = 1;
+                    playerDirectionY = deltaY; // Store the player's direction
+                    playerDirectionX = 0;
+                }
+
+                if (e.Key == Key.Space)
+                {
+                    // Use the stored direction for shooting
+                    Shoot(playerDirectionX, playerDirectionY);
+
+                }
+                double playerCurrentX = currentPlayer.GetCurrentX();
+                double playerCurrentY = currentPlayer.GetCurrentY();
+                int stepSize = 10;
+                double newX = playerCurrentX + deltaX * stepSize;
+                double newY = playerCurrentY + deltaY * stepSize;
+
+                bool overlap = false;
+                foreach (Obstacle obstacle in obstacles)
+                {
+                    if (obstacle.WouldOverlap(newX, newY, 50, 50))
+                    {
+                        overlap = true;
+                        double distance = obstacle.DistanceFromObstacle(playerDirectionX, playerDirectionY, playerCurrentX, playerCurrentY, 50, 50);
+                        if (distance != 0)
+                        {
+                            newX = playerDirectionX == 0 ? playerCurrentX : playerCurrentX + distance;
+                            newY = playerDirectionY == 0 ? playerCurrentY : playerCurrentY + distance;
+
+                            Move(newX, newY);
+                        }
+                        break;
+                    }
+                }
+                double minX = 0; // Minimum X-coordinate
+                double minY = 0; // Minimum Y-coordinate
+                double windowWidth = this.ActualWidth;
+                double windowHeight = this.ActualHeight;
+                double maxX = windowWidth - 60; // Maximum X-coordinate
+                double maxY = windowHeight - 80; // Maximum Y-coordinate
+
+                if (newX >= minX && newX <= maxX && newY >= minY && newY <= maxY && !overlap)
+                {
+                    Move(newX, newY);
+                }
             }
         }
         private async void Move(double newX, double newY)
         {
-            UpdatePlayer(playerVisuals[currentPlayer.GetId() - 1], newX, newY);
+            UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
             await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
         }
 
         private void Shoot(int deltaX, int deltaY)
         {
-            CreateShot(playerVisuals[currentPlayer.GetId()-1], deltaX, deltaY);
+            CreateShot(playerVisuals[currentPlayer], deltaX, deltaY);
         }
 
         private async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
@@ -450,7 +470,7 @@ namespace JAKE.client
 
                     if (enemyVisuals.ContainsKey(enemy))
                     {
-                        Rectangle enemyRect = enemyVisuals[enemy];
+                        EnemyVisual enemyRect = enemyVisuals[enemy];
                         double enemyX = Canvas.GetLeft(enemyRect);
                         double enemyY = Canvas.GetTop(enemyRect);
 
