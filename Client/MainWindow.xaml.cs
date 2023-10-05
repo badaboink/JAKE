@@ -21,6 +21,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using System.Xml.Linq;
 using JAKE.classlibrary;
 using JAKE.Client;
 using Microsoft.AspNetCore.SignalR.Client;
@@ -168,20 +169,21 @@ namespace JAKE.client
                 }
             });
             timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
-            timer = new Timer(CheckElapsedTimeSpawn, null, 0, 10000);
 
             connection.On<List<string>>("SendingEnemies", (enemydata) =>
             {
                 foreach(string enemystring in enemydata)
                 {
                     string[] parts = enemystring.Split(':');
-                    if (parts.Length == 4)
+                    if (parts.Length == 5)
                     {
                         int enemyId = int.Parse(parts[0]);
                         string enemyColor = parts[1];
                         double enemyX = double.Parse(parts[2]);
                         double enemyY = double.Parse(parts[3]);
+                        int health = int.Parse(parts[4]);
                         Enemy enemy = new Enemy(enemyId, enemyColor);
+                        enemy.SetHealth(health);
                         if (!enemies.Contains(enemy))
                         {
                             enemy.SetCurrentPosition(enemyX, enemyY);
@@ -205,6 +207,7 @@ namespace JAKE.client
                             Dispatcher.Invoke(() =>
                             {
                                 Rectangle enemyRect = enemyVisuals[enemy];
+                                enemy.SetHealth(health);
                                 enemy.SetCurrentPosition(enemyX, enemyY);
                                 Canvas.SetLeft(enemyRect, enemyX);
                                 Canvas.SetTop(enemyRect, enemyY);
@@ -213,10 +216,22 @@ namespace JAKE.client
                     }
                 }
             });
-        }
-        private async void CheckElapsedTimeSpawn(object state)
-        {
-            await connection.SendAsync("SendEnemies");
+            connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    Enemy enemy = new Enemy(enemyid, enemycolor);
+                    Rectangle enemyRect = enemyVisuals[enemy];
+                    enemies.Remove(enemy);
+                    enemyVisuals.Remove(enemy);
+                    EnemyContainer.Children.Remove(enemyRect);
+                });
+            });
+            connection.On<int, string, int>("UpdateEnemyHealth", (enemyid, enemycolor, enemyhealth) =>
+            {
+                Enemy enemyToUpdate = enemies.FirstOrDefault(enemy => enemy.MatchesId(enemyid));
+                enemyToUpdate?.SetHealth(enemyhealth);
+            });
         }
         private async void CheckElapsedTimeMove(object state)
         {
@@ -375,7 +390,7 @@ namespace JAKE.client
             CreateShot(playerVisuals[currentPlayer.GetId()-1], deltaX, deltaY);
         }
 
-        private void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
+        private async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
         {
             // Create a new shot visual element (e.g., a bullet or projectile)
             Ellipse shotVisual = new Ellipse
@@ -405,7 +420,7 @@ namespace JAKE.client
 
             // Update the shot's position based on the direction and speed
             bool shouldRender = true;
-            CompositionTarget.Rendering += (sender, e) =>
+            CompositionTarget.Rendering += async (sender, e) =>
             {
                 if (!shouldRender) return;
                 double currentX = Canvas.GetLeft(shotVisual);
@@ -452,13 +467,14 @@ namespace JAKE.client
                             ShotContainer.Children.Remove(shotVisual);
                             shotHitEnemy = true;
                             shouldRender = false;
-
+                            await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
                             if (enemy.GetHealth() <= 0)
                             {
                                 enemiesToRemove.Add(enemy); // Add the enemy to the removal list
                                 enemyVisuals.Remove(enemy);
                                 EnemyContainer.Children.Remove(enemyRect);
                                 Debug.WriteLine("mire enemy");
+                                await connection.SendAsync("SendDeadEnemy", enemy.ToString());
                             }
                             break;
                         }

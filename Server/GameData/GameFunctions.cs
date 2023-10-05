@@ -28,15 +28,49 @@ namespace Server.GameData
             }
             return obstacles;
         }
-        public static Enemy GenerateEnemy(int id)
+        public static Enemy GenerateEnemy(int id, List<Obstacle> obstacles)
         {
             Random random = new Random();
             Enemy enemy = new Enemy(id, "Red", 10);
-            double spawnX = random.Next(0, 1936);
-            double spawnY = random.Next(0, 1056);
-            enemy.SetCurrentPosition(spawnX, spawnY);
+            int maxAttempts = 100;
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                double spawnX = random.Next(0, 1936);
+                double spawnY = random.Next(0, 1056);
+
+                // Check if the generated position overlaps with any obstacle
+                bool positionClear = IsPositionClear(spawnX, spawnY, obstacles, enemy.GetSize());
+
+                if (positionClear)
+                {
+                    // Set the position and break out of the loop
+                    enemy.SetCurrentPosition(spawnX, spawnY);
+                    break;
+                }
+            }
+            //double spawnX = random.Next(0, 1936);
+            //double spawnY = random.Next(0, 1056);
+            //enemy.SetCurrentPosition(spawnX, spawnY);
             return enemy;
         }
-        
+        private static bool IsPositionClear(double x, double y, List<Obstacle> obstacles, int enemySize)
+        {
+            foreach (Obstacle obstacle in obstacles)
+            {
+                // Check if the enemy's position overlaps with the obstacle
+                if (!obstacle.WouldOverlap(x, y, enemySize, enemySize))
+                {
+                    // The position is clear, so continue checking other obstacles
+                    continue;
+                }
+
+                // The position overlaps with an obstacle, so it's not clear
+                return false;
+            }
+
+            // The position is clear of all obstacles
+            return true;
+        }
+
     }
 }

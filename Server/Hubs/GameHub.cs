@@ -45,6 +45,7 @@ namespace Server.Hubs
                 DateTime startTime = _gameDataService.GetCurrentGameTime();
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
+                Console.WriteLine($"Sending enemy update {DateTime.Now}");
                 _gameDataService.UpdateEnemyPositions();
                 if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
                 {
@@ -87,10 +88,33 @@ namespace Server.Hubs
 
         public async Task SendMove(int id, double x, double y)
         {
-            Console.WriteLine("Sending move");
+            //Console.WriteLine("Sending move");
             _gameDataService.EditPlayerPosition(id-1, x, y);
-            Console.WriteLine($"Move Player: {_gameDataService.GetPlayerData(id - 1)}");
+            //Console.WriteLine($"Move Player: {_gameDataService.GetPlayerData(id - 1)}");
             await Clients.Others.SendAsync("UpdateUsers", _gameDataService.GetPlayerData(id - 1));
+        }
+        public async Task SendEnemyUpdate(string enemy)
+        {
+            string[] parts = enemy.Split(':');
+            if (parts.Length == 5)
+            {
+                int id = int.Parse(parts[0]);
+                string color = parts[1];
+                int health = int.Parse(parts[4]);
+                _gameDataService.UpdateEnemy(id, health);
+                await Clients.Others.SendAsync("UpdateEnemyHealth", id, color, health);
+            }
+        }
+        public async Task SendDeadEnemy(string enemy)
+        {
+            string[] parts = enemy.Split(':');
+            if (parts.Length == 5)
+            {
+                int id = int.Parse(parts[0]);
+                string color = parts[1];
+                _gameDataService.RemoveEnemy(id);
+                await Clients.Others.SendAsync("UpdateDeadEnemy", id, color);
+            }
         }
     }
 }
