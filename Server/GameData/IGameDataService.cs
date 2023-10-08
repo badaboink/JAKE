@@ -22,7 +22,7 @@ namespace Server.GameData
         void UpdateEnemy(int id, int health);
         List<string> GetEnemies();
         List<string> UpdateEnemyPositions();
-        Player FindClosestPlayer(Enemy enemy);
+        //Player FindClosestPlayer(Enemy enemy);
         DateTime GetCurrentGameTime();
         void SetGameTime(DateTime gametime);
     }

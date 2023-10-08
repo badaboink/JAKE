@@ -16,6 +16,7 @@ namespace JAKE.classlibrary
         private double _currentY;
         private int _health;
         private int _size;
+        private IMoveStrategy movementStrategy;
 
         public Enemy(int id, string color, double speed = 2, int health = 20, int size=20)
         {
@@ -76,6 +77,22 @@ namespace JAKE.classlibrary
         {
             _size = size;
         }
+        public IMoveStrategy GetCurrentMovementStrategy()
+        {
+            return movementStrategy;
+        }
+        public void SetMovementStrategy(IMoveStrategy movementStrategy)
+        {
+            this.movementStrategy = movementStrategy;
+        }
+        public void Move(List<Player> players)
+        {
+            // Delegate the movement behavior to the current strategy
+            if (movementStrategy != null)
+            {
+                movementStrategy.Move(this, players); // Pass the current enemy object to the strategy
+            }
+        }
         //private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
         //{
         //    { "Green", "heal" },
@@ -93,6 +110,27 @@ namespace JAKE.classlibrary
         public bool MatchesId(int id)
         {
             return _id == id;
+        }
+        public Player FindClosestPlayer(List<Player> players)
+        {
+            Player closestPlayer = null;
+            double closestDistance = double.MaxValue;
+
+            foreach (var player in players)
+            {
+                // Calculate the distance between enemy and player
+                double distance = Math.Sqrt(
+                    Math.Pow(player.GetCurrentX() - GetCurrentX(), 2) +
+                    Math.Pow(player.GetCurrentY() - GetCurrentY(), 2));
+
+                if (distance < closestDistance)
+                {
+                    closestDistance = distance;
+                    closestPlayer = player;
+                }
+            }
+
+            return closestPlayer;
         }
         public override int GetHashCode()
         {
