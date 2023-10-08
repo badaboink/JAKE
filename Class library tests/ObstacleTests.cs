@@ -16,14 +16,14 @@ namespace Class_library_tests
             obstacle1 = new Obstacle(10, 10, 0, 0);
         }
         [Fact]
-        public void WouldOverlap_Returns_True_When_OverlapExists()
+        public void Test_WouldOverlap_Returns_True_When_OverlapExists()
         {
             bool result = obstacle1.WouldOverlap(5, 5, 5, 5);
 
             Assert.True(result);
         }
         [Fact]
-        public void WouldOverlap_Returns_False_When_NoOverlapExists()
+        public void Test_WouldOverlap_Returns_False_When_NoOverlapExists()
         {
             bool result = obstacle1.WouldOverlap(20, 20, 5, 5);
 
@@ -33,7 +33,7 @@ namespace Class_library_tests
         // player is 5x5
         // player is at the bottom of the obstacle right by the edge of it
         [Fact]
-        public void DistanceFromObstacle_Returns_CorrectDistance_FromAbove()
+        public void Test_DistanceFromObstacle_Returns_CorrectDistance_FromAbove()
         {
             double expectedDistance = 0;
             
@@ -44,7 +44,7 @@ namespace Class_library_tests
         // player is on the right side of the obstacle
         // moving towards it
         [Fact]
-        public void DistanceFromObstacle_Returns_CorrectDistance_FromLeft()
+        public void Test_DistanceFromObstacle_Returns_CorrectDistance_FromLeft()
         {
             double expectedDistance = 10;
 
