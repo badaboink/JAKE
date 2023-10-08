@@ -87,6 +87,10 @@ namespace JAKE.classlibrary
             { "Blue", "wall" },
             { "Red", "strength" },
         };
+        public bool MatchesId(int id)
+        {
+            return _id == id;
+        }
         public override bool Equals(object obj)
         {
             if (obj is Player otherPlayer)

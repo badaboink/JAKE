@@ -30,8 +30,6 @@ namespace JAKE.client
 {
     public partial class MainWindow : Window
     {
-        private TcpClient client;
-        private NetworkStream stream;
         private Player currentPlayer;
         private bool gamestarted = false;
         private List<Player> playerInfoList = new List<Player>();
@@ -40,6 +38,7 @@ namespace JAKE.client
         private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Enemy> enemies = new List<Enemy>();
+        private List<Shot> shots = new List<Shot>();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
         private DateTime lastGameTime = DateTime.MinValue;
 
@@ -239,6 +238,14 @@ namespace JAKE.client
                     }
                 }
             });
+            connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
+            {
+                Player playerToUpdate = playerInfoList.FirstOrDefault(player => player.MatchesId(playerid));
+                if (playerToUpdate != null)
+                {
+                    CreateShot(playerVisuals[playerToUpdate], X, Y);
+                }
+            });
             connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
             {
                 Dispatcher.Invoke(() =>
@@ -412,118 +419,136 @@ namespace JAKE.client
 
         private async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
         {
-            // Create a new shot visual element (e.g., a bullet or projectile)
-            Ellipse shotVisual = new Ellipse
+            bool CountKills = false;
+            if (playerVisual == playerVisuals[currentPlayer])
             {
-                Width = 10,
-                Height = 10,
-                Fill = Brushes.Red // You can customize the shot appearance
-            };
-
-            // Get the player's position
-            double playerX = Canvas.GetLeft(playerVisual);
-            double playerY = Canvas.GetTop(playerVisual);
-
-            // Calculate the center of the player
-            double playerCenterX = playerX + playerVisual.Width / 2;
-            double playerCenterY = playerY + playerVisual.Height / 2;
-
-            // Set the initial position of the shot at the center of the player
-            Canvas.SetLeft(shotVisual, playerCenterX - shotVisual.Width / 2);
-            Canvas.SetTop(shotVisual, playerCenterY - shotVisual.Height / 2);
-
-            // Add the shot to the ShotContainer (Canvas)
-            ShotContainer.Children.Add(shotVisual);
-
-            // Define the speed of the shot (you can adjust this value)
-            double shotSpeed = 5;
-
-            // Update the shot's position based on the direction and speed
-            bool shouldRender = true;
-            CompositionTarget.Rendering += async (sender, e) =>
+                await connection.SendAsync("ShotFired", currentPlayer.GetId(), directionX, directionY);
+                CountKills = true;
+            }
+            Dispatcher.Invoke(() =>
             {
-                if (!shouldRender) return;
-                double currentX = Canvas.GetLeft(shotVisual);
-                double currentY = Canvas.GetTop(shotVisual);
+                // Create a new shot visual element (e.g., a bullet or projectile)
+                ShotVisual shotVisual = new ShotVisual();
+                Shot shot = new Shot(5, "red", 10, 5);
+                // Get the player's position
+                double playerX = Canvas.GetLeft(playerVisual);
+                double playerY = Canvas.GetTop(playerVisual);
 
-                double newX = currentX + directionX * shotSpeed;
-                double newY = currentY + directionY * shotSpeed;
+                // Calculate the center of the player
+                double playerCenterX = playerX + playerVisual.Width / 2;
+                double playerCenterY = playerY + playerVisual.Height / 2;
+                shotVisual.EllipseSize = shot.getSize();
 
-                // Check for collisions with obstacles
-                foreach (Obstacle obstacle in obstacles)
+                ColorConverter converter = new ColorConverter();
+                Color shotColor = (Color)ColorConverter.ConvertFromString(shot.getColor());
+                SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
+                shotVisual.FillColor = solidColorBrush;
+                shotVisual.UpdateShot(solidColorBrush);
+
+                shot.setPosition(playerCenterX - shot.getSize() / 2, playerCenterY - shot.getSize() / 2);
+
+                // Set the initial position of the shot at the center of the player
+                Canvas.SetLeft(shotVisual, shot.getX());
+                Canvas.SetTop(shotVisual, shot.getY());
+
+                // Add the shot to the ShotContainer (Canvas)
+                ShotContainer.Children.Add(shotVisual);
+
+                // Update the shot's position based on the direction and speed
+                bool shouldRender = true;
+            
+            
+                CompositionTarget.Rendering += async (sender, e) =>
                 {
-                    if (obstacle.WouldOverlap(newX, newY, shotVisual.Width, shotVisual.Height))
+                    if (!shouldRender) return;
+                    double currentX = Canvas.GetLeft(shotVisual);
+                    double currentY = Canvas.GetTop(shotVisual);
+
+                    double newX = currentX + directionX * shot.getSpeed();
+                    double newY = currentY + directionY * shot.getSpeed();
+
+                    // Check for collisions with obstacles
+                    // TO-DO: shotvisual does not set width and height for some reason... will fix in future maybe
+                    foreach (Obstacle obstacle in obstacles)
                     {
-                        // Remove the shot and break out of the loop
-                        ShotContainer.Children.Remove(shotVisual);
-                        shouldRender = false;
-                        return;
-                    }
-                }
-
-                List<Enemy> enemiesToRemove = new List<Enemy>(); // Create a list to store enemies to be removed
-
-    
-                bool shotHitEnemy = false;
-                foreach (Enemy enemy in enemies)
-                {
-
-                    if (enemyVisuals.ContainsKey(enemy))
-                    {
-                        EnemyVisual enemyRect = enemyVisuals[enemy];
-                        double enemyX = Canvas.GetLeft(enemyRect);
-                        double enemyY = Canvas.GetTop(enemyRect);
-
-                        if (newX + shotVisual.Width >= enemyX &&
-                            newX <= enemyX + enemyRect.Width &&
-                            newY + shotVisual.Height >= enemyY &&
-                            newY <= enemyY + enemyRect.Height)
+                        if (obstacle.WouldOverlap(newX, newY, shotVisual.EllipseSize, shotVisual.EllipseSize))
                         {
-                            enemy.SetHealth(enemy.GetHealth() - 5); // Reduce the enemy's health
-                            score += 5;
-                            Debug.WriteLine("score: " + score);
-                            scoreLabel.Text = $"Score: {score}";
-                            Debug.WriteLine("pataike i enemy");
+                            // Remove the shot and break out of the loop
                             ShotContainer.Children.Remove(shotVisual);
-                            shotHitEnemy = true;
                             shouldRender = false;
-                            await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
-                            if (enemy.GetHealth() <= 0)
-                            {
-                                enemiesToRemove.Add(enemy); // Add the enemy to the removal list
-                                enemyVisuals.Remove(enemy);
-                                EnemyContainer.Children.Remove(enemyRect);
-                                Debug.WriteLine("mire enemy");
-                                await connection.SendAsync("SendDeadEnemy", enemy.ToString());
-                            }
-                            break;
+                            return;
                         }
                     }
+
                     
-                }
-                //Debug.WriteLine("po break"); //lygiai du praeina tarp shots
-                // Remove the enemies that need to be removed
-                foreach (Enemy enemyToRemove in enemiesToRemove)
-                {
-                    enemies.Remove(enemyToRemove);
-                    Debug.WriteLine("removed enemy");
-                }
+                    List<Enemy> enemiesToRemove = new List<Enemy>(); // Create a list to store enemies to be removed
 
-
-                // Update the shot's position
-                if (!shotHitEnemy)
-                {
-                    //Debug.WriteLine("paskutinis if");
-                    Canvas.SetLeft(shotVisual, newX);
-                    Canvas.SetTop(shotVisual, newY);
-
-                    // Remove the shot if it goes out of bounds
-                    if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
+                    bool shotHitEnemy = false;
+                    
+                    foreach (Enemy enemy in enemies)
                     {
-                        ShotContainer.Children.Remove(shotVisual);
+                        if (enemyVisuals.ContainsKey(enemy))
+                        {
+                            EnemyVisual enemyRect = enemyVisuals[enemy];
+                            double enemyX = Canvas.GetLeft(enemyRect);
+                            double enemyY = Canvas.GetTop(enemyRect);
+
+                            if (newX + shotVisual.EllipseSize >= enemyX &&
+                                newX <= enemyX + enemyRect.Width &&
+                                newY + shotVisual.EllipseSize >= enemyY &&
+                                newY <= enemyY + enemyRect.Height)
+                            {
+                                if (CountKills)
+                                {
+                                    enemy.SetHealth(enemy.GetHealth() - 5); // Reduce the enemy's health
+                                    score += 5;
+                                    Debug.WriteLine("score: " + score);
+                                    scoreLabel.Text = $"Score: {score}";
+                                    Debug.WriteLine("pataike i enemy");
+                                    await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
+                                    if (enemy.GetHealth() <= 0)
+                                    {
+                                        enemiesToRemove.Add(enemy); // Add the enemy to the removal list
+                                        enemyVisuals.Remove(enemy);
+                                        EnemyContainer.Children.Remove(enemyRect);
+                                        Debug.WriteLine("mire enemy");
+                                        await connection.SendAsync("SendDeadEnemy", enemy.ToString());
+                                    }
+                                }
+
+                                ShotContainer.Children.Remove(shotVisual);
+                                shotHitEnemy = true;
+                                shouldRender = false;
+                                break;
+                            }
+                        }
+
                     }
-                }
-            };
+                    //Debug.WriteLine("po break"); //lygiai du praeina tarp shots
+                    // Remove the enemies that need to be removed
+                    foreach (Enemy enemyToRemove in enemiesToRemove)
+                    {
+                        enemies.Remove(enemyToRemove);
+                        Debug.WriteLine("removed enemy");
+                    }
+
+
+                    // Update the shot's position
+                    if (!shotHitEnemy)
+                    {
+                        //Debug.WriteLine("paskutinis if");
+                        Canvas.SetLeft(shotVisual, newX);
+                        Canvas.SetTop(shotVisual, newY);
+
+                        // Remove the shot if it goes out of bounds
+                        if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
+                        {
+                            ShotContainer.Children.Remove(shotVisual);
+                        }
+                    }
+                };
+            });
+                
         }
 
         private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)

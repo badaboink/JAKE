@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.SignalR.Protocol;
 using Server.GameData;
 using System;
 using System.Drawing;
+using System.IO;
 using System.Net.Sockets;
 using System.Numerics;
 using System.Threading.Tasks;
@@ -96,15 +97,20 @@ namespace Server.Hubs
         }
         public async Task SendEnemyUpdate(string enemy)
         {
-            string[] parts = enemy.Split(':');
-            if (parts.Length == 6)
+            string[] partsenemy = enemy.Split(':');
+            if (partsenemy.Length == 6)
             {
-                int id = int.Parse(parts[0]);
-                string color = parts[1];
-                int health = int.Parse(parts[4]);
+                int id = int.Parse(partsenemy[0]);
+                string color = partsenemy[1];
+                int health = int.Parse(partsenemy[4]);
                 _gameDataService.UpdateEnemy(id, health);
                 await Clients.Others.SendAsync("UpdateEnemyHealth", id, color, health);
             }
+
+        }
+        public async Task ShotFired(int player_id, double directionX, double directionY)
+        {
+            await Clients.Others.SendAsync("UpdateShotsFired", player_id, directionX, directionY);
         }
         public async Task SendDeadEnemy(string enemy)
         {
