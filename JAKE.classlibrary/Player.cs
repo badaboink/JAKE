@@ -107,5 +107,10 @@ namespace JAKE.classlibrary
         {
             return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}";
         }
+
+        public void IncreaseHealth(int health)
+        {
+            //health padidint, arba cia arba prie singleton???
+        }
     }
 }

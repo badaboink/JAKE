@@ -416,7 +416,7 @@ namespace JAKE.client
             CreateShot(playerVisuals[currentPlayer], deltaX, deltaY);
         }
 
-        private async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
+        public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
         {
             bool CountKills = false;
             if (playerVisual == playerVisuals[currentPlayer])
@@ -427,24 +427,24 @@ namespace JAKE.client
             Dispatcher.Invoke(() =>
             {
                 // Create a new shot visual element (e.g., a bullet or projectile)
-                ShotVisual shotVisual = new ShotVisual();
-                Shot shot = new Shot(5, "red", 10, 5);
-                // Get the player's position
+                ShotVisual shotVisual;
+                Shot shot;
+                SolidColorBrush solidColorBrush;
+
                 double playerX = Canvas.GetLeft(playerVisual);
                 double playerY = Canvas.GetTop(playerVisual);
+                double playerWidth = playerVisual.Width;
+                double playerHeight = playerVisual.Height;
 
-                // Calculate the center of the player
-                double playerCenterX = playerX + playerVisual.Width / 2;
-                double playerCenterY = playerY + playerVisual.Height / 2;
-                shotVisual.EllipseSize = shot.getSize();
+                SingleShot(playerX, playerY, playerWidth, playerHeight, out shot);
 
-                ColorConverter converter = new ColorConverter();
                 Color shotColor = (Color)ColorConverter.ConvertFromString(shot.getColor());
-                SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
+                solidColorBrush = new SolidColorBrush(shotColor);
+
+                shotVisual = new ShotVisual();
+                shotVisual.EllipseSize = shot.getSize();
                 shotVisual.FillColor = solidColorBrush;
                 shotVisual.UpdateShot(solidColorBrush);
-
-                shot.setPosition(playerCenterX - shot.getSize() / 2, playerCenterY - shot.getSize() / 2);
 
                 // Set the initial position of the shot at the center of the player
                 Canvas.SetLeft(shotVisual, shot.getX());
@@ -455,8 +455,8 @@ namespace JAKE.client
 
                 // Update the shot's position based on the direction and speed
                 bool shouldRender = true;
-            
-            
+
+
                 CompositionTarget.Rendering += async (sender, e) =>
                 {
                     if (!shouldRender) return;
@@ -470,7 +470,9 @@ namespace JAKE.client
                     // TO-DO: shotvisual does not set width and height for some reason... will fix in future maybe
                     foreach (Obstacle obstacle in obstacles)
                     {
-                        if (obstacle.WouldOverlap(newX, newY, shotVisual.EllipseSize, shotVisual.EllipseSize))
+                        double elipse = shotVisual.EllipseSize;
+                        shot = RemoveShot(shot, newX, newY, obstacle, elipse);
+                        if (shot==null) //obstacle.WouldOverlap(newX, newY, shotVisual.EllipseSize, shotVisual.EllipseSize)
                         {
                             // Remove the shot and break out of the loop
                             ShotContainer.Children.Remove(shotVisual);
@@ -479,11 +481,11 @@ namespace JAKE.client
                         }
                     }
 
-                    
+
                     List<Enemy> enemiesToRemove = new List<Enemy>(); // Create a list to store enemies to be removed
 
                     bool shotHitEnemy = false;
-                    
+
                     foreach (Enemy enemy in enemies)
                     {
                         if (enemyVisuals.ContainsKey(enemy))
@@ -546,9 +548,39 @@ namespace JAKE.client
                         }
                     }
                 };
+                // return shotVisual;
             });
-                
         }
+
+        public static Shot RemoveShot(Shot shot, double newX, double newY, Obstacle obstacle, double elipse)
+        {
+            if (obstacle.WouldOverlap(newX, newY, elipse, elipse))
+            {
+                shot = null;
+            }
+            return shot;
+        }
+
+        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, out Shot shot) //out SolidColorBrush solidColorBrush
+        {
+            //shot = null;
+            
+            Shot localShot = new Shot(5, "red", 10, 5);
+
+            //Dispatcher.Invoke(() =>
+            //{
+
+                // Calculate the center of the player
+                double playerCenterX = playerX + playerWidth / 2; //10x 10y ir 10 width ir height
+                double playerCenterY = playerY + playerHeight / 2; // 15 ir 15 - 10 ir 10 ats
+
+                localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
+            //});
+
+            // Assign local variables to out parameters after the lambda expression
+            shot = localShot;
+        }
+
 
         private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
         {
@@ -557,5 +589,24 @@ namespace JAKE.client
 
             currentPlayer.SetCurrentPosition(moveX, moveY);
         }
+
+        /*
+         
+           MapObjectFactory objectFactory = new MapObjectFactory();
+        
+        IMapObject healthBoost = objectFactory.CreateMapObject("healthboost");
+        IMapObject coin = objectFactory.CreateMapObject("coin");
+        IMapObject weapon = objectFactory.CreateMapObject("weapon");
+        IMapObject shield = objectFactory.CreateMapObject("shield");
+        IMapObject speedBoost = objectFactory.CreateMapObject("speedboost");
+        
+        Player player = new Player(); // Assuming you have a Player class
+        
+        healthBoost.Interact(player);
+        coin.Interact(player);
+        weapon.Interact(player);
+        shield.Interact(player);
+        speedBoost.Interact(player);
+        */
     }
 }

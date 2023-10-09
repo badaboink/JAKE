@@ -22,4 +22,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Client\JAKE.client.csproj" />
+    <ProjectReference Include="..\JAKE.classlibrary\JAKE.classlibrary.csproj" />
+  </ItemGroup>
+
 </Project>
