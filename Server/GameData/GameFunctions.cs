@@ -53,7 +53,7 @@ namespace Server.GameData
             //enemy.SetCurrentPosition(spawnX, spawnY);
             return enemy;
         }
-        private static bool IsPositionClear(double x, double y, List<Obstacle> obstacles, int enemySize)
+        public static bool IsPositionClear(double x, double y, List<Obstacle> obstacles, int enemySize)
         {
             foreach (Obstacle obstacle in obstacles)
             {

@@ -53,6 +53,11 @@ namespace JAKE.classlibrary
             return _name;
         }
 
+        public void SetName(string name)
+        {
+            _name = name;
+        }
+
         public string GetColor()
         {
             return _color;

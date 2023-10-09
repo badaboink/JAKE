@@ -40,6 +40,7 @@ namespace JAKE.client
         private List<Shot> shots = new List<Shot>();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
         private DateTime lastGameTime = DateTime.MinValue;
+        private Dictionary<Enemy, bool> collisionCheckedEnemies = new Dictionary<Enemy, bool>();
 
         public MainWindow()
         {
@@ -52,6 +53,11 @@ namespace JAKE.client
             // Start the SignalR connection when the window loads
             Loaded += MainWindow_Loaded;
             this.KeyDown += MainWindow_KeyDown;
+
+            foreach (Enemy enemy in enemies)
+            {
+                collisionCheckedEnemies[enemy] = false;
+            }
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -183,6 +189,7 @@ namespace JAKE.client
                         PlayerVisual playerVisual = playerVisuals[playerInfo];
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
+
                     });
                 }
             });
@@ -221,6 +228,8 @@ namespace JAKE.client
                                 Canvas.SetLeft(enemyVisual, enemyX);
                                 Canvas.SetTop(enemyVisual, enemyY);
                                 EnemyContainer.Children.Add(enemyVisual);
+
+                                HandleEnemyCollisions(playerVisuals[currentPlayer]);
                             });
                         }
                         else
@@ -232,9 +241,15 @@ namespace JAKE.client
                                 enemy.SetCurrentPosition(enemyX, enemyY);
                                 Canvas.SetLeft(enemyVisual, enemyX);
                                 Canvas.SetTop(enemyVisual, enemyY);
+
+                                HandleEnemyCollisions(playerVisuals[currentPlayer]);
                             });
                         }
                     }
+                }
+                foreach (Enemy enemy in enemies)
+                {
+                    collisionCheckedEnemies[enemy] = false;
                 }
             });
             connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
@@ -329,6 +344,7 @@ namespace JAKE.client
         private int playerDirectionX = 0;
         private int playerDirectionY = 0;
         private int score = 0;
+        private int health = 100;
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (gamestarted)
@@ -403,8 +419,47 @@ namespace JAKE.client
                 {
                     Move(newX, newY);
                 }
+
+                HandleEnemyCollisions(playerVisuals[currentPlayer]);
             }
         }
+
+        private void HandleEnemyCollisions(PlayerVisual playerVisual)
+        {
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
+
+            foreach (Enemy enemy in enemies)
+            {
+                if (enemyVisuals.ContainsKey(enemy))
+                {
+                    EnemyVisual enemyRect = enemyVisuals[enemy];
+                    double enemyX = Canvas.GetLeft(enemyRect);
+                    double enemyY = Canvas.GetTop(enemyRect);
+
+                    if (playerX + playerVisual.Width >= enemyX &&
+                        playerX <= enemyX + enemyRect.Width &&
+                        playerY + playerVisual.Height >= enemyY &&
+                        playerY <= enemyY + enemyRect.Height)
+                    {
+                        health -= 5;
+                        healthLabel.Text = $"Health: {health}";
+
+                        collisionCheckedEnemies[enemy] = true;
+
+                        if(health <= 0)
+                        {
+                            gamestarted = false;
+                            deadLabel.Text = "DEAD!";
+                            healthLabel.Text = $"Health: {0}";
+                            //currentPlayer.SetName("DEAD B****");
+                            //playerVisuals[currentPlayer].
+                        }
+                    }
+                }
+            }
+        }
+
         private async void Move(double newX, double newY)
         {
             UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
@@ -483,6 +538,7 @@ namespace JAKE.client
                     List<Enemy> enemiesToRemove = new List<Enemy>(); // Create a list to store enemies to be removed
 
                     bool shotHitEnemy = false;
+                    bool overlapWithEnemy = false;
                     
                     foreach (Enemy enemy in enemies)
                     {
@@ -497,6 +553,7 @@ namespace JAKE.client
                                 newY + shotVisual.EllipseSize >= enemyY &&
                                 newY <= enemyY + enemyRect.Height)
                             {
+
                                 if (CountKills)
                                 {
                                     enemy.SetHealth(enemy.GetHealth() - 5); // Reduce the enemy's health
@@ -546,6 +603,7 @@ namespace JAKE.client
                         }
                     }
                 };
+
             });
                 
         }
