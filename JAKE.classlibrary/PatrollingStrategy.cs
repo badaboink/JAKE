@@ -10,8 +10,8 @@ namespace JAKE.classlibrary
     {
         private List<Obstacle> obstacles;
         private Random random;
-        private double directionX;
-        private double directionY;
+        private int directionX;
+        private int directionY;
         private double maxX;
         private double maxY;
         private double enemySpeed;
@@ -22,21 +22,31 @@ namespace JAKE.classlibrary
             this.maxY = maxY;
             this.enemySpeed = enemySpeed;
             this.obstacles = obstacles;
+            this.directionX = 2;
+            this.directionY = 2;
             GenerateRandomDirection();
         }
         private void GenerateRandomDirection()
-        {
-            // Generate random direction vector (normalized)
-            directionX = random.NextDouble() * 2 - 1; // Range: [-1, 1]
-            directionY = random.NextDouble() * 2 - 1; // Range: [-1, 1]
-
-            // Normalize the direction vector
-            double length = Math.Sqrt(directionX * directionX + directionY * directionY);
-            if (length > 0)
+        {           
+            if (directionX ==2 && directionY==2)
             {
-                directionX /= length;
-                directionY /= length;
+                if (random.Next(1, 3) == 1)
+                {
+                    directionX = random.Next(0, 2) == 0 ? -1 : 1;
+                    directionY = 0;
+                }
+                else
+                {
+                    directionY = random.Next(0, 2) == 0 ? -1 : 1;
+                    directionX = 0;
+                }
             }
+            else
+            {
+                directionX = directionX == 1 || directionX == -1 ? 0 : random.Next(0, 2) == 0 ? -1 : 1;
+                directionY = directionY == 1 || directionY == -1 ? 0 : random.Next(0, 2) == 0 ? -1 : 1;
+            }
+            
         }
 
         public void Move(Enemy enemy, List<Player> players)
@@ -56,11 +66,8 @@ namespace JAKE.classlibrary
                 {
                     if (obstacle.WouldOverlap(newX, newY, 20, 20))
                     {
-                        // Stops at the wall of the direction that it's moving towards most
-                        directionX = (Math.Abs(directionX) > Math.Abs(directionY)) ? (directionX < 0 ? -1 : 1) : 0;
-                        directionY = (Math.Abs(directionY) > Math.Abs(directionX)) ? (directionY < 0 ? -1 : 1) : 0;
 
-                        double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
+                        double distance = obstacle.DistanceFromObstacle(directionX, directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
                         if (distance != 0)
                         {
                             newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
@@ -72,10 +79,18 @@ namespace JAKE.classlibrary
                         break;
                     }
                 }
+
+                enemy.SetCurrentPosition(newX, newY);
             }
 
-            // Update the enemy's position
-            enemy.SetCurrentPosition(newX, newY);
+        }
+        public int GetCurrentX()
+        {
+            return directionX;
+        }
+        public int GetCurrentY()
+        {
+            return directionY;
         }
     }
 }
