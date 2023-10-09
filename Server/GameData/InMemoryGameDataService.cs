@@ -101,82 +101,10 @@ namespace Server.GameData
                 foreach (var enemy in enemies)
                 {
                     enemy.Move(players);
-                    // Find the closest player
-                    //Player closestPlayer = enemy.FindClosestPlayer(players);
-
-                    //if (closestPlayer != null)
-                    //{
-                    //    // Calculate direction vector from enemy to closest player
-                    //    double directionX = closestPlayer.GetCurrentX() - enemy.GetCurrentX();
-                    //    double directionY = closestPlayer.GetCurrentY() - enemy.GetCurrentY();
-
-                    //    // Normalize the direction vector
-                    //    double length = Math.Sqrt(directionX * directionX + directionY * directionY);
-                    //    if (length > 0)
-                    //    {
-                    //        directionX /= length;
-                    //        directionY /= length;
-                    //    }
-
-                    //    // Define enemy movement speed
-                    //    double enemySpeed = enemy.GetSpeed();
-
-                    //    double newX = enemy.GetCurrentX() + directionX * enemySpeed;
-                    //    double newY = enemy.GetCurrentY() + directionY * enemySpeed;
-
-                    //    bool CantMove = false;
-                    //    foreach (Obstacle obstacle in obstacles)
-                    //    {
-                    //        if (obstacle.WouldOverlap(newX, newY, 20, 20))
-                    //        {
-                    //            CantMove = true;
-
-                    //            // Stops at a the wall of the direction that its moving towards most
-                    //            directionX = (Math.Abs(directionX) > Math.Abs(directionY)) ? (directionX < 0 ? -1 : 1) : 0;
-                    //            directionY = (Math.Abs(directionY) > Math.Abs(directionX)) ? (directionY < 0 ? -1 : 1) : 0;
-
-                    //            double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), 20, 20);
-                    //            if (distance != 0)
-                    //            {
-                    //                newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
-                    //                newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentX() + distance;
-
-                    //                enemy.SetCurrentPosition(newX, newY);
-                    //            }
-                    //            break;
-                    //        }
-                    //    }
-                    //    // Update enemy position based on direction and speed
-                    //    if (!CantMove)
-                    //    {
-                    //        enemy.SetCurrentPosition(newX, newY);
-                    //    }
-                    //}
                 }
                 return enemies.Select(enemy => enemy.ToString()).ToList();
             }
         }
-        //public Player FindClosestPlayer(Enemy enemy)
-        //{
-        //    Player closestPlayer = null;
-        //    double closestDistance = double.MaxValue;
-
-        //    foreach (var player in players)
-        //    {
-        //        // Calculate the distance between enemy and player
-        //        double distance = Math.Sqrt(
-        //            Math.Pow(player.GetCurrentX() - enemy.GetCurrentX(), 2) +
-        //            Math.Pow(player.GetCurrentY() - enemy.GetCurrentY(), 2));
-
-        //        if (distance < closestDistance)
-        //        {
-        //            closestDistance = distance;
-        //            closestPlayer = player;
-        //        }
-        //    }
-
-        //    return closestPlayer;
-        //}
         public DateTime GetCurrentGameTime()
         {
             return gametime;

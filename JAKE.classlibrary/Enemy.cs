@@ -70,12 +70,16 @@ namespace JAKE.classlibrary
         }
         public int GetSize()
         {
-            return _health;
+            return _size;
         }
 
         public void SetSize(int size)
         {
             _size = size;
+        }
+        public void SetSpeed(double speed)
+        {
+            _speed = speed;
         }
         public IMoveStrategy GetCurrentMovementStrategy()
         {

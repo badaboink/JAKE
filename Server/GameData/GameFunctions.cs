@@ -35,8 +35,8 @@ namespace Server.GameData
             int maxAttempts = 100;
             for (int attempt = 0; attempt < maxAttempts; attempt++)
             {
-                double spawnX = random.Next(0, 1936);
-                double spawnY = random.Next(0, 1056);
+                double spawnX = random.Next(enemy.GetSize(), 1920-60-enemy.GetSize());
+                double spawnY = random.Next(enemy.GetSize(), 1080-80-enemy.GetSize());
 
                 // Check if the generated position overlaps with any obstacle
                 bool positionClear = IsPositionClear(spawnX, spawnY, obstacles, enemy.GetSize());
