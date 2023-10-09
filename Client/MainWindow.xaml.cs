@@ -40,6 +40,7 @@ namespace JAKE.client
         private List<Shot> shots = new List<Shot>();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
         private DateTime lastGameTime = DateTime.MinValue;
+        private GameStats gameStat = GameStats.Instance;
         private Dictionary<Enemy, bool> collisionCheckedEnemies = new Dictionary<Enemy, bool>();
 
         public MainWindow()
@@ -158,6 +159,7 @@ namespace JAKE.client
                         }
                     }
                 }
+                gameStat.PlayersCount = playerInfoList.Count;
             });
             connection.On<DateTime>("GameTime", (GameTime) =>
             {
@@ -559,9 +561,9 @@ namespace JAKE.client
                                 if (CountKills)
                                 {
                                     enemy.SetHealth(enemy.GetHealth() - 5); // Reduce the enemy's health
-                                    score += 5;
-                                    Debug.WriteLine("score: " + score);
-                                    scoreLabel.Text = $"Score: {score}";
+                                    gameStat.PlayerScore += 5;
+                                    Debug.WriteLine("score: " + gameStat.PlayerScore);
+                                    scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
                                     Debug.WriteLine("pataike i enemy");
                                     await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
                                     if (enemy.GetHealth() <= 0)
