@@ -22,20 +22,31 @@ namespace JAKE.classlibrary
             this.maxY = maxY;
             this.enemySpeed = enemySpeed;
             this.obstacles = obstacles;
+            this.directionX = 2;
+            this.directionY = 2;
             GenerateRandomDirection();
         }
         private void GenerateRandomDirection()
-        {            
-            if (random.Next(1,3) == 1)
+        {           
+            if (directionX ==2 && directionY==2)
             {
-                directionX = random.Next(0, 2) == 0 ? -1 : 1;
-                directionY = 0;
+                if (random.Next(1, 3) == 1)
+                {
+                    directionX = random.Next(0, 2) == 0 ? -1 : 1;
+                    directionY = 0;
+                }
+                else
+                {
+                    directionY = random.Next(0, 2) == 0 ? -1 : 1;
+                    directionX = 0;
+                }
             }
             else
             {
-                directionY = random.Next(0, 2) == 0 ? -1 : 1;
-                directionX = 0;
+                directionX = directionX == 1 || directionX == -1 ? 0 : random.Next(0, 2) == 0 ? -1 : 1;
+                directionY = directionY == 1 || directionY == -1 ? 0 : random.Next(0, 2) == 0 ? -1 : 1;
             }
+            
         }
 
         public void Move(Enemy enemy, List<Player> players)
@@ -68,10 +79,18 @@ namespace JAKE.classlibrary
                         break;
                     }
                 }
+
+                enemy.SetCurrentPosition(newX, newY);
             }
 
-            // Update the enemy's position
-            enemy.SetCurrentPosition(newX, newY);
+        }
+        public int GetCurrentX()
+        {
+            return directionX;
+        }
+        public int GetCurrentY()
+        {
+            return directionY;
         }
     }
 }
