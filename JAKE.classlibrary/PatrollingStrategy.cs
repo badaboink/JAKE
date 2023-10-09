@@ -10,8 +10,8 @@ namespace JAKE.classlibrary
     {
         private List<Obstacle> obstacles;
         private Random random;
-        private double directionX;
-        private double directionY;
+        private int directionX;
+        private int directionY;
         private double maxX;
         private double maxY;
         private double enemySpeed;
@@ -25,17 +25,16 @@ namespace JAKE.classlibrary
             GenerateRandomDirection();
         }
         private void GenerateRandomDirection()
-        {
-            // Generate random direction vector (normalized)
-            directionX = random.NextDouble() * 2 - 1; // Range: [-1, 1]
-            directionY = random.NextDouble() * 2 - 1; // Range: [-1, 1]
-
-            // Normalize the direction vector
-            double length = Math.Sqrt(directionX * directionX + directionY * directionY);
-            if (length > 0)
+        {            
+            if (random.Next(1,3) == 1)
             {
-                directionX /= length;
-                directionY /= length;
+                directionX = random.Next(0, 2) == 0 ? -1 : 1;
+                directionY = 0;
+            }
+            else
+            {
+                directionY = random.Next(0, 2) == 0 ? -1 : 1;
+                directionX = 0;
             }
         }
 
@@ -56,11 +55,8 @@ namespace JAKE.classlibrary
                 {
                     if (obstacle.WouldOverlap(newX, newY, 20, 20))
                     {
-                        // Stops at the wall of the direction that it's moving towards most
-                        directionX = (Math.Abs(directionX) > Math.Abs(directionY)) ? (directionX < 0 ? -1 : 1) : 0;
-                        directionY = (Math.Abs(directionY) > Math.Abs(directionX)) ? (directionY < 0 ? -1 : 1) : 0;
 
-                        double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
+                        double distance = obstacle.DistanceFromObstacle(directionX, directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
                         if (distance != 0)
                         {
                             newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
