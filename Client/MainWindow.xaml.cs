@@ -159,7 +159,7 @@ namespace JAKE.client
                         }
                     }
                 }
-                gameStat.PlayersCount = playerInfoList.Count;
+                gameStat.PlayersCount = playerInfoList.Count;  //singleton
             });
             connection.On<DateTime>("GameTime", (GameTime) =>
             {
@@ -345,8 +345,8 @@ namespace JAKE.client
 
         private int playerDirectionX = 0;
         private int playerDirectionY = 0;
-        private int score = 0;
-        private int health = 100;
+        //private int score = 0;
+        //private int health = 100;
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (gamestarted)
@@ -444,12 +444,13 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= enemyY &&
                         playerY <= enemyY + enemyRect.Height)
                     {
-                        health -= 5;
-                        healthLabel.Text = $"Health: {health}";
+                        gameStat.PlayerHealth -= 5;
+                        //health -= 5;
+                        healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
 
                         collisionCheckedEnemies[enemy] = true;
 
-                        if(health <= 0)
+                        if(gameStat.PlayerHealth <= 0)
                         {
                             gamestarted = false;
                             deadLabel.Text = "DEAD!";
