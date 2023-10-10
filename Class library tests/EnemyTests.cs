@@ -98,17 +98,33 @@ namespace Class_library_tests
             enemy.SetSpeed(5.0);
             var strategy = new ChasePlayerStrategy(obstacles);
 
-            Player player = new Player(1, "a", "red");
-            player.SetCurrentPosition(100, 100);
+            Player player1 = new Player(1, "a", "red");
+            Player player2 = new Player(2, "a", "red");
+            Player player3 = new Player(3, "a", "red");
+            player1.SetCurrentPosition(1, 1);
+            player2.SetCurrentPosition(100, 100);
+            player3.SetCurrentPosition(25, 25);
 
-            enemy.SetCurrentPosition(50, 50); // Set initial enemy position
+            enemy.SetCurrentPosition(50, 50);
 
-            var players = new List<Player> { player }; // Create a list of players with the mock
+            double directionX = player3.GetCurrentX() - enemy.GetCurrentX();
+            double directionY = player3.GetCurrentY() - enemy.GetCurrentY();
+            double length = Math.Sqrt(directionX * directionX + directionY * directionY);
+            if (length > 0)
+            {
+                directionX /= length;
+                directionY /= length;
+            }
+            double presumed_x = enemy.GetCurrentX() + directionX * enemy.GetSpeed();
+            double presumed_y = enemy.GetCurrentY() + directionY * enemy.GetSpeed();
+
+
+            var players = new List<Player> { player1, player2, player3 };
 
             strategy.Move(enemy, players);
 
-            Assert.Equal(53.54, enemy.GetCurrentX(), 2); 
-            Assert.Equal(53.54, enemy.GetCurrentY(), 2); 
+            Assert.Equal(presumed_x, enemy.GetCurrentX(), 2);
+            Assert.Equal(presumed_y, enemy.GetCurrentY(), 2);
         }
 
     }
