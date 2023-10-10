@@ -42,6 +42,12 @@ namespace JAKE.client
         private DateTime lastGameTime = DateTime.MinValue;
         private GameStats gameStat = GameStats.Instance;
         private Dictionary<Enemy, bool> collisionCheckedEnemies = new Dictionary<Enemy, bool>();
+        private List<Coin> coins = new List<Coin>();
+        private List<HealthBoost> healthBoosts = new List<HealthBoost>();
+        private List<Shield> shields = new List<Shield>();
+        private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
+        private List<Weapon> weapons = new List<Weapon>();
+
 
         public MainWindow()
         {
@@ -622,21 +628,13 @@ namespace JAKE.client
 
         public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, out Shot shot) //out SolidColorBrush solidColorBrush
         {
-            //shot = null;
             
             Shot localShot = new Shot(5, "red", 10, 5);
 
-            //Dispatcher.Invoke(() =>
-            //{
+            double playerCenterX = playerX + playerWidth / 2; //10x 10y ir 10 width ir height
+            double playerCenterY = playerY + playerHeight / 2; // 15 ir 15 - 10 ir 10 ats
 
-                // Calculate the center of the player
-                double playerCenterX = playerX + playerWidth / 2; //10x 10y ir 10 width ir height
-                double playerCenterY = playerY + playerHeight / 2; // 15 ir 15 - 10 ir 10 ats
-
-                localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
-            //});
-
-            // Assign local variables to out parameters after the lambda expression
+            localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;
         }
 
@@ -659,7 +657,7 @@ namespace JAKE.client
         IMapObject shield = objectFactory.CreateMapObject("shield");
         IMapObject speedBoost = objectFactory.CreateMapObject("speedboost");
         
-        Player player = new Player(); // Assuming you have a Player class
+        Player player = new Player(); 
         
         healthBoost.Interact(player);
         coin.Interact(player);

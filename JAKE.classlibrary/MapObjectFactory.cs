@@ -12,16 +12,18 @@ namespace JAKE.classlibrary
         {
             switch (objectType.ToLower())
             {
-                case "healthboost":
-                    return new HealthBoost();
+                case "healthboost10":
+                    return new HealthBoost(10);
+                case "healthboost20":
+                    return new HealthBoost(20);
                 case "coin":
-                    return new Coin();
+                    return new Coin(10);
                 case "weapon":
-                    return new Weapon();
+                    return new Weapon(30,10,15);
                 case "shield":
-                    return new Shield();
+                    return new Shield(30);
                 case "speedboost":
-                    return new SpeedBoost();
+                    return new SpeedBoost(25);
                 default:
                     throw new ArgumentException("Invalid object type");
             }

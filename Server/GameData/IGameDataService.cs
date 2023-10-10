@@ -25,5 +25,9 @@ namespace Server.GameData
         //Player FindClosestPlayer(Enemy enemy);
         DateTime GetCurrentGameTime();
         void SetGameTime(DateTime gametime);
+
+        //IMapObject AddCoin();
+        //void RemoveCoin(int id);
+        //List<string> GetCoins();
     }
 }
