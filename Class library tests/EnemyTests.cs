@@ -125,8 +125,8 @@ namespace Class_library_tests
 
             strategy.Move(enemy, players);
 
-            Assert.Equal(presumed_x, enemy.GetCurrentX(), 2); 
-            Assert.Equal(presumed_y, enemy.GetCurrentY(), 2); 
+            Assert.Equal(presumed_x, enemy.GetCurrentX(), 2);
+            Assert.Equal(presumed_y, enemy.GetCurrentY(), 2);
         }
 
     }
