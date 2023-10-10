@@ -1,4 +1,5 @@
 ﻿using JAKE.classlibrary;
+using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Protocol;
 using Server.GameData;
@@ -19,15 +20,22 @@ namespace Server.Hubs
         public override async Task OnConnectedAsync()
         {
             string connectionId = Context.ConnectionId;
+            Observer observer = new Observer(Clients.Client(connectionId));
+            _gameDataService.AddObserver(connectionId, observer);
             Console.WriteLine(connectionId);
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
             string connectionId = Context.ConnectionId;
+            _gameDataService.RemoveObserver(connectionId);
             Console.WriteLine($"Disconnected: {connectionId}");
             Player playertoremove = _gameDataService.RemovePlayer(connectionId);
             Console.WriteLine(_gameDataService.GetPlayerList().Count);
-            await Clients.All.SendAsync("DisconnectedPlayer", playertoremove.ToString());
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            foreach (var observerEntry in observers)
+            {
+                await observerEntry.Value.HandleDisconnectedPlayer(playertoremove.ToString());
+            }
             await base.OnDisconnectedAsync(exception);
         }
 
@@ -40,47 +48,23 @@ namespace Server.Hubs
             _gameDataService = gameDataService;
         }
         private object syncLock = new object();
-        public async Task SendEnemies()
-        {
-            lock(syncLock)
-            {
-                DateTime startTime = _gameDataService.GetCurrentGameTime();
-                DateTime currentTime = DateTime.Now;
-                TimeSpan elapsedTime = currentTime - startTime;
-                Console.WriteLine($"Sending enemy update {DateTime.Now}");
-                _gameDataService.UpdateEnemyPositions();
-                if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
-                {
-                    _gameDataService.AddEnemies();
-                    Console.WriteLine($"Spawning enemy {startTime} - {DateTime.Now}. {_gameDataService.GetEnemies().Count}");
-                    _gameDataService.SetGameTime(DateTime.Now);
-                }
-            }
-            if (_gameDataService.GetEnemies().Count > 0)
-            {
-                Console.WriteLine($"Sending Enemies {Context.ConnectionId}");
-                await Clients.Caller.SendAsync("SendingEnemies", _gameDataService.GetEnemies());
-            }
-        }
+        
         //TODO: SendCoins
         public async Task SendColor(string color, string name)
         {
-            Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId);
             try
             {
+                Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId);
                 Console.WriteLine($"Player {newPlayer.ToString()}");
-                await Clients.Caller.SendAsync("YourPlayerInfo", newPlayer.GetId(), newPlayer.GetName(), newPlayer.GetColor());
 
-                Console.WriteLine(_gameDataService.GetObstacleData());
-                await Clients.Caller.SendAsync("ObstacleInfo", _gameDataService.GetObstacleData());
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
 
-                await Clients.All.SendAsync("PlayerList", _gameDataService.GetPlayerList());
-
-                await Clients.All.SendAsync("GameTime", _gameDataService.GetCurrentGameTime());
-
-                if(_gameDataService.GetEnemies().Count != 0)
+                await observers[Context.ConnectionId].GameStart(newPlayer, _gameDataService.GetObstacleData());
+                List<string> playerlist = _gameDataService.GetPlayerList();
+                DateTime currentgametime = _gameDataService.GetCurrentGameTime();
+                foreach (var observerEntry in observers)
                 {
-                    await Clients.Caller.SendAsync("SpawnedEnemies", _gameDataService.GetEnemies());
+                    await observerEntry.Value.GameUpdate(playerlist, currentgametime);
                 }
             }
             catch (Exception ex)
@@ -89,13 +73,46 @@ namespace Server.Hubs
             }
         }
 
+        public async Task SendEnemies()
+        {
+            lock (syncLock)
+            {
+                DateTime startTime = _gameDataService.GetCurrentGameTime();
+                DateTime currentTime = DateTime.Now;
+                TimeSpan elapsedTime = currentTime - startTime;
+                //Console.WriteLine($"Sending enemy update {DateTime.Now}");
+                
+                _gameDataService.UpdateEnemyPositions();
+                if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
+                {
+                    _gameDataService.AddEnemies();
+                    //Console.WriteLine($"Spawning enemy {startTime} - {DateTime.Now}. {_gameDataService.GetEnemies().Count}");
+                    _gameDataService.SetGameTime(DateTime.Now);
+                }
+            }
+            List<string> enemies = _gameDataService.GetEnemies();
+            if (enemies.Count > 0)
+            {
+                //Console.WriteLine($"Sending Enemies {Context.ConnectionId}");
+                await _gameDataService.GetObservers()[Context.ConnectionId].HandleEnemies(enemies);
+            }
+        }
         public async Task SendMove(int id, double x, double y)
         {
-            //Console.WriteLine("Sending move");
-            _gameDataService.EditPlayerPosition(id-1, x, y);
-            //Console.WriteLine($"Move Player: {_gameDataService.GetPlayerData(id - 1)}");
-            await Clients.Others.SendAsync("UpdateUsers", _gameDataService.GetPlayerData(id - 1));
+            _gameDataService.EditPlayerPosition(id - 1, x, y);
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            foreach (var observerEntry in observers)
+            {
+                var connectionId = observerEntry.Key;
+                var observer = observerEntry.Value;
+
+                if (connectionId != Context.ConnectionId)
+                {
+                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id - 1));
+                }
+            }
         }
+
         public async Task SendEnemyUpdate(string enemy)
         {
             string[] partsenemy = enemy.Split(':');
@@ -105,14 +122,34 @@ namespace Server.Hubs
                 string color = partsenemy[1];
                 int health = int.Parse(partsenemy[4]);
                 _gameDataService.UpdateEnemy(id, health);
-                await Clients.Others.SendAsync("UpdateEnemyHealth", id, color, health);
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var connectionId = observerEntry.Key;
+                    var observer = observerEntry.Value;
+                    Console.WriteLine($"{connectionId} vs {Context.ConnectionId}");
+                    if (connectionId != Context.ConnectionId)
+                    {
+                        await observer.HandleEnemyUpdate(id, color, health);
+                    }
+                }
             }
-
         }
+
         public async Task ShotFired(int player_id, double directionX, double directionY)
         {
-            await Clients.Others.SendAsync("UpdateShotsFired", player_id, directionX, directionY);
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            foreach (var observerEntry in observers)
+            {
+                var connectionId = observerEntry.Key;
+                var observer = observerEntry.Value;
+                if (connectionId != Context.ConnectionId)
+                {
+                    await observer.HandleShotFired(player_id, directionX, directionY);
+                }
+            }
         }
+
         public async Task SendDeadEnemy(string enemy)
         {
             string[] parts = enemy.Split(':');
@@ -121,7 +158,16 @@ namespace Server.Hubs
                 int id = int.Parse(parts[0]);
                 string color = parts[1];
                 _gameDataService.RemoveEnemy(id);
-                await Clients.Others.SendAsync("UpdateDeadEnemy", id, color);
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var connectionId = observerEntry.Key;
+                    var observer = observerEntry.Value;
+                    if (connectionId != Context.ConnectionId)
+                    {
+                        await observer.HandleDeadEnemy(id, color);
+                    }
+                }
             }
         }
     }

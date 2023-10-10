@@ -4,6 +4,8 @@ namespace Server.GameData
 {
     public class InMemoryGameDataService : IGameDataService
     {
+
+        private Dictionary<string, Observer> observers = new Dictionary<string, Observer>();
         private List<Player> players = new List<Player>();
         private List<Obstacle> obstacles = new List<Obstacle>();
         private List<Enemy> enemies = new List<Enemy>();
@@ -184,6 +186,21 @@ namespace Server.GameData
         public void SetGameTime(DateTime gametime)
         {
             this.gametime = gametime;
+        }
+        public void AddObserver(string connectionID, Observer observer)
+        {
+            observers[connectionID] = observer;
+        }
+        public void RemoveObserver(string connectionId)
+        {
+            if (observers.ContainsKey(connectionId))
+            {
+                observers.Remove(connectionId);
+            }
+        }
+        public Dictionary<string, Observer> GetObservers()
+        {
+            return observers;
         }
     }
 }

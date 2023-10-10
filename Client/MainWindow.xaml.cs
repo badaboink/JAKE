@@ -93,13 +93,10 @@ namespace JAKE.client
             string name = colorChoiceForm.Name;
 
             await connection.SendAsync("SendColor", selectedColor, name);
-            connection.On<int, string, string>("YourPlayerInfo", (id, name, color)=>
+            connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
                 currentPlayer = new Player(id, name, color);
                 gamestarted = true;
-            });
-            connection.On<string>("ObstacleInfo", (obstacleData) =>
-            {
                 string[] obstaclemessages = obstacleData.Split(',');
                 foreach (string obs in obstaclemessages)
                 {
@@ -117,7 +114,7 @@ namespace JAKE.client
                     }
                 }
             });
-            connection.On<List<string>>("PlayerList", (userData) =>
+            connection.On<List<string>, DateTime>("GameUpdate", (userData, gametime) =>
             {
                 foreach (string playerEntry in userData)
                 {
@@ -166,10 +163,7 @@ namespace JAKE.client
                     }
                 }
                 gameStat.PlayersCount = playerInfoList.Count;  //singleton
-            });
-            connection.On<DateTime>("GameTime", (GameTime) =>
-            {
-                lastGameTime = GameTime;
+                lastGameTime = gametime;
             });
         }
         private Timer timer;
