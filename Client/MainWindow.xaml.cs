@@ -463,7 +463,10 @@ namespace JAKE.client
                             healthLabel.Text = $"Health: {0}";
                             //currentPlayer.SetName("DEAD B****");
                             playerVisuals[currentPlayer].PlayerName = "DEAD";
-                            playerVisuals[currentPlayer].PlayerColor = Brushes.Black;
+                            Color shotColor = (Color)ColorConverter.ConvertFromString("black");
+                            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
+                            playerVisuals[currentPlayer].PlayerColor = solidColorBrush;
+                            playerVisuals[currentPlayer].UpdateColor(solidColorBrush);
                         }
                     }
                 }
