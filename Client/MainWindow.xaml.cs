@@ -192,6 +192,12 @@ namespace JAKE.client
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
 
+                        playerVisual.PlayerName = playerName;
+                        Color shotColor = (Color)ColorConverter.ConvertFromString(playerColor);
+                        SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
+                        playerVisual.PlayerColor = solidColorBrush;
+                        playerVisual.UpdateColor(solidColorBrush);
+
                     });
                 }
             });
@@ -426,7 +432,7 @@ namespace JAKE.client
             }
         }
 
-        private void HandleEnemyCollisions(PlayerVisual playerVisual)
+        private async void HandleEnemyCollisions(PlayerVisual playerVisual)
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
@@ -461,6 +467,7 @@ namespace JAKE.client
                             SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
                             playerVisuals[currentPlayer].PlayerColor = solidColorBrush;
                             playerVisuals[currentPlayer].UpdateColor(solidColorBrush);
+                            await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
                         }
                     }
                 }

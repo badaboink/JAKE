@@ -86,6 +86,10 @@ namespace JAKE.classlibrary
         {
             _connectionid = id;
         }
+        public void SetColor(string color)
+        {
+            _color = color;
+        }
         private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
         {
             { "Green", "heal" },

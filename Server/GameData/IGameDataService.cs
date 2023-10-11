@@ -15,6 +15,8 @@ namespace Server.GameData
         string GetPlayerData(int id);
         void EditPlayerPosition(int id, double x, double y);
 
+        void UpdateDeadPlayer(int id);
+
         // Get obstacle data as a list of strings
         string GetObstacleData();
         Enemy AddEnemies();

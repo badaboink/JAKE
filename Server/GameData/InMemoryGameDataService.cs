@@ -202,5 +202,10 @@ namespace Server.GameData
         {
             return observers;
         }
+        public void UpdateDeadPlayer(int id)
+        {
+            players[id].SetName("DEAD");
+            players[id].SetColor("Black");
+        }
     }
 }

@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary
 {
-    internal class DontMoveStrategy
+    public class DontMoveStrategy : IMoveStrategy
     {
+        public DontMoveStrategy() { }
+        public void Move(Enemy enemy, List<Player> players)
+        {
+
+        }
     }
 }
