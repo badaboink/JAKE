@@ -71,7 +71,6 @@ namespace Server.Hubs
                 Console.WriteLine(ex.ToString());
             }
         }
-
         public async Task SendEnemies()
         {
             lock (syncLock)
@@ -88,29 +87,21 @@ namespace Server.Hubs
                     //Console.WriteLine($"Spawning enemy {startTime} - {DateTime.Now}. {_gameDataService.GetEnemies().Count}");
                     _gameDataService.SetGameTime(DateTime.Now);
                 }
-                if (elapsedTime.TotalSeconds >= 1 && _gameDataService.GetCoins().Count <= 10)
+                if (_gameDataService.GetCoins().Count <= 10)
                 {
-                    Console.WriteLine("adcoin10 gamehub");
                     _gameDataService.AddCoin(10);
-                    _gameDataService.SetGameTime(DateTime.Now);
                 }
-                if (elapsedTime.TotalSeconds >= 1 && _gameDataService.GetShields().Count <= 0)
+                if (_gameDataService.GetShields().Count <= 0)
                 {
-                    Console.WriteLine("adshield30 gamehub");
                     _gameDataService.AddShield(30);
-                    _gameDataService.SetGameTime(DateTime.Now);
                 }
-                if (elapsedTime.TotalSeconds >= 1 && _gameDataService.GetHealthBoosts().Count <= 1)
+                if (_gameDataService.GetHealthBoosts().Count <= 1)
                 {
-                    Console.WriteLine("adhealth10 gamehub");
                     _gameDataService.AddHealthBoost(10);
-                    _gameDataService.SetGameTime(DateTime.Now);
                 }
-                if (elapsedTime.TotalSeconds >= 1 && _gameDataService.GetSpeedBoosts().Count <= 1)
+                if (_gameDataService.GetSpeedBoosts().Count <= 1)
                 {
-                    Console.WriteLine("adspeed5 gamehub");
                     _gameDataService.AddSpeedBoost(5);
-                    _gameDataService.SetGameTime(DateTime.Now);
                 }
             }
             List<string> enemies = _gameDataService.GetEnemies();

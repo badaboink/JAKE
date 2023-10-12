@@ -5,7 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:JAKE.client"
              mc:Ignorable="d" 
-             Height="{Binding CoinImageHeight}" Width="{Binding CoinImageWidth}">
+             Height="20" Width="20">
+             
 
     <!--<Grid>
         <Image x:Name="coinImage"   Height="{Binding CoinImageHeight}" Width="{Binding CoinImageWidth}" Source="{Binding CoinImageSource}" />

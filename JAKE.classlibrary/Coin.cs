@@ -16,9 +16,9 @@ namespace JAKE.classlibrary
         public int Width { get; set; }
         public int Height { get; set; }
         public string Image { get; set; }
-        public Coin(int points, int width=7, int height = 7)
+        public Coin(int id, int width=7, int height = 7)
         {
-            Points = points;
+            this.id = id;
             Width = width;
             Height = height;
         }
@@ -40,6 +40,14 @@ namespace JAKE.classlibrary
         {
             X = x;
             Y = y;
+        }
+        public override bool Equals(object obj)
+        {
+            if (obj is Coin otherCoin)
+            {
+                return this.MatchesId(otherCoin.id);
+            }
+            return false;
         }
 
         public void SetPoints(int points)

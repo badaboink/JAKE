@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -53,13 +54,6 @@ namespace JAKE.client
         public static readonly DependencyProperty CoinImageWidthProperty =
             DependencyProperty.Register("CoinImageWidth", typeof(int), typeof(CoinVisual), new PropertyMetadata(15));
 
-        /// <summary>
-        /// ---------------------
-        /// </summary>
-        /// <param name="image"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// 
         public SolidColorBrush CoinColor
         {
             get { return (SolidColorBrush)GetValue(CoinColorProperty); }
@@ -69,38 +63,26 @@ namespace JAKE.client
         // Using a DependencyProperty as the backing store for CoinColor.
         public static readonly DependencyProperty CoinColorProperty =
             DependencyProperty.Register("CoinColor", typeof(SolidColorBrush), typeof(CoinVisual), new PropertyMetadata(new SolidColorBrush(Colors.Black)));
-        public CoinVisual(string image, int width, int height)
-        {
-            InitializeComponent();
-            // Set the default Coin image source path
-            //CoinImageSource = image;
-            //CoinImageHeight = height;
-            //CoinImageWidth = width;
-            CoinColor = new SolidColorBrush(Colors.Black);
-        }
 
 
 
         public static readonly DependencyProperty FillColorPropertyC =
-            DependencyProperty.Register("FillColor", typeof(Brush), typeof(EnemyVisual), new PropertyMetadata(Brushes.Red));
+            DependencyProperty.Register("FillColor", typeof(Brush), typeof(CoinVisual), new PropertyMetadata(Brushes.Red));
 
         public static readonly DependencyProperty EllipseSizePropertyC =
-            DependencyProperty.Register("EllipseSize", typeof(double), typeof(EnemyVisual), new PropertyMetadata(20.0));
+            DependencyProperty.Register("EllipseSize", typeof(double), typeof(CoinVisual), new PropertyMetadata(20.0));
 
-        public Brush FillColorC
-        {
-            get { return (Brush)GetValue(FillColorPropertyC); }
-            set { SetValue(FillColorPropertyC, value); }
-        }
 
         public double EllipseSizeC
         {
             get { return (double)GetValue(EllipseSizePropertyC); }
             set { SetValue(EllipseSizePropertyC, value); }
         }
+
         public CoinVisual()
         {
             InitializeComponent();
+            coinCircle.Fill = new SolidColorBrush(Colors.Black);
         }
     }
 
