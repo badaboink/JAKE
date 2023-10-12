@@ -15,12 +15,17 @@ namespace JAKE.classlibrary
         public double Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        public Object Image { get; set; }
-        public Coin(int points, int width=7, int heught = 7)
+        public string Image { get; set; }
+        public Coin(int points, int width=7, int height = 7)
         {
             Points = points;
             Width = width;
-            Height = heught;
+            Height = height;
+        }
+
+        public Coin(int id)
+        {
+            this.id = id;
         }
         public void Interact(Player player)
         {
@@ -37,6 +42,10 @@ namespace JAKE.classlibrary
             Y = y;
         }
 
+        public void SetPoints(int points)
+        {
+            this.Points = points;
+        }
         public override string ToString()
         {
             return $"{id}:{X}:{Y}:{Width}:{Height}:{Points}";

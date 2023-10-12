@@ -31,8 +31,17 @@ namespace Server.GameData
         void RemoveObserver(string connectionID);
         Dictionary<string, Observer> GetObservers();
 
-        //IMapObject AddCoin();
-        //void RemoveCoin(int id);
-        //List<string> GetCoins();
+        Coin AddCoin(int points);
+        void RemoveCoin(int id);
+        List<string> GetCoins();
+        Shield AddShield(int time);
+        void RemoveShield(int id);
+        List<string> GetShields();
+        HealthBoost AddHealthBoost(int health);
+        void RemoveHealthBoost(int id);
+        List<string> GetHealthBoosts();
+        SpeedBoost AddSpeedBoost(int speed);
+        void RemoveSpeedBoost(int id);
+        List<string> GetSpeedBoosts();
     }
 }

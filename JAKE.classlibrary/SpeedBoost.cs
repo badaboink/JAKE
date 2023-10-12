@@ -8,18 +8,20 @@ namespace JAKE.classlibrary
 {
     public class SpeedBoost : IMapObject
     {
-        public int Value { get; private set; }
+        public int Speed { get; private set; }
         public int id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        public Object Image { get; set; }
-        public SpeedBoost(int value, int width = 7, int heught = 7)
+        public int Time { get; set; }
+        public string Image { get; set; }
+        public SpeedBoost(int speed, int width = 7, int heught = 7)
         {
-            Value = value;
+            Speed = speed;
             Width = width;
             Height = heught;
+            Time = 15;
         }
 
         public void Interact(Player player)
@@ -35,6 +37,16 @@ namespace JAKE.classlibrary
         {
             X = x;
             Y = y;
+        }
+
+        public override string ToString()
+        {
+            return $"{id}:{X}:{Y}:{Width}:{Height}:{Speed}:{Time}";
+        }
+        public void SetSpeedTime(int speed, int time)
+        {
+            this.Speed = speed;
+            this.Time = time;
         }
     }
 }

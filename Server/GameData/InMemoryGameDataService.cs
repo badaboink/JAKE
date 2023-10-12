@@ -11,7 +11,7 @@ namespace Server.GameData
         private List<Enemy> enemies = new List<Enemy>();
         private DateTime gametime = DateTime.Now;
 
-        private List<IMapObject> coins = new List<IMapObject>();
+        private List<Coin> coins = new List<Coin>();
         private List<HealthBoost> healthBoosts = new List<HealthBoost>();
         private List<Shield> shields = new List<Shield>();
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
@@ -24,11 +24,13 @@ namespace Server.GameData
         }
         public Player AddPlayer(string playerName, string playerColor, string connectionID)
         {
+            Console.WriteLine("addplayer inmemory");
             int playerId = players.Count + 1;
             Player newPlayer = new Player(playerId, playerName, playerColor);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);
             return newPlayer;
+
         }
         public Player RemovePlayer(string connectionID)
         {
@@ -57,52 +59,8 @@ namespace Server.GameData
         //kurioj vietoj laikom points ir health? prie player? 
         //gamedata kuo skiriasi kiekvienam faile metodai? kur jie naudojasi?
         //gamehub sedcoins?
-        private readonly object coinsListLock = new object();
-        public IMapObject AddCoin(int points)
-        {
-            //TODO: surast random vieta kur padet ji, kad neoverlapintu nieko kito tam taske (obstacle) visa kita gali overlapint?
-            //sukurt random x ir y ir eit per obstacles sarasa ir tikrint ir tada is naujo kol neoverlapina
-            lock (coinsListLock)
-            {
-                Random random = new Random();
-                double x=0, y = 0;
-                bool overlap = true;
-                IMapObject coin = objectFactory.CreateMapObject(string.Format("coin{0}", points));
+        
 
-                while (overlap)
-                {
-                    x = random.Next(0, 1920);
-                    y = random.Next(0, 1080); 
-
-                    // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, coin.Width, coin.Height));
-                }
-
-                coin.SetPosition(x, y);
-                coin.id = coins.Count + 1;
-                coins.Add(coin);
-                return coin;
-            }
-        }
-
-        public void RemoveCoin(int id)
-        {
-            lock (coinsListLock)
-            {
-                IMapObject coinToRemove = coins.FirstOrDefault(coin => coin.MatchesId(id));
-                if (coinToRemove != null)
-                {
-                    coins.Remove(coinToRemove);
-                }
-            }
-        }
-        public List<string> GetCoins()
-        {
-            lock (coinsListLock)
-            {
-                return coins.Select(coin => coin.ToString()).ToList();
-            }
-        }
         public void EditPlayerPosition(int id, double x, double y)
         {
             players[id].SetCurrentPosition(x, y);
@@ -207,5 +165,194 @@ namespace Server.GameData
             players[id].SetName("DEAD");
             players[id].SetColor("Black");
         }
+        private readonly object coinsListLock = new object();
+        public Coin AddCoin(int points)
+        {
+            //Console.WriteLine("ADDCOIN inemmory");
+            lock (coinsListLock)
+            {
+                Random random = new Random();
+                double x = 0, y = 0;
+                bool overlap = true;
+                Coin coin = (Coin)objectFactory.CreateMapObject("coin", points);
+
+                while (overlap)
+                {
+                    x = random.Next(0, 1536);
+                    y = random.Next(0, 800);
+
+                    // Check for overlap with obstacles
+                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, coin.Width, coin.Height));
+                }
+
+                coin.SetPosition(x, y);
+                coin.id = coins.Count + 1;
+                coins.Add(coin);
+                return coin;
+            }
+        }
+
+        public void RemoveCoin(int id)
+        {
+            lock (coinsListLock)
+            {
+                Coin coinToRemove = coins.FirstOrDefault(coin => coin.MatchesId(id));
+                if (coinToRemove != null)
+                {
+                    coins.Remove(coinToRemove);
+                }
+            }
+        }
+        public List<string> GetCoins()
+        {
+            lock (coinsListLock)
+            {
+                Console.WriteLine("getcoins() inmemory");
+                return coins.Select(coin => coin.ToString()).ToList();
+            }
+        }
+
+        private readonly object healthListLock = new object();
+        public HealthBoost AddHealthBoost(int health)
+        {
+            //Console.WriteLine("ADDCOIN inemmory");
+            lock (healthListLock)
+            {
+                Random random = new Random();
+                double x = 0, y = 0;
+                bool overlap = true;
+                HealthBoost healthBoost = (HealthBoost)objectFactory.CreateMapObject("healthboost", health);
+
+                while (overlap)
+                {
+                    x = random.Next(0, 1536);
+                    y = random.Next(0, 800);
+
+                    // Check for overlap with obstacles
+                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, healthBoost.Width, healthBoost.Height));
+                }
+
+                healthBoost.SetPosition(x, y);
+                healthBoost.id = healthBoosts.Count + 1;
+                healthBoosts.Add(healthBoost);
+                return healthBoost;
+            }
+        }
+
+        public void RemoveHealthBoost(int id)
+        {
+            lock (healthListLock)
+            {
+                HealthBoost healthToRemove = healthBoosts.FirstOrDefault(health => health.MatchesId(id));
+                if (healthToRemove != null)
+                {
+                    healthBoosts.Remove(healthToRemove);
+                }
+            }
+        }
+        public List<string> GetHealthBoosts()
+        {
+            lock (healthListLock)
+            {
+                Console.WriteLine("HealthBoostget() inmemory");
+                return healthBoosts.Select(healthBoost => healthBoost.ToString()).ToList();
+            }
+        }
+
+        private readonly object speedListLock = new object();
+        public SpeedBoost AddSpeedBoost(int speed)
+        {
+            //Console.WriteLine("ADDCOIN inemmory");
+            lock (speedListLock)
+            {
+                Random random = new Random();
+                double x = 0, y = 0;
+                bool overlap = true;
+                SpeedBoost speedBoost = (SpeedBoost)objectFactory.CreateMapObject("speedboost", speed);
+
+                while (overlap)
+                {
+                    x = random.Next(0, 1536);
+                    y = random.Next(0, 800);
+
+                    // Check for overlap with obstacles
+                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, speedBoost.Width, speedBoost.Height));
+                }
+
+                speedBoost.SetPosition(x, y);
+                speedBoost.id = speedBoosts.Count + 1;
+                speedBoosts.Add(speedBoost);
+                return speedBoost;
+            }
+        }
+
+        public void RemoveSpeedBoost(int id)
+        {
+            lock (speedListLock)
+            {
+                SpeedBoost speedToRemove = speedBoosts.FirstOrDefault(speed => speed.MatchesId(id));
+                if (speedToRemove != null)
+                {
+                    speedBoosts.Remove(speedToRemove);
+                }
+            }
+        }
+        public List<string> GetSpeedBoosts()
+        {
+            lock (speedListLock)
+            {
+                Console.WriteLine("speedBoostget() inmemory");
+                return speedBoosts.Select(speedBoost => speedBoost.ToString()).ToList();
+            }
+        }
+
+        private readonly object shieldListLock = new object();
+        public Shield AddShield(int time)
+        {
+            //Console.WriteLine("ADDCOIN inemmory");
+            lock (shieldListLock)
+            {
+                Random random = new Random();
+                double x = 0, y = 0;
+                bool overlap = true;
+                Shield shield = (Shield)objectFactory.CreateMapObject("shield", time);
+
+                while (overlap)
+                {
+                    x = random.Next(0, 1536);
+                    y = random.Next(0, 800);
+
+                    // Check for overlap with obstacles
+                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, shield.Width, shield.Height));
+                }
+
+                shield.SetPosition(x, y);
+                shield.id = shields.Count + 1;
+                shields.Add(shield);
+                return shield;
+            }
+        }
+
+        public void RemoveShield(int id)
+        {
+            lock (shieldListLock)
+            {
+                Shield shieldToRemove = shields.FirstOrDefault(shield => shield.MatchesId(id));
+                if (shieldToRemove != null)
+                {
+                    shields.Remove(shieldToRemove);
+                }
+            }
+        }
+        public List<string> GetShields()
+        {
+            lock (shieldListLock)
+            {
+                Console.WriteLine("getshields() inmemory");
+                return shields.Select(shield => shield.ToString()).ToList();
+            }
+        }
+
+
     }
 }

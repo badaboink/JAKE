@@ -8,22 +8,20 @@ namespace JAKE.classlibrary
 {
     public class MapObjectFactory
     {
-        public IMapObject CreateMapObject(string objectType)
+        public IMapObject CreateMapObject(string objectType, int value, int weapsp=0, int weapstr=0)
         {
             switch (objectType.ToLower())
             {
-                case "healthboost10":
-                    return new HealthBoost(10);
-                case "healthboost20":
-                    return new HealthBoost(20);
+                case "healthboost":
+                    return new HealthBoost(value);
                 case "coin":
-                    return new Coin(10);
+                    return new Coin(value);
                 case "weapon":
-                    return new Weapon(30,10,15);
+                    return new Weapon(value, weapsp,weapstr);
                 case "shield":
-                    return new Shield(30);
+                    return new Shield(value);
                 case "speedboost":
-                    return new SpeedBoost(25);
+                    return new SpeedBoost(value);
                 default:
                     throw new ArgumentException("Invalid object type");
             }

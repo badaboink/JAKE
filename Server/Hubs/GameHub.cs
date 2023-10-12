@@ -49,7 +49,6 @@ namespace Server.Hubs
         }
         private object syncLock = new object();
         
-        //TODO: SendCoins
         public async Task SendColor(string color, string name)
         {
             try
@@ -89,6 +88,30 @@ namespace Server.Hubs
                     //Console.WriteLine($"Spawning enemy {startTime} - {DateTime.Now}. {_gameDataService.GetEnemies().Count}");
                     _gameDataService.SetGameTime(DateTime.Now);
                 }
+                if (elapsedTime.TotalSeconds >= 1 && _gameDataService.GetCoins().Count <= 10)
+                {
+                    Console.WriteLine("adcoin10 gamehub");
+                    _gameDataService.AddCoin(10);
+                    _gameDataService.SetGameTime(DateTime.Now);
+                }
+                if (elapsedTime.TotalSeconds >= 1 && _gameDataService.GetShields().Count <= 0)
+                {
+                    Console.WriteLine("adshield30 gamehub");
+                    _gameDataService.AddShield(30);
+                    _gameDataService.SetGameTime(DateTime.Now);
+                }
+                if (elapsedTime.TotalSeconds >= 1 && _gameDataService.GetHealthBoosts().Count <= 1)
+                {
+                    Console.WriteLine("adhealth10 gamehub");
+                    _gameDataService.AddHealthBoost(10);
+                    _gameDataService.SetGameTime(DateTime.Now);
+                }
+                if (elapsedTime.TotalSeconds >= 1 && _gameDataService.GetSpeedBoosts().Count <= 1)
+                {
+                    Console.WriteLine("adspeed5 gamehub");
+                    _gameDataService.AddSpeedBoost(5);
+                    _gameDataService.SetGameTime(DateTime.Now);
+                }
             }
             List<string> enemies = _gameDataService.GetEnemies();
             if (enemies.Count > 0)
@@ -96,7 +119,109 @@ namespace Server.Hubs
                 //Console.WriteLine($"Sending Enemies {Context.ConnectionId}");
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleEnemies(enemies);
             }
+            List<string> coins = _gameDataService.GetCoins();
+            if (coins.Count > 0)
+            {
+                await _gameDataService.GetObservers()[Context.ConnectionId].HandleCoins(coins);
+            }
+            List<string> shields = _gameDataService.GetShields();
+            if (shields.Count > 0)
+            {
+                await _gameDataService.GetObservers()[Context.ConnectionId].HandleShields(shields);
+            }
+            List<string> healthBoosts = _gameDataService.GetHealthBoosts();
+            if (healthBoosts.Count > 0)
+            {
+                await _gameDataService.GetObservers()[Context.ConnectionId].HandleHealthBoosts(healthBoosts);
+            }
+            List<string> speedBoosts = _gameDataService.GetSpeedBoosts();
+            if (speedBoosts.Count > 0)
+            {
+                await _gameDataService.GetObservers()[Context.ConnectionId].HandleSpeedBoosts(speedBoosts);
+            }
+
         }
+        public async Task SendPickedCoin(string coin)
+        {
+            string[] parts = coin.Split(':');
+            if (parts.Length == 6)
+            {
+                int id = int.Parse(parts[0]);
+                string points = parts[5];
+                _gameDataService.RemoveCoin(id);
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var connectionId = observerEntry.Key;
+                    var observer = observerEntry.Value;
+                    if (connectionId != Context.ConnectionId)
+                    {
+                        await observer.HandlePickedCoin(id);
+                    }
+                }
+            }
+        }
+
+        public async Task SendPickedShield(string shield)
+        {
+            string[] parts = shield.Split(':');
+            if (parts.Length == 6)
+            {
+                int id = int.Parse(parts[0]);
+                _gameDataService.RemoveShield(id);
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var connectionId = observerEntry.Key;
+                    var observer = observerEntry.Value;
+                    if (connectionId != Context.ConnectionId)
+                    {
+                        await observer.HandlePickedShield(id);
+                    }
+                }
+            }
+        }
+
+        public async Task SendPickedHealthBoost(string health)
+        {
+            string[] parts = health.Split(':');
+            if (parts.Length == 6)
+            {
+                int id = int.Parse(parts[0]);
+                _gameDataService.RemoveHealthBoost(id);
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var connectionId = observerEntry.Key;
+                    var observer = observerEntry.Value;
+                    if (connectionId != Context.ConnectionId)
+                    {
+                        await observer.HandlePickedHealthBoost(id);
+                    }
+                }
+            }
+        }
+
+        public async Task SendPickedSpeedBoost(string speed)
+        {
+            string[] parts = speed.Split(':');
+            if (parts.Length == 7)
+            {
+                int id = int.Parse(parts[0]);
+                _gameDataService.RemoveSpeedBoost(id);
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var connectionId = observerEntry.Key;
+                    var observer = observerEntry.Value;
+                    if (connectionId != Context.ConnectionId)
+                    {
+                        await observer.HandlePickedSpeedBoost(id);
+                    }
+                }
+            }
+        }
+
         public async Task UpdateDeadPlayer(int id)
         {
             _gameDataService.UpdateDeadPlayer(id - 1);

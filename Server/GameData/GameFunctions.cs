@@ -55,29 +55,6 @@ namespace Server.GameData
             return enemy;
         }
 
-        public static IMapObject GenerateCoin(int id, List<Obstacle> obstacles)
-        {
-                Random random = new Random();
-                MapObjectFactory objectFactory = new MapObjectFactory();
-                double x = 0, y = 0;
-                bool overlap = true;
-                IMapObject coin = objectFactory.CreateMapObject(string.Format("coin{0}", 10));
-
-                while (overlap)
-                {
-                    x = random.Next(0, 1920);
-                    y = random.Next(0, 1080);
-
-                    // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, coin.Width, coin.Height));
-                }
-
-                coin.SetPosition(x, y);
-                coin.id = id;
-                return coin;
-
-        }
-
         public static bool IsPositionClear(double x, double y, List<Obstacle> obstacles, int enemySize)
         {
             foreach (Obstacle obstacle in obstacles)

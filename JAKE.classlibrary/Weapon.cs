@@ -16,7 +16,7 @@ namespace JAKE.classlibrary
         public double Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        public Object Image { get; set; }
+        public string Image { get; set; }
         public Weapon(int time, int speed, int strength, int width = 7, int heught = 7)
         {
             Time = time;
@@ -38,6 +38,11 @@ namespace JAKE.classlibrary
         {
             X = x;
             Y = y;
+        }
+
+        public override string ToString()
+        {
+            return $"{id}:{X}:{Y}:{Width}:{Height}:{ShootingSpeed}:{ShootingStrength}:{Time}";
         }
     }
 }

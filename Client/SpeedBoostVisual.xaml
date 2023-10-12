@@ -1,0 +1,13 @@
+﻿<UserControl x:Class="JAKE.client.SpeedBoostVisual"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:JAKE.client"
+             mc:Ignorable="d" 
+           Height="{Binding SpeedBoostImageHeight}" Width="{Binding SpeedBoostImageWidth}">
+
+    <Grid>
+        <Image x:Name="SpeedBoostImage"   Height="{Binding SpeedBoostImageHeight}" Width="{Binding SpeedBoostImageWidth}" Source="{Binding SpeedBoostImageSource}" />
+    </Grid>
+</UserControl>

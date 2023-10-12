@@ -49,5 +49,40 @@ namespace Server.GameData
         {
             await clientProxy.SendAsync("DisconnectedPlayer", player);
         }
+
+        public async Task HandleCoins(List<string> coins)
+        {
+            await clientProxy.SendAsync("SendingCoins", coins);
+        }
+        public async Task HandlePickedCoin(int id)
+        {
+            await clientProxy.SendAsync("SendingPickedCoin", id);
+        }
+        public async Task HandleShields(List<string> shields)
+        {
+            await clientProxy.SendAsync("SendingShields", shields);
+        }
+        public async Task HandlePickedShield(int id)
+        {
+            await clientProxy.SendAsync("SendingPickedShield", id);
+        }
+
+        public async Task HandleHealthBoosts(List<string> healthBoosts)
+        {
+            await clientProxy.SendAsync("SendingHealthBoosts", healthBoosts);
+        }
+        public async Task HandlePickedHealthBoost(int id)
+        {
+            await clientProxy.SendAsync("SendingPickedHealthBoost", id);
+        }
+
+        public async Task HandleSpeedBoosts(List<string> speedBoosts)
+        {
+            await clientProxy.SendAsync("SendingSpeedBoosts", speedBoosts);
+        }
+        public async Task HandlePickedSpeedBoost(int id)
+        {
+            await clientProxy.SendAsync("SendingPickedSpeedBoost", id);
+        }
     }
 }

@@ -43,10 +43,15 @@ namespace JAKE.client
         private GameStats gameStat = GameStats.Instance;
         private Dictionary<Enemy, bool> collisionCheckedEnemies = new Dictionary<Enemy, bool>();
         private List<Coin> coins = new List<Coin>();
+        private Dictionary<Coin, CoinVisual> coinVisuals = new Dictionary<Coin, CoinVisual>();
         private List<HealthBoost> healthBoosts = new List<HealthBoost>();
-        private List<Shield> shields = new List<Shield>();
+        private Dictionary<HealthBoost, HealthBoostVisual> healthBoostsVisuals = new Dictionary<HealthBoost, HealthBoostVisual>();
+        private List<Shield> shields = new List<Shield>(); 
+        private Dictionary<Shield, ShieldVisual> shieldVisuals = new Dictionary<Shield, ShieldVisual>();
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
+        private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
         private List<Weapon> weapons = new List<Weapon>();
+        //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
 
 
         public MainWindow()
@@ -223,10 +228,13 @@ namespace JAKE.client
                             enemy.SetCurrentPosition(enemyX, enemyY);
                             enemies.Add(enemy);
                             Dispatcher.Invoke(() =>
+
                             {
+                                Debug.WriteLine("enemy spalva: " + enemy.GetColor());
                                 EnemyVisual enemyVisual = new EnemyVisual();
                                 ColorConverter converter = new ColorConverter();
                                 Color enemyColor = (Color)ColorConverter.ConvertFromString(enemy.GetColor());
+                                
                                 SolidColorBrush solidColorBrush = new SolidColorBrush(enemyColor);
                                 enemyVisual.FillColor = solidColorBrush;
                                 enemyVisual.EllipseSize = enemy.GetSize();
@@ -307,10 +315,288 @@ namespace JAKE.client
                     });
                 }
             });
+            connection.On<List<string>>("SendingCoins", (coinsdata) =>
+            {
+                //Debug.WriteLine("sendingcoins jakeclient");
+                //Debug.WriteLine("CoinContainer Width: " + CoinContainer.ActualWidth);
+                //Debug.WriteLine("CoinContainer Height: " + CoinContainer.ActualHeight);
+                //Debug.WriteLine("CoinContainer Visibility: " + CoinContainer.Visibility);
+                foreach (string coinstring in coinsdata)
+                {
+                    Debug.WriteLine("coin: " + coinstring);
+                    string[] parts = coinstring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int coinId = int.Parse(parts[0]);
+                        double coinX = double.Parse(parts[1]);
+                        double coinY = double.Parse(parts[2]);
+                        int coinWidth = int.Parse(parts[3]);
+                        int coinHeight = int.Parse(parts[4]);
+                        int points = int.Parse(parts[5]);
+                        Coin coin = new Coin(coinId, coinWidth,coinHeight);
+                        coin.Image = "./coin.png";
+                        if (!coins.Contains(coin))
+                        {
+                            coin.SetPosition(coinX, coinY);
+                            coins.Add(coin);
+                            Dispatcher.Invoke(() =>
+                            {
+                                Debug.WriteLine("kuria nauja grazu coin");
+                                CoinVisual coinVisual = new CoinVisual(coin.Image, coin.Width, coin.Height);
+
+                                coinVisuals[coin] = coinVisual;
+                                Canvas.SetLeft(coinVisual, coinX);
+                                Canvas.SetTop(coinVisual, coinY);
+                                CoinContainer.Children.Add(coinVisual);
+                                Debug.WriteLine("First Coin X: " + Canvas.GetLeft(coinVisual));
+                                Debug.WriteLine("First Coin Y: " + Canvas.GetTop(coinVisual));
+
+                                //Color coinColor = (Color)ColorConverter.ConvertFromString("red");
+                                //SolidColorBrush solidColorBrush = new SolidColorBrush(coinColor);
+
+                                //CoinVisual coinVisual = new CoinVisual();
+                                //coinVisual.EllipseSizeC = 20;
+                                //coinVisual.FillColorC = solidColorBrush;
+                                //Canvas.SetLeft(coinVisual, coinX);
+                                //Canvas.SetTop(coinVisual, coinY);
+
+                                //// Add the shot to the ShotContainer (Canvas)
+                                //CoinContainer.Children.Add(coinVisual);
+                                //if (coinVisual.IsVisible) Debug.WriteLine("visual is visible");
+                                //else Debug.WriteLine("NESIMATO");
+
+                                HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                        else
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                Debug.WriteLine("atvaizduoja jau esama coin");
+                                CoinVisual coinVisual = coinVisuals[coin];
+                                coin.SetPoints(points);
+                                coin.SetPosition(coinX, coinY);
+                                Canvas.SetLeft(coinVisual, coinX);
+                                Canvas.SetTop(coinVisual, coinY);
+
+                                HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                    }
+                }
+
+            });
+            connection.On<int>("SendingPickedCoin", (coinid) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+             
+                    Coin coin = new Coin(coinid);
+                    CoinVisual coinVisual = coinVisuals[coin];
+                    coins.Remove(coin);
+                    coinVisuals.Remove(coin);    
+                    CoinContainer.Children.Remove(coinVisual);
+                    //coins.RemoveAll(coin => coin.id == coinid);
+                });
+            });
+            connection.On<List<string>>("SendingShields", (shieldsdata) =>
+            {
+                Debug.WriteLine("sendingSHIELDS jakeclient");
+                foreach (string shieldstring in shieldsdata)
+                {
+                    Debug.WriteLine("shield: " + shieldstring);
+                    string[] parts = shieldstring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int shieldId = int.Parse(parts[0]);
+                        double shieldX = double.Parse(parts[1]);
+                        double shieldY = double.Parse(parts[2]);
+                        int shieldWidth = int.Parse(parts[3]);
+                        int shieldHeight = int.Parse(parts[4]);
+                        int time = int.Parse(parts[5]);
+                        Shield shield = new Shield(shieldId, shieldWidth, shieldHeight);
+                        shield.Image = "shield.png";
+                        if (!shields.Contains(shield))
+                        {
+                            shield.SetPosition(shieldX, shieldY);
+                            shields.Add(shield);
+                            Dispatcher.Invoke(() =>
+                            {
+                                Debug.WriteLine("kuria nauja grazu shield");
+                                ShieldVisual shieldVisual = new ShieldVisual(shield.Image, shield.Width, shield.Height);
+                                shieldVisuals[shield] = shieldVisual;
+                                Canvas.SetLeft(shieldVisual, shieldX);
+                                Canvas.SetTop(shieldVisual, shieldY);
+                                ShieldContainer.Children.Add(shieldVisual);
+                                Debug.WriteLine("First Shield X: " + Canvas.GetLeft(shieldVisual));
+                                Debug.WriteLine("First Shield Y: " + Canvas.GetTop(shieldVisual));
+                                HandleShieldsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                        else
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                Debug.WriteLine("atvaizduoja jau esama shield");
+                                ShieldVisual shieldVisual = shieldVisuals[shield];
+                                shield.SetTime(time);
+                                shield.SetPosition(shieldX, shieldY);
+                                Canvas.SetLeft(shieldVisual, shieldX);
+                                Canvas.SetTop(shieldVisual, shieldY);
+
+                                HandleShieldsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                    }
+                }
+
+            });
+            connection.On<int>("SendingPickedShield", (shieldid) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+
+                    Shield shield = new Shield(shieldid);
+                    ShieldVisual shieldVisual = shieldVisuals[shield];
+                    shields.Remove(shield);
+                    shieldVisuals.Remove(shield);
+                    ShieldContainer.Children.Remove(shieldVisual);
+                });
+            });
+            connection.On<List<string>>("SendingHealthBoosts", (healthdata) =>
+            {
+                Debug.WriteLine("sendingHEALTHBOOSTS jakeclient");
+                foreach (string healthstring in healthdata)
+                {
+                    Debug.WriteLine("healthBoost: " + healthstring);
+                    string[] parts = healthstring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int healthId = int.Parse(parts[0]);
+                        double healthX = double.Parse(parts[1]);
+                        double healthY = double.Parse(parts[2]);
+                        int healthWidth = int.Parse(parts[3]);
+                        int healthHeight = int.Parse(parts[4]);
+                        int healthVal = int.Parse(parts[5]);
+                        HealthBoost health = new HealthBoost(healthId, healthWidth, healthHeight);
+                        health.Image = "healthboost.png";
+                        if (!healthBoosts.Contains(health))
+                        {
+                            health.SetPosition(healthX, healthY);
+                            healthBoosts.Add(health);
+                            Dispatcher.Invoke(() =>
+                            {
+                                Debug.WriteLine("kuria nauja grazu health");
+                                HealthBoostVisual healthVisual = new HealthBoostVisual(health.Image, health.Width, health.Height);
+                                healthBoostsVisuals[health] = healthVisual;
+                                Canvas.SetLeft(healthVisual, healthX);
+                                Canvas.SetTop(healthVisual, healthY);
+                                HealthBoostContainer.Children.Add(healthVisual);
+                                Debug.WriteLine("First HealthBoost X: " + Canvas.GetLeft(healthVisual));
+                                Debug.WriteLine("First HealthBoost Y: " + Canvas.GetTop(healthVisual));
+                                HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                        else
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                Debug.WriteLine("atvaizduoja jau esama health");
+                                HealthBoostVisual healthVisual = healthBoostsVisuals[health];
+                                health.SetHealth(healthVal);
+                                health.SetPosition(healthX, healthY);
+                                Canvas.SetLeft(healthVisual, healthX);
+                                Canvas.SetTop(healthVisual, healthY);
+
+                                HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                    }
+                }
+
+            });
+            connection.On<int>("SendingPickedHealthBoost", (healthid) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+
+                    HealthBoost health = new HealthBoost(healthid);
+                    HealthBoostVisual healthVisual = healthBoostsVisuals[health];
+                    healthBoosts.Remove(health);
+                    healthBoostsVisuals.Remove(health);
+                    HealthBoostContainer.Children.Remove(healthVisual);
+                });
+            });
+            connection.On<List<string>>("SendingSpeedBoosts", (speeddata) =>
+            {
+                Debug.WriteLine("sendingSPEEDBOOSTS jakeclient");
+                foreach (string speedstring in speeddata)
+                {
+                    Debug.WriteLine("speedBoost: " + speedstring);
+                    string[] parts = speedstring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int speedId = int.Parse(parts[0]);
+                        double speedX = double.Parse(parts[1]);
+                        double speedY = double.Parse(parts[2]);
+                        int speedWidth = int.Parse(parts[3]);
+                        int speedHeight = int.Parse(parts[4]);
+                        int speedVal = int.Parse(parts[5]);
+                        int time = int.Parse(parts[6]);
+                        SpeedBoost speed = new SpeedBoost(speedId, speedWidth, speedHeight);
+                        speed.Image = "speedboost.png";
+                        if (!speedBoosts.Contains(speed))
+                        {
+                            speed.SetPosition(speedX, speedY);
+                            speedBoosts.Add(speed);
+                            Dispatcher.Invoke(() =>
+                            {
+                                Debug.WriteLine("kuria nauja grazu speed");
+                                SpeedBoostVisual speedVisual = new SpeedBoostVisual(speed.Image, speed.Width, speed.Height);
+                                speedBoostsVisuals[speed] = speedVisual;
+                                Canvas.SetLeft(speedVisual, speedX);
+                                Canvas.SetTop(speedVisual, speedY);
+                                SpeedBoostContainer.Children.Add(speedVisual);
+                                Debug.WriteLine("First SpeedBoost X: " + Canvas.GetLeft(speedVisual));
+                                Debug.WriteLine("First SpeedBoost Y: " + Canvas.GetTop(speedVisual));
+                                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                        else
+                        {
+                            Dispatcher.Invoke(() =>
+                            {
+                                Debug.WriteLine("atvaizduoja jau esama speed");
+                                SpeedBoostVisual speedVisual = speedBoostsVisuals[speed];
+                                speed.SetSpeedTime(speedVal, time); 
+                                speed.SetPosition(speedX, speedY);
+                                Canvas.SetLeft(speedVisual, speedX);
+                                Canvas.SetTop(speedVisual, speedY);
+
+                                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                    }
+                }
+
+            });
+            connection.On<int>("SendingPickedSpeedBoost", (speedid) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+
+                    SpeedBoost speed = new SpeedBoost(speedid);
+                    SpeedBoostVisual speedVisual = speedBoostsVisuals[speed];
+                    speedBoosts.Remove(speed);
+                    speedBoostsVisuals.Remove(speed);
+                    SpeedBoostContainer.Children.Remove(speedVisual);
+                });
+            });
         }
         private async void CheckElapsedTimeMove(object state)
         {
             await connection.SendAsync("SendEnemies");
+           // await connection.SendAsync("SendCoins");
         }
         private void LoadGameMap()
         {
@@ -474,6 +760,121 @@ namespace JAKE.client
             }
         }
 
+        private async void HandleCoinsCollisions(PlayerVisual playerVisual)
+        {
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
+
+            foreach (Coin coin in coins)
+            {
+                if (coinVisuals.ContainsKey(coin))
+                {
+                    CoinVisual coinRect = coinVisuals[coin];
+                    double coinX = Canvas.GetLeft(coinRect);
+                    double coinY = Canvas.GetTop(coinRect);
+
+                    if (playerX + playerVisual.Width >= coinX &&
+                        playerX <= coinX + coinRect.Width &&
+                        playerY + playerVisual.Height >= coinY &&
+                        playerY <= coinY + coinRect.Height)
+                    {
+                   
+                        // coin.Interact(playerVisual); //TODO: paduot player atrinkta pagal player visual ir tada viduj interact is gamestats pasiimt score ir pridet
+                        //arba - tieisog padidint score??? arba saugot ir prie klases points ir gamestats? 
+                        gameStat.PlayerScore += coin.Points;
+
+                        //collisionCheckedCoins[coin] = true;
+
+                        await connection.SendAsync("SendPickedCoin", coin.ToString());
+                        
+                    }
+                }
+            }
+        }
+        private async void HandleShieldsCollisions(PlayerVisual playerVisual)
+        {
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
+
+            foreach (Shield shield in shields)
+            {
+                if (shieldVisuals.ContainsKey(shield))
+                {
+                    ShieldVisual shieldRect = shieldVisuals[shield];
+                    double shieldX = Canvas.GetLeft(shieldRect);
+                    double shieldY = Canvas.GetTop(shieldRect);
+
+                    if (playerX + playerVisual.Width >= shieldX &&
+                        playerX <= shieldX + shieldRect.Width &&
+                        playerY + playerVisual.Height >= shieldY &&
+                        playerY <= shieldY + shieldRect.Height)
+                    {
+
+                        //TODO: jei paliecia priesas nenusiima gyvybe - veliavele kazkokia??? ir timeri uzdet
+                        //pakeist player visual kazkaip - borderi koki uzdet
+
+                        await connection.SendAsync("SendPickedShield", shield.ToString());
+
+                    }
+                }
+            }
+        }
+        private async void HandleSpeedBoostsCollisions(PlayerVisual playerVisual)
+        {
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
+
+            foreach (SpeedBoost speedBoost in speedBoosts)
+            {
+                if (speedBoostsVisuals.ContainsKey(speedBoost))
+                {
+                    SpeedBoostVisual speedBoostRect = speedBoostsVisuals[speedBoost];
+                    double speedBoostX = Canvas.GetLeft(speedBoostRect);
+                    double speedBoostY = Canvas.GetTop(speedBoostRect);
+
+                    if (playerX + playerVisual.Width >= speedBoostX &&
+                        playerX <= speedBoostX + speedBoostRect.Width &&
+                        playerY + playerVisual.Height >= speedBoostY &&
+                        playerY <= speedBoostY + speedBoostRect.Height)
+                    {
+
+                      //TODO: kur speed saugosi?
+                        //speedBoost.Interact(player); // padidint speed pagal reiksme
+
+                        await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
+
+                    }
+                }
+            }
+        }
+        private async void HandleHealthBoostsCollisions(PlayerVisual playerVisual)
+        {
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
+
+            foreach (HealthBoost healthBoost in healthBoosts)
+            {
+                if (healthBoostsVisuals.ContainsKey(healthBoost))
+                {
+                    HealthBoostVisual healthBoostRect = healthBoostsVisuals[healthBoost];
+                    double healthBoostX = Canvas.GetLeft(healthBoostRect);
+                    double healthBoostY = Canvas.GetTop(healthBoostRect);
+
+                    if (playerX + playerVisual.Width >= healthBoostX &&
+                        playerX <= healthBoostX + healthBoostRect.Width &&
+                        playerY + playerVisual.Height >= healthBoostY &&
+                        playerY <= healthBoostY + healthBoostRect.Height)
+                    {
+
+                        gameStat.PlayerHealth += healthBoost.Health;
+
+                        await connection.SendAsync("SendPickedhealthBoost", healthBoost.ToString());
+
+                    }
+                }
+            }
+        }
+
         private async void Move(double newX, double newY)
         {
             UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
@@ -632,7 +1033,7 @@ namespace JAKE.client
             return shot;
         }
 
-        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, out Shot shot) //out SolidColorBrush solidColorBrush
+        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, out Shot shot)
         {
             
             Shot localShot = new Shot(5, "red", 10, 5);

@@ -14,9 +14,10 @@ namespace JAKE.classlibrary
         public int Width { get; set; }
         public int Height { get; set; }
 
-        public Object Image { get; set; }
+        public string Image { get; set; }
         void Interact(Player player);
         bool MatchesId(int id);
         public void SetPosition(double x, double y);
+        public string ToString();
     }
 }

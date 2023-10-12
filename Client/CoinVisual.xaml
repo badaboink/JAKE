@@ -1,0 +1,23 @@
+﻿<UserControl x:Class="JAKE.client.CoinVisual"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:JAKE.client"
+             mc:Ignorable="d" 
+             Height="{Binding CoinImageHeight}" Width="{Binding CoinImageWidth}">
+
+    <!--<Grid>
+        <Image x:Name="coinImage"   Height="{Binding CoinImageHeight}" Width="{Binding CoinImageWidth}" Source="{Binding CoinImageSource}" />
+    </Grid>-->
+
+    <!--<Grid>
+        <Rectangle x:Name="coinRectangle" Width="50" Height="50" Fill="{Binding CoinColor}" /> 
+    </Grid>-->
+    <!--{Binding CoinWidth}  {Binding CoinHeight}-->
+
+    <Grid>
+        <Ellipse x:Name="coinCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>
+    </Grid>
+</UserControl>
+
