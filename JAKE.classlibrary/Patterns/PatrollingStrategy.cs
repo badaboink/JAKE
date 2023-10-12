@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JAKE.classlibrary
+namespace JAKE.classlibrary.Patterns
 {
     public class PatrollingStrategy : IMoveStrategy
     {
@@ -17,18 +17,18 @@ namespace JAKE.classlibrary
         private double enemySpeed;
         public PatrollingStrategy(double maxX, double maxY, double enemySpeed, List<Obstacle> obstacles)
         {
-            this.random = new Random();
+            random = new Random();
             this.maxX = maxX;
             this.maxY = maxY;
             this.enemySpeed = enemySpeed;
             this.obstacles = obstacles;
-            this.directionX = 2;
-            this.directionY = 2;
+            directionX = 2;
+            directionY = 2;
             GenerateRandomDirection();
         }
         private void GenerateRandomDirection()
-        {           
-            if (directionX ==2 && directionY==2)
+        {
+            if (directionX == 2 && directionY == 2)
             {
                 if (random.Next(1, 3) == 1)
                 {
@@ -46,7 +46,7 @@ namespace JAKE.classlibrary
                 directionX = directionX == 1 || directionX == -1 ? 0 : random.Next(0, 2) == 0 ? -1 : 1;
                 directionY = directionY == 1 || directionY == -1 ? 0 : random.Next(0, 2) == 0 ? -1 : 1;
             }
-            
+
         }
 
         public void Move(Enemy enemy, List<Player> players)
@@ -55,7 +55,7 @@ namespace JAKE.classlibrary
             double newY = enemy.GetCurrentY() + directionY * enemySpeed;
 
             // Check if the new position is out of bounds
-            if (newX < enemy.GetSize()|| newX > maxX || newY < enemy.GetSize() || newY > maxY)
+            if (newX < enemy.GetSize() || newX > maxX || newY < enemy.GetSize() || newY > maxY)
             {
                 // Change direction and continue patrolling
                 GenerateRandomDirection();

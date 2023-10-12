@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JAKE.classlibrary
+namespace JAKE.classlibrary.Patterns
 {
     public class MapObjectFactory
     {
-        public IMapObject CreateMapObject(string objectType, int value, int weapsp=0, int weapstr=0)
+        public IMapObject CreateMapObject(string objectType, int value, int weapsp = 0, int weapstr = 0)
         {
             switch (objectType.ToLower())
             {
@@ -17,7 +17,7 @@ namespace JAKE.classlibrary
                 case "coin":
                     return new Coin(value);
                 case "weapon":
-                    return new Weapon(value, weapsp,weapstr);
+                    return new Weapon(value, weapsp, weapstr);
                 case "shield":
                     return new Shield(value);
                 case "speedboost":

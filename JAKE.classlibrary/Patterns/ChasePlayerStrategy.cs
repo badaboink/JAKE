@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JAKE.classlibrary
+namespace JAKE.classlibrary.Patterns
 {
     public class ChasePlayerStrategy : IMoveStrategy
     {
@@ -45,8 +45,8 @@ namespace JAKE.classlibrary
                         CantMove = true;
 
                         // Stops at the wall of the direction that it's moving towards most
-                        directionX = (Math.Abs(directionX) > Math.Abs(directionY)) ? (directionX < 0 ? -1 : 1) : 0;
-                        directionY = (Math.Abs(directionY) > Math.Abs(directionX)) ? (directionY < 0 ? -1 : 1) : 0;
+                        directionX = Math.Abs(directionX) > Math.Abs(directionY) ? directionX < 0 ? -1 : 1 : 0;
+                        directionY = Math.Abs(directionY) > Math.Abs(directionX) ? directionY < 0 ? -1 : 1 : 0;
 
                         double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
                         if (distance != 0)

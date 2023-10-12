@@ -1,4 +1,5 @@
 ﻿using JAKE.classlibrary;
+using JAKE.classlibrary.Patterns;
 using Moq;
 using System;
 using System.Collections.Generic;

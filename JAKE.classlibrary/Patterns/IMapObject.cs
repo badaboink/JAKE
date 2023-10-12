@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JAKE.classlibrary
+namespace JAKE.classlibrary.Patterns
 {
     public interface IMapObject
     {

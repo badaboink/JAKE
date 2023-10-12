@@ -23,6 +23,7 @@ using System.Windows.Shapes;
 using System.Windows.Threading;
 using System.Xml.Linq;
 using JAKE.classlibrary;
+using JAKE.classlibrary.Patterns;
 using JAKE.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 
