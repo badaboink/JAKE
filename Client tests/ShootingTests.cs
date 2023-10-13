@@ -23,12 +23,12 @@ namespace Class_library_tests
             //MainWindow a = new MainWindow();
 
             // Act
-            MainWindow.SingleShot(10,10,10,10, out shot);
+            MainWindow.SingleShot(10,10,10,10, "#FF0000FF", out shot);  // spalvos kodas cia (melyna)
 
             // Assert
             Assert.NotNull(shot);
-            Assert.Equal(10, shot.getSize());
-            Assert.Equal("red", shot.getColor());
+            Assert.Equal(10, shot.getSize());     // toks dydis #FF0000FF spalvos suvio
+            Assert.Equal("blue", shot.getColor());
             Assert.Equal(10, shot.getX());
             Assert.Equal(10, shot.getY());
 
@@ -47,7 +47,7 @@ namespace Class_library_tests
             double playerSize = 5;
 
             Obstacle obstacle = new Obstacle(obstacleWidth, obstacleHeight, obstacleX, obstacleY);
-            Shot shot = new Shot(5, "red", 5, 10);
+            Shot shot = new Shot();
 
             // Act
             Shot result = MainWindow.RemoveShot(shot, playerX, playerY, obstacle, playerSize);
@@ -69,7 +69,7 @@ namespace Class_library_tests
             double playerSize = 5;
 
             Obstacle obstacle = new Obstacle(obstacleWidth, obstacleHeight, obstacleX, obstacleY);
-            Shot shot = new Shot(5, "red", 5, 10);
+            Shot shot = new Shot();
 
             // Act
             Shot result = MainWindow.RemoveShot(shot, playerX, playerY, obstacle, playerSize);

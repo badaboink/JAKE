@@ -13,9 +13,8 @@ namespace JAKE.classlibrary
         {
             setColor("blue");
             setSpeed(5);
-            setSize(11);
+            setSize(10);
             setPoints(5);
-            setPosition(shot.getX(), shot.getY());
         }
     }
 }
