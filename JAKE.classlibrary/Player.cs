@@ -46,6 +46,11 @@ namespace JAKE.classlibrary
         public int GetId()
         {
             return _id;
+
+        }
+        public void SetId(int id)
+        {
+            this._id =  id;
         }
 
         public string GetName()
