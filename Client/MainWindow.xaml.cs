@@ -55,6 +55,8 @@ namespace JAKE.client
         private readonly object enemyListLock = new object();
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
 
+        private bool isCollidingWithHealthBoost = false;
+
 
         public MainWindow()
         {
@@ -324,13 +326,9 @@ namespace JAKE.client
             });
             connection.On<List<string>>("SendingCoins", (coinsdata) =>
             {
-                //Debug.WriteLine("sendingcoins jakeclient");
-                //Debug.WriteLine("CoinContainer Width: " + CoinContainer.ActualWidth);
-                //Debug.WriteLine("CoinContainer Height: " + CoinContainer.ActualHeight);
-                //Debug.WriteLine("CoinContainer Visibility: " + CoinContainer.Visibility);
+                string image = "coin.png";
                 foreach (string coinstring in coinsdata)
                 {
-                    Debug.WriteLine("coin: " + coinstring);
                     string[] parts = coinstring.Split(':');
                     if (parts.Length == 6)
                     {
@@ -340,80 +338,60 @@ namespace JAKE.client
                         int coinWidth = int.Parse(parts[3]);
                         int coinHeight = int.Parse(parts[4]);
                         int points = int.Parse(parts[5]);
-                        Coin coin = new Coin(coinId, coinWidth, coinHeight);
-                        coin.Image = "./coin.png";
+                        Coin coin = new Coin(coinId, coinX, coinY, points, image);
+                        Debug.WriteLine("coin to string: " + coin.ToString());
                         if (!coins.Contains(coin))
-                        {
-                            coin.SetPosition(coinX, coinY);
+                        {                         
                             coins.Add(coin);
                             Dispatcher.Invoke(() =>
                             {
-                                Debug.WriteLine("kuria nauja grazu coin");
+                              
                                 CoinVisual coinVisual = new CoinVisual();
 
+                                //CoinVisual coinVisual = new CoinVisual("coin.png", coinWidth, coinHeight);
+                                //coinVisual.CoinImageHeight = coinHeight;
+                                //coinVisual.CoinImageWidth = coinWidth;
+                                //coinVisual.CoinImageSource = image;
 
-                                coinVisual.EllipseSizeC = 20;
                                 Canvas.SetLeft(coinVisual, coinX);
                                 Canvas.SetTop(coinVisual, coinY);
                                 coinVisuals[coin] = coinVisual;
                                 CoinContainer.Children.Add(coinVisual);
-                                Debug.WriteLine("First Coin X: " + Canvas.GetLeft(coinVisual));
-                                Debug.WriteLine("First Coin Y: " + Canvas.GetTop(coinVisual));
-
-                                //Color coinColor = (Color)ColorConverter.ConvertFromString("red");
-                                //SolidColorBrush solidColorBrush = new SolidColorBrush(coinColor);
-
-                                //CoinVisual coinVisual = new CoinVisual();
-                                //coinVisual.EllipseSizeC = 20;
-                                //coinVisual.FillColorC = solidColorBrush;
-                                //Canvas.SetLeft(coinVisual, coinX);
-                                //Canvas.SetTop(coinVisual, coinY);
-
-                                //// Add the shot to the ShotContainer (Canvas)
-                                //CoinContainer.Children.Add(coinVisual);
-                                //if (coinVisual.IsVisible) Debug.WriteLine("visual is visible");
-                                //else Debug.WriteLine("NESIMATO");
 
                                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
                             });
                         }
-                        //else
-                        //{
-                        //    Dispatcher.Invoke(() =>
-                        //    {
-                        //        Debug.WriteLine("atvaizduoja jau esama coin");
-                        //        CoinVisual coinVisual = coinVisuals[coin];
-                        //        coin.SetPoints(points);
-                        //        coin.SetPosition(coinX, coinY);
-                        //        Canvas.SetLeft(coinVisual, coinX);
-                        //        Canvas.SetTop(coinVisual, coinY);
-
-                        //        HandleCoinsCollisions(playerVisuals[currentPlayer]);
-                        //    });
-                        //}
                     }
                 }
 
             });
+
             connection.On<int>("SendingPickedCoin", (coinid) =>
             {
                 Dispatcher.Invoke(() =>
                 {
-             
-                    Coin coin = new Coin(coinid);
-                    CoinVisual coinVisual = coinVisuals[coin];
-                    coins.Remove(coin);
-                    coinVisuals.Remove(coin);    
-                    CoinContainer.Children.Remove(coinVisual);
-                    //coins.RemoveAll(coin => coin.id == coinid);
+                        foreach (var pair in coinVisuals)
+                        {
+                            Coin coin = pair.Key;
+                            CoinVisual coinVisual = pair.Value;
+
+                            if (coin.id == coinid)
+                            {
+                                coins.Remove(coin);
+                                coinVisuals.Remove(coin);
+                                CoinContainer.Children.Remove(coinVisual);
+                                break;
+                            }
+                        }
+                       
                 });
             });
+          
             connection.On<List<string>>("SendingShields", (shieldsdata) =>
             {
-                Debug.WriteLine("sendingSHIELDS jakeclient");
+                string image = "shield.png";
                 foreach (string shieldstring in shieldsdata)
                 {
-                    Debug.WriteLine("shield: " + shieldstring);
                     string[] parts = shieldstring.Split(':');
                     if (parts.Length == 6)
                     {
@@ -423,39 +401,23 @@ namespace JAKE.client
                         int shieldWidth = int.Parse(parts[3]);
                         int shieldHeight = int.Parse(parts[4]);
                         int time = int.Parse(parts[5]);
-                        Shield shield = new Shield(shieldId, shieldWidth, shieldHeight);
-                        shield.Image = "shield.png";
+                        Shield shield = new Shield(shieldId, shieldX, shieldY, time, image);
+                        
                         if (!shields.Contains(shield))
                         {
-                            shield.SetPosition(shieldX, shieldY);
                             shields.Add(shield);
                             Dispatcher.Invoke(() =>
                             {
-                                Debug.WriteLine("kuria nauja grazu shield");
-                                ShieldVisual shieldVisual = new ShieldVisual(shield.Image, shield.Width, shield.Height);
-                                shieldVisuals[shield] = shieldVisual;
-                                Canvas.SetLeft(shieldVisual, shieldX);
-                                Canvas.SetTop(shieldVisual, shieldY);
-                                ShieldContainer.Children.Add(shieldVisual);
-                                Debug.WriteLine("First Shield X: " + Canvas.GetLeft(shieldVisual));
-                                Debug.WriteLine("First Shield Y: " + Canvas.GetTop(shieldVisual));
-                                HandleShieldsCollisions(playerVisuals[currentPlayer]);
-                            });
-                        }
-                        else
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                Debug.WriteLine("atvaizduoja jau esama shield");
-                                ShieldVisual shieldVisual = shieldVisuals[shield];
-                                shield.SetTime(time);
-                                shield.SetPosition(shieldX, shieldY);
-                                Canvas.SetLeft(shieldVisual, shieldX);
-                                Canvas.SetTop(shieldVisual, shieldY);
 
+                                ShieldVisual shieldVisual = new ShieldVisual();
+                                Canvas.SetLeft(shieldVisual, shieldX);
+                                Canvas.SetTop(shieldVisual, shieldY);
+                                shieldVisuals[shield] = shieldVisual;
+                                ShieldContainer.Children.Add(shieldVisual);
                                 HandleShieldsCollisions(playerVisuals[currentPlayer]);
                             });
                         }
+                        
                     }
                 }
 
@@ -464,20 +426,28 @@ namespace JAKE.client
             {
                 Dispatcher.Invoke(() =>
                 {
+                    foreach (var pair in shieldVisuals)
+                    {
+                        Shield shield = pair.Key;
+                        ShieldVisual shieldVisual = pair.Value;
 
-                    Shield shield = new Shield(shieldid);
-                    ShieldVisual shieldVisual = shieldVisuals[shield];
-                    shields.Remove(shield);
-                    shieldVisuals.Remove(shield);
-                    ShieldContainer.Children.Remove(shieldVisual);
+                        if (shield.id == shieldid)
+                        {
+                            shields.Remove(shield);
+                            shieldVisuals.Remove(shield);
+                            ShieldContainer.Children.Remove(shieldVisual);
+                            break;
+                        }
+                    }
+
                 });
             });
             connection.On<List<string>>("SendingHealthBoosts", (healthdata) =>
             {
-                Debug.WriteLine("sendingHEALTHBOOSTS jakeclient");
+                string image = "healthBoost.png";
                 foreach (string healthstring in healthdata)
                 {
-                    Debug.WriteLine("healthBoost: " + healthstring);
+                    Debug.WriteLine("health: " + healthstring);
                     string[] parts = healthstring.Split(':');
                     if (parts.Length == 6)
                     {
@@ -487,39 +457,20 @@ namespace JAKE.client
                         int healthWidth = int.Parse(parts[3]);
                         int healthHeight = int.Parse(parts[4]);
                         int healthVal = int.Parse(parts[5]);
-                        HealthBoost health = new HealthBoost(healthId, healthWidth, healthHeight);
-                        health.Image = "healthboost.png";
+                        HealthBoost health = new HealthBoost(healthId, healthX, healthY, healthVal, image);
                         if (!healthBoosts.Contains(health))
                         {
-                            health.SetPosition(healthX, healthY);
                             healthBoosts.Add(health);
                             Dispatcher.Invoke(() =>
                             {
-                                Debug.WriteLine("kuria nauja grazu health");
-                                HealthBoostVisual healthVisual = new HealthBoostVisual(health.Image, health.Width, health.Height);
+                                HealthBoostVisual healthVisual = new HealthBoostVisual();
                                 healthBoostsVisuals[health] = healthVisual;
                                 Canvas.SetLeft(healthVisual, healthX);
                                 Canvas.SetTop(healthVisual, healthY);
                                 HealthBoostContainer.Children.Add(healthVisual);
-                                Debug.WriteLine("First HealthBoost X: " + Canvas.GetLeft(healthVisual));
-                                Debug.WriteLine("First HealthBoost Y: " + Canvas.GetTop(healthVisual));
                                 HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
                             });
-                        }
-                        else
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                Debug.WriteLine("atvaizduoja jau esama health");
-                                HealthBoostVisual healthVisual = healthBoostsVisuals[health];
-                                health.SetHealth(healthVal);
-                                health.SetPosition(healthX, healthY);
-                                Canvas.SetLeft(healthVisual, healthX);
-                                Canvas.SetTop(healthVisual, healthY);
-
-                                HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
-                            });
-                        }
+                        }     
                     }
                 }
 
@@ -528,22 +479,28 @@ namespace JAKE.client
             {
                 Dispatcher.Invoke(() =>
                 {
-
-                    HealthBoost health = new HealthBoost(healthid);
-                    HealthBoostVisual healthVisual = healthBoostsVisuals[health];
-                    healthBoosts.Remove(health);
-                    healthBoostsVisuals.Remove(health);
-                    HealthBoostContainer.Children.Remove(healthVisual);
+                    foreach (var pair in healthBoostsVisuals)
+                    {
+                        HealthBoost healthBoost = pair.Key;
+                        HealthBoostVisual healthBoostVisual = pair.Value;
+                        if (healthBoost.id == healthid)
+                        {
+                            healthBoosts.Remove(healthBoost);
+                            healthBoostsVisuals.Remove(healthBoost);
+                            HealthBoostContainer.Children.Remove(healthBoostVisual);
+                        }
+                    }
                 });
             });
             connection.On<List<string>>("SendingSpeedBoosts", (speeddata) =>
             {
-                Debug.WriteLine("sendingSPEEDBOOSTS jakeclient");
+              
                 foreach (string speedstring in speeddata)
                 {
-                    Debug.WriteLine("speedBoost: " + speedstring);
+                    Debug.WriteLine("speedboost: " + speedstring);
+                    string image = "speedboost.png";
                     string[] parts = speedstring.Split(':');
-                    if (parts.Length == 6)
+                    if (parts.Length == 7)
                     {
                         int speedId = int.Parse(parts[0]);
                         double speedX = double.Parse(parts[1]);
@@ -552,39 +509,21 @@ namespace JAKE.client
                         int speedHeight = int.Parse(parts[4]);
                         int speedVal = int.Parse(parts[5]);
                         int time = int.Parse(parts[6]);
-                        SpeedBoost speed = new SpeedBoost(speedId, speedWidth, speedHeight);
-                        speed.Image = "speedboost.png";
+                        SpeedBoost speed = new SpeedBoost(speedId, speedX, speedY, speedVal, image);
                         if (!speedBoosts.Contains(speed))
                         {
-                            speed.SetPosition(speedX, speedY);
+                            Debug.WriteLine("kuria speedboost");
                             speedBoosts.Add(speed);
                             Dispatcher.Invoke(() =>
                             {
-                                Debug.WriteLine("kuria nauja grazu speed");
-                                SpeedBoostVisual speedVisual = new SpeedBoostVisual(speed.Image, speed.Width, speed.Height);
+                                SpeedBoostVisual speedVisual = new SpeedBoostVisual();
                                 speedBoostsVisuals[speed] = speedVisual;
                                 Canvas.SetLeft(speedVisual, speedX);
                                 Canvas.SetTop(speedVisual, speedY);
                                 SpeedBoostContainer.Children.Add(speedVisual);
-                                Debug.WriteLine("First SpeedBoost X: " + Canvas.GetLeft(speedVisual));
-                                Debug.WriteLine("First SpeedBoost Y: " + Canvas.GetTop(speedVisual));
                                 HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
                             });
-                        }
-                        else
-                        {
-                            Dispatcher.Invoke(() =>
-                            {
-                                Debug.WriteLine("atvaizduoja jau esama speed");
-                                SpeedBoostVisual speedVisual = speedBoostsVisuals[speed];
-                                speed.SetSpeedTime(speedVal, time); 
-                                speed.SetPosition(speedX, speedY);
-                                Canvas.SetLeft(speedVisual, speedX);
-                                Canvas.SetTop(speedVisual, speedY);
-
-                                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
-                            });
-                        }
+                        }                      
                     }
                 }
 
@@ -593,19 +532,23 @@ namespace JAKE.client
             {
                 Dispatcher.Invoke(() =>
                 {
-
-                    SpeedBoost speed = new SpeedBoost(speedid);
-                    SpeedBoostVisual speedVisual = speedBoostsVisuals[speed];
-                    speedBoosts.Remove(speed);
-                    speedBoostsVisuals.Remove(speed);
-                    SpeedBoostContainer.Children.Remove(speedVisual);
+                    foreach (var pair in speedBoostsVisuals)
+                    {
+                        SpeedBoost speedBoost = pair.Key;
+                        SpeedBoostVisual speedBoostVisual = pair.Value;
+                        if (speedBoost.id == speedid)
+                        {
+                            speedBoosts.Remove(speedBoost);
+                            speedBoostsVisuals.Remove(speedBoost);
+                            SpeedBoostContainer.Children.Remove(speedBoostVisual);
+                        }
+                    }      
                 });
             });
         }
         private async void CheckElapsedTimeMove(object state)
         {
             await connection.SendAsync("SendEnemies");
-           // await connection.SendAsync("SendCoins");
         }
         private void LoadGameMap()
         {
@@ -689,9 +632,10 @@ namespace JAKE.client
                 }
                 double playerCurrentX = currentPlayer.GetCurrentX();
                 double playerCurrentY = currentPlayer.GetCurrentY();
-                int stepSize = 10;
-                double newX = playerCurrentX + deltaX * stepSize;
-                double newY = playerCurrentY + deltaY * stepSize;
+                
+                double newX = playerCurrentX + deltaX * currentPlayer.GetSpeed();
+                Debug.WriteLine("current speed: " + currentPlayer.GetSpeed());
+                double newY = playerCurrentY + deltaY * currentPlayer.GetSpeed();
 
                 bool overlap = false;
                 foreach (Obstacle obstacle in obstacles)
@@ -723,6 +667,10 @@ namespace JAKE.client
                 }
 
                 HandleEnemyCollisions(playerVisuals[currentPlayer]);
+                HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                HandleShieldsCollisions(playerVisuals[currentPlayer]);
+                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
+                HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
             }
         }
 
@@ -773,7 +721,10 @@ namespace JAKE.client
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
 
-            foreach (Coin coin in coins)
+            // Create a copy of the coins collection
+            List<Coin> coinsCopy = new List<Coin>(coins);
+
+            foreach (Coin coin in coinsCopy)
             {
                 if (coinVisuals.ContainsKey(coin))
                 {
@@ -786,25 +737,24 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= coinY &&
                         playerY <= coinY + coinRect.Height)
                     {
-                   
-                        // coin.Interact(playerVisual); //TODO: paduot player atrinkta pagal player visual ir tada viduj interact is gamestats pasiimt score ir pridet
-                        //arba - tieisog padidint score??? arba saugot ir prie klases points ir gamestats? 
+                        //TODO: kazkoki metoda viena turi turet visi objects bet jam reiktu paduot player, o prie jo nesaugom points ir visa kita
+                        //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
+                        //coin.Interact(player, coin.Points);
                         gameStat.PlayerScore += coin.Points;
-
-                        //collisionCheckedCoins[coin] = true;
+                        scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
 
                         await connection.SendAsync("SendPickedCoin", coin.ToString());
-                        
                     }
                 }
             }
         }
+        
         private async void HandleShieldsCollisions(PlayerVisual playerVisual)
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-
-            foreach (Shield shield in shields)
+            List<Shield> shieldsCopy = new List<Shield>(shields);
+            foreach (Shield shield in shieldsCopy)
             {
                 if (shieldVisuals.ContainsKey(shield))
                 {
@@ -820,6 +770,8 @@ namespace JAKE.client
 
                         //TODO: jei paliecia priesas nenusiima gyvybe - veliavele kazkokia??? ir timeri uzdet
                         //pakeist player visual kazkaip - borderi koki uzdet
+                        //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
+                        //shield.Interact(player, shield.Time);
 
                         await connection.SendAsync("SendPickedShield", shield.ToString());
 
@@ -831,8 +783,8 @@ namespace JAKE.client
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-
-            foreach (SpeedBoost speedBoost in speedBoosts)
+            List<SpeedBoost> speedBoostCopy = new List<SpeedBoost>(speedBoosts);
+            foreach (SpeedBoost speedBoost in speedBoostCopy)
             {
                 if (speedBoostsVisuals.ContainsKey(speedBoost))
                 {
@@ -845,9 +797,14 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= speedBoostY &&
                         playerY <= speedBoostY + speedBoostRect.Height)
                     {
+                        Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
+                        //speedBoost.Interact(player,speedBoost.Speed);
+                        //TODO: laika nuimt
+                        Debug.WriteLine("speed value: " + speedBoost.Speed);
+                        int speed = player.GetSpeed();
+                        player.SetSpeed(speed + speedBoost.Speed);
+                        //KODEL NEPADIDINA SPEED???????
 
-                      //TODO: kur speed saugosi?
-                        //speedBoost.Interact(player); // padidint speed pagal reiksme
 
                         await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
 
@@ -857,10 +814,15 @@ namespace JAKE.client
         }
         private async void HandleHealthBoostsCollisions(PlayerVisual playerVisual)
         {
+            if (isCollidingWithHealthBoost)
+            {
+                Debug.WriteLine("skippp");
+                return; // Skip collision handling if already colliding
+            }
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-
-            foreach (HealthBoost healthBoost in healthBoosts)
+            List<HealthBoost> healthBoostCopy = new List<HealthBoost>(healthBoosts);
+            foreach (HealthBoost healthBoost in healthBoostCopy)
             {
                 if (healthBoostsVisuals.ContainsKey(healthBoost))
                 {
@@ -873,11 +835,23 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= healthBoostY &&
                         playerY <= healthBoostY + healthBoostRect.Height)
                     {
+                        isCollidingWithHealthBoost = true;
+                        //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
+                        //healthBoost.Interact(player, healthBoost.Health);
 
+
+                        Debug.WriteLine("health pries: " + gameStat.PlayerHealth);
+                        Debug.WriteLine("health reiksme: " + healthBoost.Health);
                         gameStat.PlayerHealth += healthBoost.Health;
+                        healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                        Debug.WriteLine("health po: " + gameStat.PlayerHealth);
 
-                        await connection.SendAsync("SendPickedhealthBoost", healthBoost.ToString());
+                        healthBoosts.Remove(healthBoost);
+                        healthBoostsVisuals.Remove(healthBoost);
+                        HealthBoostContainer.Children.Remove(healthBoostRect);
 
+                        await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
+                        isCollidingWithHealthBoost = false;
                     }
                 }
             }

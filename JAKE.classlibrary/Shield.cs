@@ -9,21 +9,38 @@ namespace JAKE.classlibrary
 {
     public class Shield : IMapObject
     {
-        public int Time { get; private set; }
+        public int Time { get; set; }
         public int id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
         public string Image { get; set; }
-        public Shield(int time, int width = 7, int heught = 7)
+        public Shield(int id, double x, double y, int time, string image)
         {
             Time = time;
-            Width = width;
-            Height = heught;
+            Width = 20;
+            Height = 20;
+            this.id = id;
+            this.X = x;
+            this.Y = y;
+            Image = image;
         }
 
-        public void Interact(Player player)
+        public Shield(int id, double x, double y, int time)
+        {
+            Time = time;
+            Width = 20;
+            Height = 20;
+            this.id = id;
+            this.X = x;
+            this.Y = y;
+        }
+        public Shield(int time)
+        {
+            Time = time;
+        }
+            public void Interact(Player player)
         {
             // Implement shield logic
            // player.EquipShield("Wooden Shield");
@@ -47,6 +64,11 @@ namespace JAKE.classlibrary
         public void SetTime(int time)
         {
             this.Time = time;
+        }
+
+        public void Interact(Player player, int value)
+        {
+            player.AddShield(value);
         }
     }
 }

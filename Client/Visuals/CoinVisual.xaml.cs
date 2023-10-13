@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using JAKE.classlibrary;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,8 +21,9 @@ namespace JAKE.client
     /// Interaction logic for CoinVisual.xaml
     /// </summary>
     public partial class CoinVisual : UserControl
+
+
     {
-        // Property for binding the Coin image source
         public string CoinImageSource
         {
             get { return (string)GetValue(CoinImageSourceProperty); }
@@ -82,8 +84,17 @@ namespace JAKE.client
         public CoinVisual()
         {
             InitializeComponent();
-            coinCircle.Fill = new SolidColorBrush(Colors.Black);
+            coinCircle.Fill = new SolidColorBrush(Colors.Gold);
         }
+
+        public CoinVisual(string image, int width, int height)
+        {
+            InitializeComponent();
+            CoinImageSource = image;
+            CoinImageHeight = height;
+            CoinImageWidth = width;
+        }
+
     }
 
 }

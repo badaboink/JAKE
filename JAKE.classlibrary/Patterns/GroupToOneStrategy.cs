@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary.Patterns
 {
-    public class ChasePlayerStrategy : IMoveStrategy
+    public class GroupToOneStrategy : IMoveStrategy
     {
         private List<Obstacle> obstacles;
-        public ChasePlayerStrategy(List<Obstacle> obstacles)
+        private Enemy King;
+        public GroupToOneStrategy(List<Obstacle> obstacles, Enemy king)
         {
             this.obstacles = obstacles;
+            this.King = king;
         }
         public void Move(Enemy enemy, List<Player> players)
         {
@@ -20,8 +22,8 @@ namespace JAKE.classlibrary.Patterns
             if (closestPlayer != null)
             {
                 // Calculate direction vector from enemy to closest player
-                double directionX = closestPlayer.GetCurrentX() - enemy.GetCurrentX();
-                double directionY = closestPlayer.GetCurrentY() - enemy.GetCurrentY();
+                double directionX = King.GetCurrentX() - enemy.GetCurrentX();
+                double directionY = King.GetCurrentY() - enemy.GetCurrentY();
 
                 // Normalize the direction vector
                 double length = Math.Sqrt(directionX * directionX + directionY * directionY);

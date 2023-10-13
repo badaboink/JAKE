@@ -1,5 +1,6 @@
 ﻿using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
+using System.Reflection.Emit;
 
 namespace Server.GameData
 {
@@ -18,16 +19,21 @@ namespace Server.GameData
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
         private List<Weapon> weapons = new List<Weapon>();
         public MapObjectFactory objectFactory = new MapObjectFactory();
+
+        public Director director;
         public InMemoryGameDataService()
         {
             // Generate obstacles when the service is created
             obstacles = GameFunctions.GenerateObstacles();
+            var playerBuilder = new PlayerBuilder();
+            director = new Director(playerBuilder);
         }
         public Player AddPlayer(string playerName, string playerColor, string connectionID)
         {
             Console.WriteLine("addplayer inmemory");
             int playerId = players.Count + 1;
-            Player newPlayer = new Player(playerId, playerName, playerColor);
+            Player newPlayer = director.ConstructPlayer(playerId, playerName, playerColor);
+            newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);
             return newPlayer;
@@ -87,7 +93,8 @@ namespace Server.GameData
             lock (enemyListLock)
             {
                 Enemy newEnemy = GameFunctions.GenerateEnemy(enemies.Count + 1, obstacles);
-                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
+                // TODO - nzn kokios maxX ir maxY reiksmes
+                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80-newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
                 return newEnemy;
             }

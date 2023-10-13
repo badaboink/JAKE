@@ -10,28 +10,41 @@ namespace JAKE.classlibrary
     public class Coin : IMapObject
     {
 
-        public int Points { get; private set; }
+        public int Points { get; set; }
         public int id { get;  set; }
         public double X { get; set; }
         public double Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
         public string Image { get; set; }
-        public Coin(int id, int width=7, int height = 7)
+        public Coin(int id, double x, double y, int points, string image)
         {
             this.id = id;
-            Width = width;
-            Height = height;
+            X= x;
+            Y= y;
+            Width = 20;
+            Height = 20;
+            Points = points;
+            Image = image;
         }
 
-        public Coin(int id)
+        public Coin(int id, double x, double y, int points)
         {
             this.id = id;
+            X = x;
+            Y = y;
+            Width = 20;
+            Height = 20;
+            Points = points;
         }
-        public void Interact(Player player)
+        public Coin(int points)
         {
-            // Implement coin logic
-            //player.IncreaseCoins(1);
+            this.Points = points;
+        }
+
+        public void Interact(Player player, int value)
+        {
+            //player.IncreasePoints(value);
         }
         public bool MatchesId(int id)
         {
