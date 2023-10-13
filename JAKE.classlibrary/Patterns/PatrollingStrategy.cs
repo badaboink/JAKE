@@ -55,7 +55,7 @@ namespace JAKE.classlibrary.Patterns
             double newY = enemy.GetCurrentY() + directionY * enemySpeed;
 
             // Check if the new position is out of bounds
-            if (newX < enemy.GetSize() || newX > maxX || newY < enemy.GetSize() || newY > maxY)
+            if (newX < 0 || newX > maxX || newY < 0 || newY > maxY)
             {
                 // Change direction and continue patrolling
                 GenerateRandomDirection();
@@ -64,7 +64,7 @@ namespace JAKE.classlibrary.Patterns
             {
                 foreach (Obstacle obstacle in obstacles)
                 {
-                    if (obstacle.WouldOverlap(newX, newY, 20, 20))
+                    if (obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()))
                     {
 
                         double distance = obstacle.DistanceFromObstacle(directionX, directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());

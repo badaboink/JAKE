@@ -92,10 +92,9 @@ namespace JAKE.classlibrary
         }
         public void Move(List<Player> players)
         {
-            // Delegate the movement behavior to the current strategy
             if (movementStrategy != null)
             {
-                movementStrategy.Move(this, players); // Pass the current enemy object to the strategy
+                movementStrategy.Move(this, players);
             }
         }
         //private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>

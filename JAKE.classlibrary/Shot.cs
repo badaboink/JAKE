@@ -14,12 +14,12 @@ namespace JAKE.classlibrary
         private double _points;
         private double _x;
         private double _y;
-        public Shot(double speed, string color, double size, double points)
+        public Shot()
         {
-            _speed = speed;
-            _color = color;
-            _size = size;
-            _points = points;
+            //_speed = speed;
+            //_color = color;
+            //_size = size;
+            //_points = points;
         }
         public double getSpeed()
         {
@@ -69,7 +69,7 @@ namespace JAKE.classlibrary
         }
         public override string ToString()
         {
-            return $"{getSpeed()}:{getColor()}:{getSize()}:{getPoints()}:{getX()}:{getY()}";
+            return $"{getX()}:{getY()}";
         }
 
 

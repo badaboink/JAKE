@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary.Patterns
 {
-    public class ChasePlayerStrategy : IMoveStrategy
+    public class ChaseAndHopStrategy : IMoveStrategy
     {
         private List<Obstacle> obstacles;
-        public ChasePlayerStrategy(List<Obstacle> obstacles)
+        public ChaseAndHopStrategy(List<Obstacle> obstacles)
         {
             this.obstacles = obstacles;
         }
@@ -37,30 +37,31 @@ namespace JAKE.classlibrary.Patterns
                 double newX = enemy.GetCurrentX() + directionX * enemySpeed;
                 double newY = enemy.GetCurrentY() + directionY * enemySpeed;
 
-                bool CantMove = false;
+                double jumpHeight = 60.0;
+                double jumpDistance = 60.0;
+
+                bool needToJump = false;
                 foreach (Obstacle obstacle in obstacles)
                 {
                     if (obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()))
                     {
-                        CantMove = true;
-
-                        // Stops at the wall of the direction that it's moving towards most
-                        directionX = Math.Abs(directionX) > Math.Abs(directionY) ? directionX < 0 ? -1 : 1 : 0;
-                        directionY = Math.Abs(directionY) > Math.Abs(directionX) ? directionY < 0 ? -1 : 1 : 0;
-
-                        double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
-                        if (distance != 0)
+                        needToJump = true;
+                        bool canJump = true;
+                        double jumpX = newX + directionX * jumpDistance;
+                        double jumpY = newY + directionY * jumpDistance - jumpHeight;
+                        if (obstacle.WouldOverlap(jumpX, jumpY, enemy.GetSize(), enemy.GetSize()))
                         {
-                            newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
-                            newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentY() + distance;
-
-                            enemy.SetCurrentPosition(newX, newY);
+                            canJump = false;
+                            break;
+                        }
+                        if (canJump)
+                        {
+                            enemy.SetMovementStrategy(new HoppingStrategy(directionX, directionY, obstacle, obstacles));
                         }
                         break;
                     }
                 }
-                // Update enemy position based on direction and speed
-                if (!CantMove)
+                if(!needToJump && enemy.GetCurrentMovementStrategy() is ChaseAndHopStrategy)
                 {
                     enemy.SetCurrentPosition(newX, newY);
                 }
