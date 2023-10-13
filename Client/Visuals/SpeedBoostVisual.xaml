@@ -5,9 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:JAKE.client"
              mc:Ignorable="d" 
-           Height="{Binding SpeedBoostImageHeight}" Width="{Binding SpeedBoostImageWidth}">
+              Height="20" Width="20">
+    <Grid>
+        <Ellipse x:Name="SpeedBoostCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>
+    </Grid>
+           <!--Height="{Binding SpeedBoostImageHeight}" Width="{Binding SpeedBoostImageWidth}">
 
     <Grid>
         <Image x:Name="SpeedBoostImage"   Height="{Binding SpeedBoostImageHeight}" Width="{Binding SpeedBoostImageWidth}" Source="{Binding SpeedBoostImageSource}" />
-    </Grid>
+    </Grid>-->
 </UserControl>

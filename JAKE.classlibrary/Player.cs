@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -17,6 +18,7 @@ namespace JAKE.classlibrary
         private string _color;
         private double _currentX;
         private double _currentY;
+        private int _speed;
         public string Ability { get; set; }
 
         public Player(int id, string name, string color)
@@ -24,6 +26,7 @@ namespace JAKE.classlibrary
             _id = id;
             _name = name;
             _color = color;
+            _speed = 10;
             SetCurrentPosition(0, 0);
             if (ColorToAbilityMap.TryGetValue(color, out var ability))
             {
@@ -33,6 +36,7 @@ namespace JAKE.classlibrary
             {
                 Ability = "unknown";
             }
+             
         }
         
         
@@ -41,6 +45,7 @@ namespace JAKE.classlibrary
             _id = -1;
             _name = "";
             _color = "red";
+            _speed = 10;
         }
 
         public int GetId()
@@ -68,6 +73,11 @@ namespace JAKE.classlibrary
             return _currentX;
         }
 
+        public int GetSpeed()
+        {
+            return _speed; ;
+        }
+
         public double GetCurrentY()
         {
             return _currentY;
@@ -89,6 +99,10 @@ namespace JAKE.classlibrary
         public void SetColor(string color)
         {
             _color = color;
+        }
+        public void SetSpeed(int speed )
+        {
+            _speed = speed;
         }
         private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
         {
@@ -119,7 +133,27 @@ namespace JAKE.classlibrary
 
         public void IncreaseHealth(int health)
         {
-            //health padidint, arba cia arba prie singleton???
+            //health padidint 
+            Debug.WriteLine("padidino health");
+        }
+
+        public void IncreaseSpeed(int speed)
+        {
+            //speed padidint ir uzdet laika bet ne cia gal?? laikas default 15s
+            Debug.WriteLine("padidino speed");
+            _speed += speed;
+        }
+
+        public void IncreasePoints(int points)
+        {
+            //points padidint
+            Debug.WriteLine("padidino points");
+        }
+
+        public void AddShield(int time)
+        {
+            //uzdet shield grafika ir laika uzdet??
+            Debug.WriteLine("uzdejo shield");
         }
     }
 }

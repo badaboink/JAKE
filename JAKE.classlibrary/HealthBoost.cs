@@ -17,16 +17,33 @@ namespace JAKE.classlibrary
         public int Width { get; set; }
         public int Height { get; set; }
         public string Image { get; set; }
-        public HealthBoost(int health, int width = 7, int heught = 7)
+        public HealthBoost(int id, double x, double y, int health, string image)
         {
             Health = health;
-            Width = width;
-            Height = heught;
+            Width = 20;
+            Height = 20;
+            Image = image;
+            X = x;
+            Y = y;
+            this.id = id;
         }
-        public void Interact(Player player)
+
+        public HealthBoost(int id, double x, double y, int health)
+        { 
+            Health = health;
+            Width = 20;
+            Height = 20;
+            X = x;
+            Y = y;
+            this.id = id;
+        }
+        public HealthBoost(int health)
         {
-            // Implement health boost logic
-            // player.IncreaseHealth(50); //galimai is singleton pasiimt player ir pakeist health
+            this.Health = health;
+        }
+        public void Interact(Player player, int value)
+        {
+            // player.IncreaseHealth(value); //galimai is singleton pasiimt player ir pakeist health
         }
         public bool MatchesId(int id)
         {

@@ -59,6 +59,13 @@ namespace JAKE.client
             HealthBoostImageWidth = width;
             HealthBoostImageSource = image;
         }
-        
+
+        public HealthBoostVisual()
+        {
+            InitializeComponent();
+            HealthBoostCircle.Fill = new SolidColorBrush(Colors.Pink);
+        }
+
+
     }
 }

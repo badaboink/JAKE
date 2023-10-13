@@ -59,5 +59,11 @@ namespace JAKE.client
             ShieldImageWidth = width;
             ShieldImageSource = image;
         }
+
+        public ShieldVisual()
+        {
+            InitializeComponent();
+            shieldCircle.Fill = new SolidColorBrush(Colors.Black);
+        }
     }
 }
