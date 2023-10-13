@@ -686,7 +686,6 @@ namespace JAKE.client
                 {
                     // Use the stored direction for shooting
                     Shoot(playerDirectionX, playerDirectionY);
-
                 }
                 double playerCurrentX = currentPlayer.GetCurrentX();
                 double playerCurrentY = currentPlayer.GetCurrentY();
@@ -916,8 +915,11 @@ namespace JAKE.client
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
+                    string playerColor = playerVisual.PlayerColor.ToString();
+                    
 
-                    SingleShot(playerX, playerY, playerWidth, playerHeight, out shot);
+                    SingleShot(playerX, playerY, playerWidth, playerHeight, playerColor, out shot);
+
 
                     Color shotColor = (Color)ColorConverter.ConvertFromString(shot.getColor());
                     solidColorBrush = new SolidColorBrush(shotColor);
@@ -984,7 +986,7 @@ namespace JAKE.client
 
                                     if (CountKills)
                                     {
-                                        enemy.SetHealth(enemy.GetHealth() - 5); // Reduce the enemy's health
+                                        enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
                                         gameStat.PlayerScore += 5;
                                         Debug.WriteLine("score: " + gameStat.PlayerScore);
                                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
@@ -1045,17 +1047,36 @@ namespace JAKE.client
             return shot;
         }
 
-        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, out Shot shot)
+        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, string playerColor, out Shot shot)
         {
-            
-            Shot localShot = new Shot(5, "red", 10, 5);
+            Shot localShot = new Shot();
 
-            double playerCenterX = playerX + playerWidth / 2; //10x 10y ir 10 width ir height
-            double playerCenterY = playerY + playerHeight / 2; // 15 ir 15 - 10 ir 10 ats
+            double playerCenterX = playerX + playerWidth / 2;
+            double playerCenterY = playerY + playerHeight / 2;
 
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
-            shot = localShot;
+
+            switch (playerColor)
+            {
+                case "#FF008000":
+                    shot = new GreenShot(localShot);
+                    break;
+                case "#FFFF0000":
+                    shot = new RedShot(localShot);
+                    break;
+                case "#FF0000FF":
+                    shot = new BlueShot(localShot);
+                    break;
+                default:
+                    shot = new BlueShot(localShot);   // defaultu padarys melyna shot
+                    break;
+            }
+
+            // #FF008000 green
+            // #FF0000FF blue
+            // #FFFF0000 red
         }
+
 
 
         private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
