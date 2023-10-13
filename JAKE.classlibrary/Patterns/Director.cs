@@ -21,7 +21,7 @@ namespace JAKE.classlibrary.Patterns
             this.playerBuilder = playerBuilder;
         }
 
-        public Player ConstructPlayer(int id, string color, string name)
+        public Player ConstructPlayer(int id, string color)
         {
             return playerBuilder
                 .SetId(id)

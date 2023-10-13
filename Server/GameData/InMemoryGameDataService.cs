@@ -32,7 +32,7 @@ namespace Server.GameData
         {
             Console.WriteLine("addplayer inmemory");
             int playerId = players.Count + 1;
-            Player newPlayer = director.ConstructPlayer(playerId, playerName, playerColor);
+            Player newPlayer = director.ConstructPlayer(playerId, playerColor);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);
