@@ -9,7 +9,7 @@ namespace JAKE.classlibrary
 {
     public class SpeedBoost : IMapObject
     {
-        public int Speed { get; private set; }
+        public int Speed { get; set; }
         public int id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
@@ -17,18 +17,36 @@ namespace JAKE.classlibrary
         public int Height { get; set; }
         public int Time { get; set; }
         public string Image { get; set; }
-        public SpeedBoost(int speed, int width = 7, int heught = 7)
+        public SpeedBoost(int id, double x, double y, int speed, string image)
         {
             Speed = speed;
-            Width = width;
-            Height = heught;
+            Width = 20;
+            Height = 20;
             Time = 15;
+            Speed = speed;
+            Image = image;
+            this.id = id;
+            X = x;
+            Y = y;
         }
-
-        public void Interact(Player player)
+        public SpeedBoost(int id, double x, double y, int speed)
         {
-            // Implement speed boost logic
-            // player.IncreaseSpeed(2);
+            Speed = speed;
+            Width = 20;
+            Height = 20;
+            Time = 15;
+            Speed = speed;
+            this.id = id;
+            X = x;
+            Y = y;
+        }
+        public SpeedBoost(int speed)
+        {
+            Speed = speed;
+        }
+        public void Interact(Player player, int value)
+        {  
+            player.IncreaseSpeed(value);
         }
         public bool MatchesId(int id)
         {

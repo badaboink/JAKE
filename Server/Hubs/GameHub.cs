@@ -91,7 +91,7 @@ namespace Server.Hubs
                 {
                     _gameDataService.AddCoin(10);
                 }
-                if (_gameDataService.GetShields().Count <= 0)
+                if (_gameDataService.GetShields().Count <= 2)
                 {
                     _gameDataService.AddShield(30);
                 }
@@ -99,7 +99,7 @@ namespace Server.Hubs
                 {
                     _gameDataService.AddHealthBoost(10);
                 }
-                if (_gameDataService.GetSpeedBoosts().Count <= 1)
+                if (_gameDataService.GetSpeedBoosts().Count <= 2)
                 {
                     _gameDataService.AddSpeedBoost(5);
                 }
@@ -138,17 +138,12 @@ namespace Server.Hubs
             if (parts.Length == 6)
             {
                 int id = int.Parse(parts[0]);
-                string points = parts[5];
                 _gameDataService.RemoveCoin(id);
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
                 foreach (var observerEntry in observers)
                 {
-                    var connectionId = observerEntry.Key;
-                    var observer = observerEntry.Value;
-                    if (connectionId != Context.ConnectionId)
-                    {
-                        await observer.HandlePickedCoin(id);
-                    }
+                    var observer = observerEntry.Value;     
+                    await observer.HandlePickedCoin(id);
                 }
             }
         }
@@ -162,13 +157,9 @@ namespace Server.Hubs
                 _gameDataService.RemoveShield(id);
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
                 foreach (var observerEntry in observers)
-                {
-                    var connectionId = observerEntry.Key;
+                {  
                     var observer = observerEntry.Value;
-                    if (connectionId != Context.ConnectionId)
-                    {
-                        await observer.HandlePickedShield(id);
-                    }
+                    await observer.HandlePickedShield(id);
                 }
             }
         }
@@ -185,6 +176,7 @@ namespace Server.Hubs
                 {
                     var connectionId = observerEntry.Key;
                     var observer = observerEntry.Value;
+
                     if (connectionId != Context.ConnectionId)
                     {
                         await observer.HandlePickedHealthBoost(id);
@@ -203,12 +195,8 @@ namespace Server.Hubs
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
                 foreach (var observerEntry in observers)
                 {
-                    var connectionId = observerEntry.Key;
                     var observer = observerEntry.Value;
-                    if (connectionId != Context.ConnectionId)
-                    {
-                        await observer.HandlePickedSpeedBoost(id);
-                    }
+                    await observer.HandlePickedSpeedBoost(id);  
                 }
             }
         }

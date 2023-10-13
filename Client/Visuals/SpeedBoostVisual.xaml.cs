@@ -59,6 +59,11 @@ namespace JAKE.client
             SpeedBoostImageWidth = width;
             SpeedBoostImageSource = image;
         }
-       
+
+        public SpeedBoostVisual()
+        {
+            InitializeComponent();
+            SpeedBoostCircle.Fill = new SolidColorBrush(Colors.Brown);
+        }
     }
 }

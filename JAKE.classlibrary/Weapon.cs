@@ -9,16 +9,16 @@ namespace JAKE.classlibrary
 {
     public class Weapon : IMapObject
     {
-        public int Time { get; private set; }
-        public int ShootingSpeed { get; private set; }
-        public int ShootingStrength { get; private set; }
+        public int Time { get;  set; }
+        public int ShootingSpeed { get;  set; }
+        public int ShootingStrength { get;  set; }
         public int id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
         public string Image { get; set; }
-        public Weapon(int time, int speed, int strength, int width = 7, int heught = 7)
+        public Weapon(int time, int speed, int strength, int width = 20, int heught = 20)
         {
             Time = time;
             ShootingSpeed = speed;
@@ -26,7 +26,7 @@ namespace JAKE.classlibrary
             Width = width;
             Height = heught;
         }
-        public void Interact(Player player)
+        public void Interact(Player player, int value)
         {
             // Implement weapon logic
             //player.EquipWeapon("Sword");
