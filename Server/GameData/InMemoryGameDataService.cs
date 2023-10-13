@@ -87,7 +87,8 @@ namespace Server.GameData
             lock (enemyListLock)
             {
                 Enemy newEnemy = GameFunctions.GenerateEnemy(enemies.Count + 1, obstacles);
-                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
+                // TODO - nzn kokios maxX ir maxY reiksmes
+                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80-newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
                 return newEnemy;
             }
