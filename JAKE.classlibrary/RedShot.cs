@@ -16,7 +16,6 @@ namespace JAKE.classlibrary
             setSpeed(3);
             setSize(18);
             setPoints(10);
-            setPosition(shot.getX(), shot.getY());
         }
     }
 }

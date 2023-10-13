@@ -1049,35 +1049,30 @@ namespace JAKE.client
 
         public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, string playerColor, out Shot shot)
         {
-            Shot localShot = new Shot();
+            Shot localShot;
 
             double playerCenterX = playerX + playerWidth / 2;
             double playerCenterY = playerY + playerHeight / 2;
 
-            localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
-
             switch (playerColor)
             {
                 case "#FF008000":
-                    shot = new GreenShot(localShot);
+                    localShot = new GreenShot(new Shot());
                     break;
                 case "#FFFF0000":
-                    shot = new RedShot(localShot);
+                    localShot = new RedShot(new Shot());
                     break;
                 case "#FF0000FF":
-                    shot = new BlueShot(localShot);
+                    localShot = new BlueShot(new Shot());
                     break;
                 default:
-                    shot = new BlueShot(localShot);   // defaultu padarys melyna shot
+                    localShot = new BlueShot(new Shot());   // defaultu padarys melyna shot
                     break;
             }
 
-            // #FF008000 green
-            // #FF0000FF blue
-            // #FFFF0000 red
+            localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
+            shot = localShot;
         }
-
-
 
         private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
         {
