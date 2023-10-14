@@ -11,28 +11,14 @@ namespace JAKE.classlibrary.Patterns
         private static GameStats instance = null;
         private static readonly object lockObject = new object();
 
-        private float playingTime;
         private int playersCount;
-        private int enemiesCount;
         private float playerHealth;
         private int playerScore;
-
-        public float PlayingTime
-        {
-            get { return playingTime; }
-            set { playingTime = value; }
-        }
 
         public int PlayersCount
         {
             get { return playersCount; }
             set { playersCount = value; }
-        }
-
-        public int EnemiesCount
-        {
-            get { return enemiesCount; }
-            set { enemiesCount = value; }
         }
 
         public float PlayerHealth
@@ -49,9 +35,7 @@ namespace JAKE.classlibrary.Patterns
 
         private GameStats()
         {
-            playingTime = 0f;
             playersCount = 0;
-            enemiesCount = 0;
             playerHealth = 100f;
             playerScore = 0;
         }

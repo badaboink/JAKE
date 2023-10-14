@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,10 +12,28 @@ namespace JAKE.classlibrary
     {
         public BlueShot(Shot shot) : base(shot)
         {
-            setColor("blue");
-            setSpeed(5);
-            setSize(10);
-            setPoints(5);
+            ShootBlue("blue", 5, 10, 5);       
+        }
+
+        public void ShootBlue(string color, double speed, double size, double points)
+        {
+            Shoot(color, speed, size, points);
+        }
+        public override string getColor()
+        {
+            return wrapee.getColor();
+        }
+        public override double getSpeed()
+        {
+            return wrapee.getSpeed();
+        }
+        public override double getSize()
+        {
+            return wrapee.getSize();
+        }
+        public override double getPoints()
+        {
+            return wrapee.getPoints();
         }
     }
 }

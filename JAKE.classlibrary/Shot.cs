@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,27 +18,25 @@ namespace JAKE.classlibrary
         private double _y;
         public Shot()
         {
-            //_speed = speed;
-            //_color = color;
-            //_size = size;
-            //_points = points;
+
         }
-        public double getSpeed()
+        public virtual double getSpeed()
         {
             return _speed;
         }
-        public string getColor() 
+        public virtual string getColor() 
         { 
             return _color;
         }
-        public double getSize()
+        public virtual double getSize()
         { 
             return _size;
         }
-        public double getPoints() 
+        public virtual double getPoints() 
         { 
             return _points;
         }
+
         public double getX() 
         { 
             return _x;
@@ -51,8 +51,9 @@ namespace JAKE.classlibrary
             _speed = speed; 
         }
         public void setColor(string color) 
-        { 
+        {
             _color = color;
+
         }
         public void setSize(double size) 
         {
@@ -67,11 +68,16 @@ namespace JAKE.classlibrary
             _x = x;
             _y = y;
         }
+        public void setShot(string color, double speed, double size, double points)
+        {
+            setColor(color);
+            setSpeed(speed);
+            setSize(size);
+            setPoints(points);
+        }
         public override string ToString()
         {
             return $"{getX()}:{getY()}";
         }
-
-
     }
 }

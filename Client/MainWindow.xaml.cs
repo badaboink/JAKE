@@ -1040,13 +1040,14 @@ namespace JAKE.client
                     localShot = new BlueShot(new Shot());
                     break;
                 default:
-                    localShot = new BlueShot(new Shot());   // defaultu padarys melyna shot
+                    localShot = new BlueShot(new Shot());
                     break;
             }
 
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;
         }
+
 
         private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
         {

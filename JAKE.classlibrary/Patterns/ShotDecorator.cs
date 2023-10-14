@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,12 +9,20 @@ namespace JAKE.classlibrary.Patterns
 {
     public abstract class ShotDecorator : Shot
     {
-        protected Shot _shot;
+        protected Shot wrapee;
 
-        protected ShotDecorator(Shot shot) : base()
+        public ShotDecorator(Shot shot) : base()
         {
-            _shot = shot;
+            wrapee = shot;
         }
+
+        public void Shoot(string color, double speed, double size, double points)
+        {
+
+            wrapee.setShot(color, speed, size, points);
+
+        }
+
     }
 
 
