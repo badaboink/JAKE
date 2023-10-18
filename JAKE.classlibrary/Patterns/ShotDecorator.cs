@@ -22,9 +22,5 @@ namespace JAKE.classlibrary.Patterns
             wrapee.setShot(color, speed, size, points);
 
         }
-
     }
-
-
-
 }

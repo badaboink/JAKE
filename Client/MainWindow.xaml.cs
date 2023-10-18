@@ -53,6 +53,7 @@ namespace JAKE.client
         private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
         private List<Weapon> weapons = new List<Weapon>();
         private readonly object enemyListLock = new object();
+        private bool shieldOn = false;
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
 
         private bool isCollidingWithHealthBoost = false;
@@ -210,7 +211,8 @@ namespace JAKE.client
                     });
                 }
             });
-            timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
+        
+           timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
 
             connection.On<List<string>>("SendingEnemies", (enemydata) =>
             {
@@ -605,25 +607,29 @@ namespace JAKE.client
                     deltaX = -1;
                     playerDirectionX = deltaX; // Store the player's direction
                     playerDirectionY = 0;
+                    UpdateTextLabelPosition(-10, 0);
                 }
                 else if (e.Key == Key.Right)
                 {
                     deltaX = 1;
                     playerDirectionX = deltaX; // Store the player's direction
                     playerDirectionY = 0;
+                    UpdateTextLabelPosition(10, 0);
                 }
                 else if (e.Key == Key.Up)
                 {
                     deltaY = -1;
                     playerDirectionY = deltaY; // Store the player's direction
                     playerDirectionX = 0;
+                    UpdateTextLabelPosition(0, -10);
                 }
                 else if (e.Key == Key.Down)
                 {
                     deltaY = 1;
                     playerDirectionY = deltaY; // Store the player's direction
                     playerDirectionX = 0;
-                }
+                    UpdateTextLabelPosition(0, 10);
+                }              
 
                 if (e.Key == Key.Space)
                 {
@@ -674,10 +680,57 @@ namespace JAKE.client
             }
         }
 
+        private void UpdateTextLabelPosition(int posX, int posY)
+        {
+            // pastoviai updatinama, kad tekstas sekiotu zaideja
+            double playerX = currentPlayer.GetCurrentX();
+            double playerY = currentPlayer.GetCurrentY();
+            // object paemimo text
+            Canvas.SetLeft(testLabel, playerX);
+            Canvas.SetTop(testLabel, playerY - 30);
+            // sirdele
+            Canvas.SetLeft(heartLabel, playerX);
+            Canvas.SetTop(heartLabel, playerY - 40);
+            // shield
+            Canvas.SetLeft(shieldBorder, playerX + posX);
+            Canvas.SetTop(shieldBorder, playerY + posY);
+        }
+
+        private void HideDisplay()
+        {
+            // tekstas dingsta po puse sekundes
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(0.5);
+            timer.Tick += (sender, args) =>
+            {
+                testLabel.Text = "";
+                heartLabel.Visibility = Visibility.Hidden;
+                //shieldBorder.Visibility = Visibility.Hidden;
+                timer.Stop();
+            };
+
+            timer.Start();
+        }
+        private void HideShieldDisplay()
+        {
+            // tekstas dingsta po 10 sekundziu
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Tick += (sender, args) =>
+            {
+                shieldBorder.Visibility = Visibility.Hidden;
+                shieldOn = false;
+                timer.Stop();
+            };
+
+            timer.Start();
+        }
+
         private async void HandleEnemyCollisions(PlayerVisual playerVisual)
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
+
 
             foreach (Enemy enemy in enemies)
             {
@@ -692,9 +745,11 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= enemyY &&
                         playerY <= enemyY + enemyRect.Height)
                     {
-                        gameStat.PlayerHealth -= 5;
-                        //health -= 5;
-                        healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                        if (!shieldOn)
+                        {
+                            gameStat.PlayerHealth -= 5;
+                            healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                        }
 
                         collisionCheckedEnemies[enemy] = true;
 
@@ -703,7 +758,6 @@ namespace JAKE.client
                             gamestarted = false;
                             deadLabel.Text = "DEAD!";
                             healthLabel.Text = $"Health: {0}";
-                            //currentPlayer.SetName("DEAD B****");
                             playerVisuals[currentPlayer].PlayerName = "DEAD";
                             Color shotColor = (Color)ColorConverter.ConvertFromString("black");
                             SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
@@ -742,7 +796,9 @@ namespace JAKE.client
                         //coin.Interact(player, coin.Points);
                         gameStat.PlayerScore += coin.Points;
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-
+                        Base text = new Base(currentPlayer);
+                        testLabel.Text = text.DisplayObject("coin").text;
+                        HideDisplay();
                         await connection.SendAsync("SendPickedCoin", coin.ToString());
                     }
                 }
@@ -772,7 +828,17 @@ namespace JAKE.client
                         //pakeist player visual kazkaip - borderi koki uzdet
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //shield.Interact(player, shield.Time);
-
+                        Base baseObj = new Base(currentPlayer);
+                        testLabel.Text = baseObj.DisplayObject("shield").text;
+                        ShieldOn shieldObj = new ShieldOn(currentPlayer);
+                        bool shieldVisible = shieldObj.DisplayShield().shieldOn;
+                        if (shieldVisible)
+                        {
+                            shieldBorder.Visibility = Visibility.Visible;
+                            shieldOn = true;
+                        }
+                        HideDisplay();
+                        HideShieldDisplay();
                         await connection.SendAsync("SendPickedShield", shield.ToString());
 
                     }
@@ -804,6 +870,10 @@ namespace JAKE.client
                         int speed = player.GetSpeed();
                         player.SetSpeed(speed + speedBoost.Speed);
                         //KODEL NEPADIDINA SPEED???????
+                        // nezinau, Agne
+                        Base text = new Base(currentPlayer);
+                        testLabel.Text = text.DisplayObject("speedboost").text;
+                        HideDisplay();
 
 
                         await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
@@ -838,7 +908,14 @@ namespace JAKE.client
                         isCollidingWithHealthBoost = true;
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //healthBoost.Interact(player, healthBoost.Health);
-
+                        // &#x2665; sirdele
+                        HealthAdd heartObj = new HealthAdd(currentPlayer);
+                        bool heart = heartObj.DisplayHealth().healthVisibility;
+                        if (heart)
+                        {
+                            heartLabel.Visibility = Visibility.Visible;
+                        }
+                        HideDisplay();
 
                         Debug.WriteLine("health pries: " + gameStat.PlayerHealth);
                         Debug.WriteLine("health reiksme: " + healthBoost.Health);

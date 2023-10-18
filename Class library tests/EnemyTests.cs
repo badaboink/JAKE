@@ -130,5 +130,22 @@ namespace Class_library_tests
             Assert.Equal(presumed_y, enemy.GetCurrentY(), 2);
         }
 
+        [Fact]
+        public void Test_Move_WhenClosestPlayerIsNull_ShouldNotChangePosition()
+        {
+            // Arrange
+            Enemy enemy = new(1, "red");
+            List<Player> players = new List<Player>();
+            var obstacles = new List<Obstacle>();
+            ChaseAndHopStrategy strategy = new ChaseAndHopStrategy(obstacles);
+
+            // Act
+            strategy.Move(enemy, players);
+
+            // Assert
+            Assert.Equal(0, enemy.GetCurrentX());
+            Assert.Equal(0, enemy.GetCurrentY());
+        }
+
     }
 }

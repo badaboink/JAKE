@@ -80,6 +80,7 @@ namespace Server.GameData
 
         public List<string> GetPlayerList()
         {
+
             return players.Select(player => player.ToString()).ToList();
         }
 

@@ -119,6 +119,10 @@ namespace JAKE.classlibrary
         {
             return _id == id;
         }
+        public virtual (string text, bool healthVisibility, bool shieldOn) Display(string text, bool visibleHealth, bool shieldOn)
+        {
+            return (text, visibleHealth, shieldOn);
+        }
         public override bool Equals(object obj)
         {
             if (obj is Player otherPlayer)
