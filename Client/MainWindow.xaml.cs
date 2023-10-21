@@ -26,6 +26,7 @@ using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
 using JAKE.Client;
 using Microsoft.AspNetCore.SignalR.Client;
+using Newtonsoft.Json;
 
 namespace JAKE.client
 {
@@ -54,6 +55,7 @@ namespace JAKE.client
         private List<Weapon> weapons = new List<Weapon>();
         private readonly object enemyListLock = new object();
         private bool shieldOn = false;
+        private bool OverlapMove = false;
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
 
         private bool isCollidingWithHealthBoost = false;
@@ -126,6 +128,7 @@ namespace JAKE.client
             });
             connection.On<List<string>, DateTime>("GameUpdate", (userData, gametime) =>
             {
+                Debug.WriteLine("gameupdate userdata count: " + userData.Count);
                 foreach (string playerEntry in userData)
                 {
                     string[] parts = playerEntry.Split(':');
@@ -142,7 +145,7 @@ namespace JAKE.client
 
                         if (!playerInfoList.Contains(playerInfo))
                         {
-                            playerInfo.SetCurrentPosition(x, y);
+                            //playerInfo.SetCurrentPosition(x, y);
                             playerInfoList.Add(playerInfo);
                             Debug.WriteLine("PRIDEJO " + playerInfo.GetId() + " LIST COUNT DABAR " +  playerInfoList.Count);
                             Dispatcher.Invoke(() =>
@@ -609,28 +612,28 @@ namespace JAKE.client
                     deltaX = -1;
                     playerDirectionX = deltaX; // Store the player's direction
                     playerDirectionY = 0;
-                    UpdateTextLabelPosition(-10, 0, 30, 45);
+                    if (!OverlapMove) UpdateTextLabelPosition(-10, 0, 30, 45);
                 }
                 else if (e.Key == Key.Right)
                 {
                     deltaX = 1;
                     playerDirectionX = deltaX; // Store the player's direction
                     playerDirectionY = 0;
-                    UpdateTextLabelPosition(10, 0, 10, 45);
+                    if (!OverlapMove) UpdateTextLabelPosition(10, 0, 10, 45);
                 }
                 else if (e.Key == Key.Up)
                 {
                     deltaY = -1;
                     playerDirectionY = deltaY; // Store the player's direction
                     playerDirectionX = 0;
-                    UpdateTextLabelPosition(0, -10, 20, 35);
+                    if (!OverlapMove) UpdateTextLabelPosition(0, -10, 20, 35);
                 }
                 else if (e.Key == Key.Down)
                 {
                     deltaY = 1;
                     playerDirectionY = deltaY; // Store the player's direction
                     playerDirectionX = 0;
-                    UpdateTextLabelPosition(0, 10, 20, 55);
+                    if (!OverlapMove) UpdateTextLabelPosition(0, 10, 20, 55);
                 }              
 
                 if (e.Key == Key.Space)
@@ -638,41 +641,75 @@ namespace JAKE.client
                     // Use the stored direction for shooting
                     Shoot(playerDirectionX, playerDirectionY);
                 }
+
                 double playerCurrentX = currentPlayer.GetCurrentX();
                 double playerCurrentY = currentPlayer.GetCurrentY();
-                
-                double newX = playerCurrentX + deltaX * currentPlayer.GetSpeed();
-                Debug.WriteLine("current speed: " + currentPlayer.GetSpeed());
-                double newY = playerCurrentY + deltaY * currentPlayer.GetSpeed();
+                double stepSize = gameStat.PlayerSpeed; // Step size can be adjusted as needed
 
+                double newX = playerCurrentX + playerDirectionX * stepSize;
+                double newY = playerCurrentY + playerDirectionY * stepSize;
                 bool overlap = false;
+                OverlapMove = false;
+
                 foreach (Obstacle obstacle in obstacles)
                 {
                     if (obstacle.WouldOverlap(newX, newY, 50, 50))
                     {
                         overlap = true;
-                        double distance = obstacle.DistanceFromObstacle(playerDirectionX, playerDirectionY, playerCurrentX, playerCurrentY, 50, 50);
-                        if (distance != 0)
-                        {
-                            newX = playerDirectionX == 0 ? playerCurrentX : playerCurrentX + distance;
-                            newY = playerDirectionY == 0 ? playerCurrentY : playerCurrentY + distance;
+                        OverlapMove = true;
+                        double distanceX = obstacle.DistanceFromObstacleX(gameStat, playerDirectionX, playerCurrentX, 50);
+                        double distanceY = obstacle.DistanceFromObstacleY(gameStat, playerDirectionY, playerCurrentY, 50);
 
-                            Move(newX, newY);
+                        // Move player to the closest edge of the obstacle
+                        newX = playerCurrentX + distanceX;
+                        newY = playerCurrentY + distanceY;
+
+                        // Adjust player position so that its side touches the obstacle's side
+                        if (playerDirectionX > 0)
+                        {
+                            // Player is moving right, adjust X position
+                            newX -= 50;
                         }
+                        else if (playerDirectionX < 0)
+                        {
+                            // Player is moving left, adjust X position
+                            newX += obstacle.Width;
+                        }
+
+                        if (playerDirectionY > 0)
+                        {
+                            // Player is moving down, adjust Y position
+                            newY -= 50;
+                        }
+                        else if (playerDirectionY < 0)
+                        {
+                            // Player is moving up, adjust Y position
+                            newY += obstacle.Height;
+                        }
+
                         break;
                     }
                 }
-                double minX = 0; // Minimum X-coordinate
-                double minY = 0; // Minimum Y-coordinate
-                double windowWidth = this.ActualWidth;
-                double windowHeight = this.ActualHeight;
-                double maxX = windowWidth - 60; // Maximum X-coordinate
-                double maxY = windowHeight - 80; // Maximum Y-coordinate
 
-                if (newX >= minX && newX <= maxX && newY >= minY && newY <= maxY && !overlap)
+
+                if (!overlap)
                 {
+                    double minX = 0; // Minimum X-coordinate
+                    double minY = 0; // Minimum Y-coordinate
+                    double windowWidth = this.ActualWidth;
+                    double windowHeight = this.ActualHeight;
+                    double maxX = windowWidth - 60; // Maximum X-coordinate
+                    double maxY = windowHeight - 80; // Maximum Y-coordinate
+
+                    // Ensure player stays within the boundaries
+                    newX = Math.Max(minX, Math.Min(newX, maxX));
+                    newY = Math.Max(minY, Math.Min(newY, maxY));
+
                     Move(newX, newY);
+                    OverlapMove = false;
                 }
+
+
 
                 HandleEnemyCollisions(playerVisuals[currentPlayer]);
                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
@@ -687,16 +724,93 @@ namespace JAKE.client
             // pastoviai updatinama, kad tekstas sekiotu zaideja
             double playerX = currentPlayer.GetCurrentX();
             double playerY = currentPlayer.GetCurrentY();
+
+            playerX += playerDirectionX * gameStat.PlayerSpeed;
+            playerY += playerDirectionY * gameStat.PlayerSpeed;
+
             // object paemimo text
             Canvas.SetLeft(testLabel, playerX);
             Canvas.SetTop(testLabel, playerY - 30);
             // sirdele -10 i desine +10 i kaire
-            Canvas.SetLeft(heart2Label, playerX - posHeartX);
-            Canvas.SetTop(heart2Label, playerY + posHeartY);
+            Canvas.SetLeft(heart2Label, playerX);
+            Canvas.SetTop(heart2Label, playerY + 50);
             // shield
-            Canvas.SetLeft(shieldBorder, playerX + posX);
-            Canvas.SetTop(shieldBorder, playerY + posY);
+            Canvas.SetLeft(shieldBorder, playerX);
+            Canvas.SetTop(shieldBorder, playerY);
         }
+
+        //private void UpdateTextLabelPosition(int posX, int posY, int posHeartX, int posHeartY)
+        //{
+        //    // Get the current player position
+        //    double playerX = currentPlayer.GetCurrentX();
+        //    double playerY = currentPlayer.GetCurrentY();
+
+        //    // Calculate the new player position
+        //    double newX = playerX + playerDirectionX * gameStat.PlayerSpeed;
+        //    double newY = playerY + playerDirectionY * gameStat.PlayerSpeed;
+        //    bool overlap = false;
+
+        //    // Check for obstacles and adjust player position
+        //    foreach (Obstacle obstacle in obstacles)
+        //    {
+        //        double distanceX = obstacle.DistanceFromShieldX(gameStat, playerDirectionX, newX, 50);
+        //        double distanceY = obstacle.DistanceFromShieldY(gameStat, playerDirectionY, newY, 50);
+
+        //        // If there is an overlap, move the player to the edge of the obstacle
+        //        if (distanceX != 0 || distanceY != 0)
+        //        {
+        //            overlap = true;
+        //            newX += distanceX;
+        //            newY += distanceY;
+        //        }
+        //    }
+
+        //    // If there is no overlap, move the player to the new position
+        //    if (!overlap)
+        //    {
+        //        double minX = 0; // Minimum X-coordinate
+        //        double minY = 0; // Minimum Y-coordinate
+        //        double windowWidth = this.ActualWidth;
+        //        double windowHeight = this.ActualHeight;
+        //        double maxX = windowWidth - 60; // Maximum X-coordinate
+        //        double maxY = windowHeight - 80; // Maximum Y-coordinate
+
+        //        newX = Math.Max(minX, Math.Min(newX, maxX));
+        //        newY = Math.Max(minY, Math.Min(newY, maxY));
+
+        //        // Set the player position
+        //        Move(newX, newY);
+        //    }
+
+        //    // Set the label positions based on the new player position
+        //    Canvas.SetLeft(testLabel, newX);
+        //    Canvas.SetTop(testLabel, newY - 30);
+        //    Canvas.SetLeft(heart2Label, newX);
+        //    Canvas.SetTop(heart2Label, newY + posHeartY);
+
+        //    // Move the shield as close as possible to the player without overlapping obstacles
+        //    double shieldX = newX + playerDirectionX * gameStat.PlayerSpeed;
+        //    double shieldY = newY + playerDirectionY * gameStat.PlayerSpeed;
+
+        //    // Check for obstacles and adjust shield position
+        //    foreach (Obstacle obstacle in obstacles)
+        //    {
+        //        double distanceX = obstacle.DistanceFromShieldX(gameStat, playerDirectionX, shieldX, 50);
+        //        double distanceY = obstacle.DistanceFromShieldY(gameStat, playerDirectionY, shieldY, 50);
+
+        //        // If there is an overlap, move the shield to the edge of the obstacle
+        //        if (distanceX != 0 || distanceY != 0)
+        //        {
+        //            shieldX += distanceX;
+        //            shieldY += distanceY;
+        //        }
+        //    }
+
+        //    // Set the shield position
+        //    Canvas.SetLeft(shieldBorder, shieldX);
+        //    Canvas.SetTop(shieldBorder, shieldY);
+        //}
+
 
         private void HideDisplay()
         {
@@ -805,12 +919,33 @@ namespace JAKE.client
                         //TODO: kazkoki metoda viena turi turet visi objects bet jam reiktu paduot player, o prie jo nesaugom points ir visa kita
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //coin.Interact(player, coin.Points);
-                        gameStat.PlayerScore += coin.Points;
+                        //gameStat.PlayerScore += coin.Points;
+                        coin.Interact(gameStat);
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
                         Base text = new Base(currentPlayer);
                         testLabel.Text = text.DisplayObject("coin").text;
                         HideDisplay();
-                        await connection.SendAsync("SendPickedCoin", coin.ToString());
+
+                        //------------- JSONAdapter
+                        Dictionary<string, object> jsonObject = new Dictionary<string, object>();
+
+                        // Add key-value pairs to the dictionary
+                        jsonObject["id"] = coin.id;
+                        jsonObject["x"] = coin.X;
+                        jsonObject["y"] = coin.Y;
+                        jsonObject["width"] = coin.Width;
+                        jsonObject["height"] = coin.Height;
+                        jsonObject["points"] = coin.Points;
+
+
+                        // Convert the dictionary to a JSON string
+                        string jsonString = JsonConvert.SerializeObject(jsonObject);
+                        IStringAdapter jsonAdapter = new JsonAdapter();
+                        
+                        string coinString = jsonAdapter.Convert(jsonString);
+                        
+                        //-----------
+                        await connection.SendAsync("SendPickedCoin", coinString);  //coin.ToString()
                     }
                 }
             }
@@ -839,6 +974,7 @@ namespace JAKE.client
                         //pakeist player visual kazkaip - borderi koki uzdet
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //shield.Interact(player, shield.Time);
+                        
                         Base baseObj = new Base(currentPlayer);
                         testLabel.Text = baseObj.DisplayObject("shield").text;
                         ShieldOn shieldObj = new ShieldOn(currentPlayer);
@@ -846,7 +982,8 @@ namespace JAKE.client
                         if (shieldVisible)
                         {
                             shieldBorder.Visibility = Visibility.Visible;
-                            shieldOn = true;
+                            shieldOn = true; //i gamestat perkelt
+                            shield.Interact(gameStat);
                         }
                         HideDisplay();
                         HideShieldDisplay();
@@ -874,20 +1011,16 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= speedBoostY &&
                         playerY <= speedBoostY + speedBoostRect.Height)
                     {
-                        Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
-                        //speedBoost.Interact(player,speedBoost.Speed);
-                        //TODO: laika nuimt
-                        Debug.WriteLine("speed value: " + speedBoost.Speed);
-                        int speed = player.GetSpeed();
-                        player.SetSpeed(speed + speedBoost.Speed);
-                        //KODEL NEPADIDINA SPEED???????
-                        // nezinau, Agne
-                        Base text = new Base(currentPlayer);
-                        testLabel.Text = text.DisplayObject("speedboost").text;
-                        HideDisplay();
 
+                        if (gameStat.PlayerSpeed < 50)
+                        {
+                            speedBoost.Interact(gameStat);
+                            Base text = new Base(currentPlayer);
+                            testLabel.Text = text.DisplayObject("speedboost").text;
+                            HideDisplay();
 
-                        await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
+                            await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
+                        }
 
                     }
                 }
@@ -921,14 +1054,12 @@ namespace JAKE.client
                         //healthBoost.Interact(player, healthBoost.Health);
                         Debug.WriteLine("health pries: " + gameStat.PlayerHealth);
                         Debug.WriteLine("health reiksme: " + healthBoost.Health);
-                        if (gameStat.PlayerHealth + healthBoost.Health > 100)
+                        healthBoost.Interact(gameStat);
+                        if (gameStat.PlayerHealth > 100)
                         {
                             gameStat.PlayerHealth = 100;
                         }
-                        else
-                        {
-                            gameStat.PlayerHealth += healthBoost.Health;
-                        }
+                        
                         healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
                         Debug.WriteLine("health po: " + gameStat.PlayerHealth);
                         Debug.WriteLine("CIA IEINA");

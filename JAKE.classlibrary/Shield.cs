@@ -61,15 +61,10 @@ namespace JAKE.classlibrary
         {
             this.Time = time;
         }
-
-        //public void Interact(GameStats gameStats)
-        //{
-        //    gameStats.Shield = true;
-        //}
-
         public void Interact(GameStats gameStats)
         {
 
+            gameStats.ShieldOn = true;
         }
     }
 }

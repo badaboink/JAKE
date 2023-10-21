@@ -38,6 +38,7 @@ namespace Server.GameData
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);
+            Console.WriteLine("playerscount inmemorydataservce: " + players.Count);
             return newPlayer;
 
         }

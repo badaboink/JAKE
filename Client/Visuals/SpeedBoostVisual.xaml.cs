@@ -63,7 +63,7 @@ namespace JAKE.client
         public SpeedBoostVisual()
         {
             InitializeComponent();
-            SpeedBoostCircle.Fill = new SolidColorBrush(Colors.Brown);
+            SpeedBoostCircle.Fill = new SolidColorBrush(Colors.LightBlue);
         }
     }
 }
