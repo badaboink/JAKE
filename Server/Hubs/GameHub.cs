@@ -1,4 +1,5 @@
 ﻿using JAKE.classlibrary;
+using JAKE.classlibrary.Patterns;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Protocol;
@@ -46,6 +47,7 @@ namespace Server.Hubs
         public GameHub(IGameDataService gameDataService)
         {
             _gameDataService = gameDataService;
+
         }
         private object syncLock = new object();
         

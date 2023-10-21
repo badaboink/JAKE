@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Server_tests
 {
-    public class UnitTest1
+    public class Generation_tests
     {
         [Fact]
         public void TestGenerateObstaclesExpectedRange()

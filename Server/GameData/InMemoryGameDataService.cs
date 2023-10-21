@@ -1,5 +1,7 @@
 ﻿using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
+using Microsoft.AspNetCore.SignalR;
+using Server.Hubs;
 using System.Reflection.Emit;
 
 namespace Server.GameData
@@ -80,6 +82,7 @@ namespace Server.GameData
 
         public List<string> GetPlayerList()
         {
+
             return players.Select(player => player.ToString()).ToList();
         }
 
@@ -360,7 +363,6 @@ namespace Server.GameData
                 return shields.Select(shield => shield.ToString()).ToList();
             }
         }
-
 
     }
 }
