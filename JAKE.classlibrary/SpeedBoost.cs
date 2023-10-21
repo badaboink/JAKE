@@ -44,9 +44,13 @@ namespace JAKE.classlibrary
         {
             Speed = speed;
         }
-        public void Interact(Player player, int value)
-        {  
-            player.IncreaseSpeed(value);
+        //public void Interact(Player player, int value)
+        //{  
+        //    player.IncreaseSpeed(value);
+        //}
+        public void Interact(GameStats gameStats)
+        {
+
         }
         public bool MatchesId(int id)
         {

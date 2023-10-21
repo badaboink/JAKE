@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary.Patterns
 {
-    public sealed class GameStats
+    public class GameStats
     {
         private static GameStats instance = null;
         private static readonly object lockObject = new object();

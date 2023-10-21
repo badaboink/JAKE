@@ -41,9 +41,9 @@ namespace JAKE.classlibrary
         {
             this.Health = health;
         }
-        public void Interact(Player player, int value)
+        public void Interact(GameStats gameStats)
         {
-            // player.IncreaseHealth(value); //galimai is singleton pasiimt player ir pakeist health
+            gameStats.PlayerHealth += this.Health;
         }
         public bool MatchesId(int id)
         {

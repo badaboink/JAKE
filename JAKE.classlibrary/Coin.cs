@@ -42,9 +42,9 @@ namespace JAKE.classlibrary
             this.Points = points;
         }
 
-        public void Interact(Player player, int value)
+        public void Interact(GameStats gameStats)
         {
-            //player.IncreasePoints(value);
+            gameStats.PlayerScore += this.Points;
         }
         public bool MatchesId(int id)
         {
