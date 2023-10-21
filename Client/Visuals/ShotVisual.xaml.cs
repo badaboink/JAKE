@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JAKE.classlibrary;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -26,6 +27,9 @@ namespace JAKE.client
         public static readonly DependencyProperty EllipseSizeProperty =
             DependencyProperty.Register("EllipseSize", typeof(double), typeof(ShotVisual), new PropertyMetadata(10.0));
 
+        public static readonly DependencyProperty PolygonSizeProperty =
+            DependencyProperty.Register("PolygonSize", typeof(double), typeof(ShotVisual), new PropertyMetadata(10.0));
+
         public Brush FillColor
         {
             get { return (Brush)GetValue(FillColorProperty); }
@@ -37,9 +41,30 @@ namespace JAKE.client
             get { return (double)GetValue(EllipseSizeProperty); }
             set { SetValue(EllipseSizeProperty, value); }
         }
-        public void UpdateShot(Brush newColor)
+
+        public double PolygonSize
         {
-            shotCircle.Fill = newColor;
+            get { return (double)GetValue(PolygonSizeProperty); }
+            set { SetValue(PolygonSizeProperty, value); }
+        }
+        public void UpdateShot(Brush newColor, string shape)
+        {
+            if(shape == "round")
+            {
+                shotCircle.Fill = newColor;
+                shotCircle.Visibility = Visibility.Visible;
+
+                shotTriangle.Fill = newColor;
+                shotTriangle.Visibility = Visibility.Collapsed;
+            }
+            else if(shape == "triangle")
+            {
+                shotCircle.Fill = newColor;
+                shotCircle.Visibility = Visibility.Collapsed;
+
+                shotTriangle.Fill = newColor;
+                shotTriangle.Visibility = Visibility.Visible;
+            }         
         }
         public ShotVisual()
         {

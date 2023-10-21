@@ -119,9 +119,9 @@ namespace JAKE.classlibrary
         {
             return _id == id;
         }
-        public virtual (string text, bool healthVisibility, bool shieldOn) Display(string text, bool visibleHealth, bool shieldOn)
+        public virtual (string text, float health, bool shieldOn) Display(string text, float health, bool shieldOn)
         {
-            return (text, visibleHealth, shieldOn);
+            return (text, health, shieldOn);
         }
         public override bool Equals(object obj)
         {

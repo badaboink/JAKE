@@ -14,19 +14,19 @@ namespace JAKE.classlibrary
     {
         public Base(Player player): base(player) { }
 
-        public (string text, bool healthVisibility, bool shieldOn) DisplayObject(string mapObj)
+        public (string text, float health, bool shieldOn) DisplayObject(string mapObj)
         {
             if (mapObj == "coin")
             {
-                return base.Display("+10 POINTS!", false, false);
+                return base.Display("+10 POINTS!", 0, false);
             }
             else if (mapObj == "shield")
             {
-                return base.Display("Shield Activated!", false, false);
+                return base.Display("Shield Activated!", 0, false);
             }
             else
             {
-                return base.Display("TUTUTURU MAX VERSTAPPEN", false, false);
+                return base.Display("TUTUTURU MAX VERSTAPPEN", 0, false);
             }
         }
     }

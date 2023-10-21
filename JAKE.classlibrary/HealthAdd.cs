@@ -9,9 +9,9 @@ namespace JAKE.classlibrary
     public class HealthAdd : Decorator
     {
         public HealthAdd(Player player) : base(player) { }
-        public (string text, bool healthVisibility, bool shieldOn) DisplayHealth()
+        public (string text, float health, bool shieldOn) DisplayHealth(float health)
         {           
-            return base.Display("", true, false);          
+            return base.Display("", health, false);          
         }
 
     }

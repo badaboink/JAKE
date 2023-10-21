@@ -5,34 +5,44 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary
 {
     public class Shot
     {
         private double _speed;
-        private string _color;
         private double _size;
         private double _points;
         private double _x;
         private double _y;
-        public Shot()
-        {
-
+        private IColor _color;
+        private IShape _shape;
+        public Shot(IColor color, IShape shape, double speed, double size, double points)
+        {         
+            _color = color;
+            _shape = shape;
+            _speed = speed;
+            _size = size;
+            _points = points;
         }
-        public virtual double getSpeed()
+        public string getShape()
+        {
+            return _shape.GetShape();
+        }
+        public string getColor()
+        {
+            return _color.GetColor();
+        }
+        public double getSpeed()
         {
             return _speed;
         }
-        public virtual string getColor() 
-        { 
-            return _color;
-        }
-        public virtual double getSize()
+        public double getSize()
         { 
             return _size;
         }
-        public virtual double getPoints() 
+        public double getPoints() 
         { 
             return _points;
         }
@@ -50,10 +60,13 @@ namespace JAKE.classlibrary
         { 
             _speed = speed; 
         }
-        public void setColor(string color) 
+        public void setColor(IColor color) 
         {
             _color = color;
-
+        }
+        public void setShape(IShape shape)
+        {
+            _shape = shape;
         }
         public void setSize(double size) 
         {
@@ -67,13 +80,6 @@ namespace JAKE.classlibrary
         { 
             _x = x;
             _y = y;
-        }
-        public void setShot(string color, double speed, double size, double points)
-        {
-            setColor(color);
-            setSpeed(speed);
-            setSize(size);
-            setPoints(points);
         }
         public override string ToString()
         {

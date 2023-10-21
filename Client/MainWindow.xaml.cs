@@ -95,7 +95,7 @@ namespace JAKE.client
         }
 
         private async Task GameStart()
-        {
+        {            
             // Create and show the ColorChoiceForm as a pop-up
             ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
             colorChoiceForm.ShowDialog();
@@ -144,6 +144,7 @@ namespace JAKE.client
                         {
                             playerInfo.SetCurrentPosition(x, y);
                             playerInfoList.Add(playerInfo);
+                            Debug.WriteLine("PRIDEJO " + playerInfo.GetId() + " LIST COUNT DABAR " +  playerInfoList.Count);
                             Dispatcher.Invoke(() =>
                             {
                                 PlayerVisual playerVisual = new PlayerVisual();
@@ -190,9 +191,10 @@ namespace JAKE.client
                     string playerColor = parts[2];
                     int x = int.Parse(parts[3]);
                     int y = int.Parse(parts[4]);
-
+                    Debug.WriteLine("LSITO COUNT again" + playerInfoList.Count);
+                    Debug.WriteLine("PLAYERIO ID again" + playerId);
                     playerInfoList[playerId - 1].SetCurrentPosition(x, y);
-
+                    
                     Dispatcher.Invoke(() =>
                     {
                         playerInfoList[playerId - 1].SetCurrentPosition(x, y);
@@ -207,7 +209,6 @@ namespace JAKE.client
                         SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
                         playerVisual.PlayerColor = solidColorBrush;
                         playerVisual.UpdateColor(solidColorBrush);
-
                     });
                 }
             });
@@ -548,6 +549,7 @@ namespace JAKE.client
                 });
             });
         }
+
         private async void CheckElapsedTimeMove(object state)
         {
             await connection.SendAsync("SendEnemies");
@@ -607,28 +609,28 @@ namespace JAKE.client
                     deltaX = -1;
                     playerDirectionX = deltaX; // Store the player's direction
                     playerDirectionY = 0;
-                    UpdateTextLabelPosition(-10, 0);
+                    UpdateTextLabelPosition(-10, 0, 30, 45);
                 }
                 else if (e.Key == Key.Right)
                 {
                     deltaX = 1;
                     playerDirectionX = deltaX; // Store the player's direction
                     playerDirectionY = 0;
-                    UpdateTextLabelPosition(10, 0);
+                    UpdateTextLabelPosition(10, 0, 10, 45);
                 }
                 else if (e.Key == Key.Up)
                 {
                     deltaY = -1;
                     playerDirectionY = deltaY; // Store the player's direction
                     playerDirectionX = 0;
-                    UpdateTextLabelPosition(0, -10);
+                    UpdateTextLabelPosition(0, -10, 20, 35);
                 }
                 else if (e.Key == Key.Down)
                 {
                     deltaY = 1;
                     playerDirectionY = deltaY; // Store the player's direction
                     playerDirectionX = 0;
-                    UpdateTextLabelPosition(0, 10);
+                    UpdateTextLabelPosition(0, 10, 20, 55);
                 }              
 
                 if (e.Key == Key.Space)
@@ -680,7 +682,7 @@ namespace JAKE.client
             }
         }
 
-        private void UpdateTextLabelPosition(int posX, int posY)
+        private void UpdateTextLabelPosition(int posX, int posY, int posHeartX, int posHeartY)
         {
             // pastoviai updatinama, kad tekstas sekiotu zaideja
             double playerX = currentPlayer.GetCurrentX();
@@ -688,9 +690,9 @@ namespace JAKE.client
             // object paemimo text
             Canvas.SetLeft(testLabel, playerX);
             Canvas.SetTop(testLabel, playerY - 30);
-            // sirdele
-            Canvas.SetLeft(heartLabel, playerX);
-            Canvas.SetTop(heartLabel, playerY - 40);
+            // sirdele -10 i desine +10 i kaire
+            Canvas.SetLeft(heart2Label, playerX - posHeartX);
+            Canvas.SetTop(heart2Label, playerY + posHeartY);
             // shield
             Canvas.SetLeft(shieldBorder, playerX + posX);
             Canvas.SetTop(shieldBorder, playerY + posY);
@@ -704,7 +706,7 @@ namespace JAKE.client
             timer.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
-                heartLabel.Visibility = Visibility.Hidden;
+                //heartLabel.Visibility = Visibility.Hidden;
                 //shieldBorder.Visibility = Visibility.Hidden;
                 timer.Stop();
             };
@@ -749,8 +751,17 @@ namespace JAKE.client
                         {
                             gameStat.PlayerHealth -= 5;
                             healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                            HealthAdd healthObj = new HealthAdd(currentPlayer);
+                            if (gameStat.PlayerHealth <= 0)
+                            {
+                                healthBar.Width = healthObj.DisplayHealth(0).health;
+                            } 
+                            else
+                            {
+                                healthBar.Width = healthObj.DisplayHealth(gameStat.PlayerHealth/2).health;
+                            }
+                            //await connection.SendAsync("UpdatePlayerHealth", currentPlayer.GetId(), gameStat.PlayerHealth);
                         }
-
                         collisionCheckedEnemies[enemy] = true;
 
                         if(gameStat.PlayerHealth <= 0)
@@ -908,25 +919,25 @@ namespace JAKE.client
                         isCollidingWithHealthBoost = true;
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //healthBoost.Interact(player, healthBoost.Health);
-                        // &#x2665; sirdele
-                        HealthAdd heartObj = new HealthAdd(currentPlayer);
-                        bool heart = heartObj.DisplayHealth().healthVisibility;
-                        if (heart)
-                        {
-                            heartLabel.Visibility = Visibility.Visible;
-                        }
-                        HideDisplay();
-
                         Debug.WriteLine("health pries: " + gameStat.PlayerHealth);
                         Debug.WriteLine("health reiksme: " + healthBoost.Health);
-                        gameStat.PlayerHealth += healthBoost.Health;
+                        if (gameStat.PlayerHealth + healthBoost.Health > 100)
+                        {
+                            gameStat.PlayerHealth = 100;
+                        }
+                        else
+                        {
+                            gameStat.PlayerHealth += healthBoost.Health;
+                        }
                         healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
                         Debug.WriteLine("health po: " + gameStat.PlayerHealth);
-
+                        Debug.WriteLine("CIA IEINA");
                         healthBoosts.Remove(healthBoost);
                         healthBoostsVisuals.Remove(healthBoost);
                         HealthBoostContainer.Children.Remove(healthBoostRect);
-
+                        HealthAdd healthObj = new HealthAdd(currentPlayer);
+                        healthBar.Width = healthObj.DisplayHealth(gameStat.PlayerHealth/2).health;
+                        //await connection.SendAsync("UpdatePlayerHealth", currentPlayer.GetId(), gameStat.PlayerHealth);
                         await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
                         isCollidingWithHealthBoost = false;
                     }
@@ -966,19 +977,17 @@ namespace JAKE.client
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
-                    string playerColor = playerVisual.PlayerColor.ToString();
                     
-
-                    SingleShot(playerX, playerY, playerWidth, playerHeight, playerColor, out shot);
-
+                    SingleShot(playerX, playerY, playerWidth, playerHeight, out shot);
 
                     Color shotColor = (Color)ColorConverter.ConvertFromString(shot.getColor());
                     solidColorBrush = new SolidColorBrush(shotColor);
 
                     shotVisual = new ShotVisual();
                     shotVisual.EllipseSize = shot.getSize();
+                    shotVisual.PolygonSize = shot.getSize();
                     shotVisual.FillColor = solidColorBrush;
-                    shotVisual.UpdateShot(solidColorBrush);
+                    shotVisual.UpdateShot(solidColorBrush, shot.getShape());
 
                     // Set the initial position of the shot at the center of the player
                     Canvas.SetLeft(shotVisual, shot.getX());
@@ -1098,28 +1107,20 @@ namespace JAKE.client
             return shot;
         }
 
-        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, string playerColor, out Shot shot)
+        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, out Shot shot)
         {
-            Shot localShot;
+            // choose shot color
+            //IColor shotColor = new BlueColor();
+            IColor shotColor = new RedColor();
+
+            // choose shot shape
+            //IShape shotShape = new RoundShot();
+            IShape shotShape = new TriangleShot();
+
+            Shot localShot = new Shot(shotColor, shotShape, 5, 10, 5);
 
             double playerCenterX = playerX + playerWidth / 2;
             double playerCenterY = playerY + playerHeight / 2;
-
-            switch (playerColor)
-            {
-                case "#FF008000":
-                    localShot = new GreenShot(new Shot());
-                    break;
-                case "#FFFF0000":
-                    localShot = new RedShot(new Shot());
-                    break;
-                case "#FF0000FF":
-                    localShot = new BlueShot(new Shot());
-                    break;
-                default:
-                    localShot = new BlueShot(new Shot());
-                    break;
-            }
 
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;

@@ -9,9 +9,9 @@ namespace JAKE.classlibrary
     public class ShieldOn : Decorator
     {
         public ShieldOn(Player player) : base(player) { }
-        public (string text, bool healthVisibility, bool shieldOn) DisplayShield()
+        public (string text, float health, bool shieldOn) DisplayShield()
         {          
-            return base.Display("", false, true);        
+            return base.Display("", 0, true);        
         }
     }
 }

@@ -8,5 +8,6 @@
              d:DesignHeight="20" d:DesignWidth="20">
     <Grid>
         <Ellipse x:Name="shotCircle" Width="{Binding EllipseSize, RelativeSource={RelativeSource AncestorType={x:Type local:ShotVisual}}}" Height="{Binding EllipseSize, RelativeSource={RelativeSource AncestorType={x:Type local:ShotVisual}}}"/>
+        <Polygon x:Name="shotTriangle" Points="10,0 0,17.32 20,17.32" Width="{Binding PolygonSize, RelativeSource={RelativeSource AncestorType={x:Type local:ShotVisual}}}" Height="{Binding PolygonSize, RelativeSource={RelativeSource AncestorType={x:Type local:ShotVisual}}}"/>
     </Grid>
 </UserControl>

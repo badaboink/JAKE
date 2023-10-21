@@ -1,5 +1,7 @@
 ﻿using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
+using Microsoft.AspNetCore.SignalR;
+using Server.Hubs;
 using System.Reflection.Emit;
 
 namespace Server.GameData
@@ -361,7 +363,6 @@ namespace Server.GameData
                 return shields.Select(shield => shield.ToString()).ToList();
             }
         }
-
 
     }
 }

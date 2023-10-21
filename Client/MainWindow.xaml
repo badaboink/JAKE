@@ -25,11 +25,17 @@
                     <TranslateTransform x:Name="textTransform"/>
                 </TextBlock.RenderTransform>
             </TextBlock>
-            <TextBlock x:Name="heartLabel" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Foreground="Red" Text="+100 &#x2665;" Visibility="Hidden" RenderTransformOrigin="1.246,1.523">
+            <!--
+            <TextBlock x:Name="heartLabel" HorizontalAlignment="Left" VerticalAlignment="Top" FontSize="20" Foreground="Red" Text="&#x2665;" Visibility="Visible" RenderTransformOrigin="1.246,1.523">
                 <TextBlock.RenderTransform>
                     <TranslateTransform x:Name="heartTransform"/>
                 </TextBlock.RenderTransform>
             </TextBlock>
+            -->
+            <StackPanel x:Name="heart2Label" Orientation="Horizontal" VerticalAlignment="Top" Visibility="Visible" RenderTransformOrigin="1.246,1.523">
+                <TextBlock FontSize="24" Foreground="Red" Text="&#x2665;" Margin="0,0,5,0"/>
+                <Rectangle x:Name="healthBar" Width="50" Height="8" Fill="Red" VerticalAlignment="Center"/>
+            </StackPanel>
             <Border x:Name="shieldBorder" HorizontalAlignment="Left" VerticalAlignment="Top" BorderBrush="Gold" BorderThickness="5" Width="50" Height="50" Visibility="Hidden" RenderTransformOrigin="1.246,1.523"></Border>
         </Canvas>
         <TextBlock />

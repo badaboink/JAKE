@@ -14,9 +14,9 @@ namespace JAKE.classlibrary
         {
             wrapper = player;
         }
-        public virtual (string text, bool healthVisibility, bool shieldOn) Display(string text, bool visibleHealth, bool shieldOn)
+        public virtual (string text, float health, bool shieldOn) Display(string text, float health, bool shieldOn)
         {
-            return wrapper.Display(text, visibleHealth, shieldOn);
+            return wrapper.Display(text, health, shieldOn);
         }
     }
 }
