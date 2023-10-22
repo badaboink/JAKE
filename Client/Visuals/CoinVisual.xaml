@@ -16,13 +16,9 @@
         <Rectangle x:Name="coinRectangle" Width="50" Height="50" Fill="{Binding CoinColor}" /> 
     </Grid>-->
     <!--{Binding CoinWidth}  {Binding CoinHeight}-->
+
     <Grid>
-        <!--<Ellipse x:Name="coinCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>-->
-        <Image x:Name="coinCircle" Margin="-7,-7,-7,-7">
-            <Image.Source>
-                <BitmapImage DecodePixelWidth="300" UriSource="/images/coin.png" />
-            </Image.Source>
-        </Image>
+        <Ellipse x:Name="coinCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>
     </Grid>
 </UserControl>
 

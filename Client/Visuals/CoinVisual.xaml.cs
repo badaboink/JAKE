@@ -84,7 +84,7 @@ namespace JAKE.client
         public CoinVisual()
         {
             InitializeComponent();
-            //coinCircle.Fill = new SolidColorBrush(Colors.Gold);
+            coinCircle.Fill = new SolidColorBrush(Colors.Gold);
         }
 
         public CoinVisual(string image, int width, int height)

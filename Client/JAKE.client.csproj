@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="images\coin.png" />
+    <Content Include="coin.png" />
   </ItemGroup>
 
   <ItemGroup>
