@@ -13,6 +13,5 @@ namespace JAKE.classlibrary
         {           
             return base.Display("", health, false);          
         }
-
     }
 }

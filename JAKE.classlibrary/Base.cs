@@ -24,9 +24,13 @@ namespace JAKE.classlibrary
             {
                 return base.Display("Shield Activated!", 0, false);
             }
-            else
+            else if (mapObj == "speed")
             {
                 return base.Display("TUTUTURU MAX VERSTAPPEN", 0, false);
+            }
+            else
+            {
+                return base.Display("Health!", 0, false);
             }
         }
     }

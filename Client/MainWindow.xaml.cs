@@ -730,8 +730,8 @@ namespace JAKE.client
             Canvas.SetLeft(testLabel, playerX);
             Canvas.SetTop(testLabel, playerY - 30);
             // sirdele -10 i desine +10 i kaire
-            Canvas.SetLeft(heart2Label, playerX);
-            Canvas.SetTop(heart2Label, playerY + 50);
+            Canvas.SetLeft(heart2Label, playerX - 20);
+            Canvas.SetTop(heart2Label, playerY + 45);
             // shield
             Canvas.SetLeft(shieldBorder, playerX);
             Canvas.SetTop(shieldBorder, playerY);
@@ -814,7 +814,7 @@ namespace JAKE.client
         {
             // tekstas dingsta po puse sekundes
             var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(0.5);
+            timer.Interval = TimeSpan.FromSeconds(8);
             timer.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
@@ -832,19 +832,28 @@ namespace JAKE.client
             timer.Interval = TimeSpan.FromSeconds(10);
             timer.Tick += (sender, args) =>
             {
-                shieldBorder.Visibility = Visibility.Hidden;
-                shieldOn = false;
-                timer.Stop();
+                ShieldOn shieldObj = new ShieldOn(currentPlayer);
+                bool shieldVisible = shieldObj.HideShield().shieldOn;
+                if (!shieldVisible)
+                {
+                    shieldBorder.Visibility = Visibility.Hidden;
+                    gameStat.ShieldOn = false;
+                    timer.Stop();
+                }          
             };
 
             timer.Start();
+        }
+
+        public static bool CheckCollision(double x1, double y1, double width1, double height1, double x2, double y2, double width2, double height2)
+        {
+            return x1 + width1 >= x2 && x1 <= x2 + width2 && y1 + height1 >= y2 && y1 <= y2 + height2;
         }
 
         private async void HandleEnemyCollisions(PlayerVisual playerVisual)
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-
 
             foreach (Enemy enemy in enemies)
             {
@@ -854,44 +863,49 @@ namespace JAKE.client
                     double enemyX = Canvas.GetLeft(enemyRect);
                     double enemyY = Canvas.GetTop(enemyRect);
 
-                    if (playerX + playerVisual.Width >= enemyX &&
-                        playerX <= enemyX + enemyRect.Width &&
-                        playerY + playerVisual.Height >= enemyY &&
-                        playerY <= enemyY + enemyRect.Height)
+                    if (CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
+                                                       enemyX, enemyY, enemyRect.Width, enemyRect.Height))
                     {
-                        if (!shieldOn)
-                        {
-                            gameStat.PlayerHealth -= 5;
-                            healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-                            HealthAdd healthObj = new HealthAdd(currentPlayer);
-                            if (gameStat.PlayerHealth <= 0)
-                            {
-                                healthBar.Width = healthObj.DisplayHealth(0).health;
-                            } 
-                            else
-                            {
-                                healthBar.Width = healthObj.DisplayHealth(gameStat.PlayerHealth/2).health;
-                            }
-                            //await connection.SendAsync("UpdatePlayerHealth", currentPlayer.GetId(), gameStat.PlayerHealth);
-                        }
-                        collisionCheckedEnemies[enemy] = true;
-
-                        if(gameStat.PlayerHealth <= 0)
-                        {
-                            gamestarted = false;
-                            deadLabel.Text = "DEAD!";
-                            healthLabel.Text = $"Health: {0}";
-                            playerVisuals[currentPlayer].PlayerName = "DEAD";
-                            Color shotColor = (Color)ColorConverter.ConvertFromString("black");
-                            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
-                            playerVisuals[currentPlayer].PlayerColor = solidColorBrush;
-                            playerVisuals[currentPlayer].UpdateColor(solidColorBrush);
-                            await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
-                        }
+                        await HandleCollision(playerVisual, enemy);
                     }
                 }
             }
         }
+
+        private async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
+        {
+            if (!gameStat.ShieldOn)
+            {
+                gameStat.PlayerHealth -= 5;
+                healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+
+                HealthAdd healthObj = new HealthAdd(currentPlayer);
+                healthBar.Width = gameStat.PlayerHealth <= 0
+                                    ? healthObj.DisplayHealth(0).health
+                                    : healthObj.DisplayHealth(gameStat.PlayerHealth / 2).health;
+
+                if (gameStat.PlayerHealth <= 0)
+                {
+                    HandlePlayerDeath();
+                    await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
+                }
+            }
+
+            collisionCheckedEnemies[enemy] = true;
+        }
+
+        private void HandlePlayerDeath()
+        {
+            gamestarted = false;
+            deadLabel.Text = "DEAD!";
+            healthLabel.Text = $"Health: {0}";
+            playerVisuals[currentPlayer].PlayerName = "DEAD";
+            Color shotColor = (Color)ColorConverter.ConvertFromString("black");
+            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
+            playerVisuals[currentPlayer].PlayerColor = solidColorBrush;
+            playerVisuals[currentPlayer].UpdateColor(solidColorBrush);
+        }
+
 
         private async void HandleCoinsCollisions(PlayerVisual playerVisual)
         {
@@ -980,7 +994,7 @@ namespace JAKE.client
                         if (shieldVisible)
                         {
                             shieldBorder.Visibility = Visibility.Visible;
-                            shieldOn = true; //i gamestat perkelt
+                            gameStat.ShieldOn = true; //i gamestat perkelt
                             shield.Interact(gameStat);
                         }
                         HideDisplay();
@@ -1014,7 +1028,7 @@ namespace JAKE.client
                         {
                             speedBoost.Interact(gameStat);
                             Base text = new Base(currentPlayer);
-                            testLabel.Text = text.DisplayObject("speedboost").text;
+                            testLabel.Text = text.DisplayObject("speed").text;
                             HideDisplay();
 
                             await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
@@ -1064,6 +1078,9 @@ namespace JAKE.client
                         healthBoosts.Remove(healthBoost);
                         healthBoostsVisuals.Remove(healthBoost);
                         HealthBoostContainer.Children.Remove(healthBoostRect);
+                        Base text = new Base(currentPlayer);
+                        testLabel.Text = text.DisplayObject("health").text;
+                        HideDisplay();
                         HealthAdd healthObj = new HealthAdd(currentPlayer);
                         healthBar.Width = healthObj.DisplayHealth(gameStat.PlayerHealth/2).health;
                         //await connection.SendAsync("UpdatePlayerHealth", currentPlayer.GetId(), gameStat.PlayerHealth);

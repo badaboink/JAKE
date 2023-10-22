@@ -77,8 +77,8 @@ namespace Server_tests
             }
         }
 
-        /* [Fact]
-         public void Test_Get_Player_List()
+        [Fact]
+        public void Test_Get_Player_List()
          {
              string playerName1 = "name1";
              string playerName2 = "name2";
@@ -99,27 +99,14 @@ namespace Server_tests
              list.Add(player1.ToString());
              list.Add(player2.ToString());
              list.Add(player3.ToString());
-
-
              gameDataService.AddPlayer(playerName1, playerColor1, connectionID1);
-             int count = gameDataService.GetPlayerList().Count;
-             Assert.Equal(1, count);
-             //Debug.WriteLine(count);
              gameDataService.AddPlayer(playerName2, playerColor2, connectionID2);
-             count = gameDataService.GetPlayerList().Count;
-             Assert.Equal(2, count);
              gameDataService.AddPlayer(playerName3, playerColor3, connectionID3);
-             count = gameDataService.GetPlayerList().Count;
-             Assert.Equal(3, count);
-             //Debug.WriteLine(count);
 
-
-             //Debug.WriteLine(count);
-             List<string> players = gameDataService.GetPlayerList();
-             Assert.Equal(list[0], players[0]);
-             Assert.Equal(list[1], players[1]);
-             Assert.Equal(list[2], players[2]);
-         }*/
+             Assert.Equal(list[0], gameDataService.GetPlayerList()[0]);
+             Assert.Equal(list[1], gameDataService.GetPlayerList()[1]);
+             Assert.Equal(list[2], gameDataService.GetPlayerList()[2]);
+         }
 
     }
 }

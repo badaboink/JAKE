@@ -13,5 +13,9 @@ namespace JAKE.classlibrary
         {          
             return base.Display("", 0, true);        
         }
+        public (string text, float health, bool shieldOn) HideShield()
+        {
+            return base.Display("", 0, false);
+        }
     }
 }
