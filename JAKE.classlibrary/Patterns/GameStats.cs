@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary.Patterns
 {
-    public sealed class GameStats
+    public class GameStats
     {
         private static GameStats instance = null;
         private static readonly object lockObject = new object();
@@ -14,6 +14,8 @@ namespace JAKE.classlibrary.Patterns
         private int playersCount;
         private float playerHealth;
         private int playerScore;
+        private int playerSpeed;
+        private bool shieldOn;
 
         public int PlayersCount
         {
@@ -33,11 +35,23 @@ namespace JAKE.classlibrary.Patterns
             set { playerScore = value; }
         }
 
+        public int PlayerSpeed
+        {
+            get { return playerSpeed; }
+            set { playerSpeed = value; }
+        }
+        public bool ShieldOn
+        {
+            get { return shieldOn; }
+            set { shieldOn = value; }
+        }
         private GameStats()
         {
             playersCount = 0;
             playerHealth = 100f;
             playerScore = 0;
+            playerSpeed = 10;
+            shieldOn = false;
         }
 
         public static GameStats Instance

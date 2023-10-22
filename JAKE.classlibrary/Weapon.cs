@@ -26,10 +26,9 @@ namespace JAKE.classlibrary
             Width = width;
             Height = heught;
         }
-        public void Interact(Player player, int value)
+        public void Interact(GameStats gameStats)
         {
-            // Implement weapon logic
-            //player.EquipWeapon("Sword");
+
         }
         public bool MatchesId(int id)
         {

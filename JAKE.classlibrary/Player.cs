@@ -139,11 +139,11 @@ namespace JAKE.classlibrary
             return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}";
         }
 
-        public void IncreaseHealth(int health)
-        {
-            //health padidint 
-            Debug.WriteLine("padidino health");
-        }
+        //public void IncreaseHealth(int health)
+        //{
+        //    //health padidint 
+        //    Debug.WriteLine("padidino health");
+        //}
 
         public void IncreaseSpeed(int speed)
         {
@@ -152,11 +152,11 @@ namespace JAKE.classlibrary
             _speed += speed;
         }
 
-        public void IncreasePoints(int points)
-        {
-            //points padidint
-            Debug.WriteLine("padidino points");
-        }
+        //public void IncreasePoints(int points)
+        //{
+        //    //points padidint
+        //    Debug.WriteLine("padidino points");
+        //}
 
         public void AddShield(int time)
         {

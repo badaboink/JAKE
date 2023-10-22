@@ -40,11 +40,7 @@ namespace JAKE.classlibrary
         {
             Time = time;
         }
-            public void Interact(Player player)
-        {
-            // Implement shield logic
-           // player.EquipShield("Wooden Shield");
-        }
+      
         public bool MatchesId(int id)
         {
             return this.id == id;
@@ -65,10 +61,10 @@ namespace JAKE.classlibrary
         {
             this.Time = time;
         }
-
-        public void Interact(Player player, int value)
+        public void Interact(GameStats gameStats)
         {
-            player.AddShield(value);
+
+            gameStats.ShieldOn = true;
         }
     }
 }

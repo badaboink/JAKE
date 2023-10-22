@@ -62,6 +62,7 @@ namespace Server.Hubs
 
                 await observers[Context.ConnectionId].GameStart(newPlayer, _gameDataService.GetObstacleData());
                 List<string> playerlist = _gameDataService.GetPlayerList();
+                Console.WriteLine("playerlistcount gamehub: " + playerlist.Count);
                 DateTime currentgametime = _gameDataService.GetCurrentGameTime();
                 foreach (var observerEntry in observers)
                 {

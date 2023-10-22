@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JAKE.classlibrary.Patterns;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -59,6 +60,115 @@ namespace JAKE.classlibrary
             }
             return distance;
         }
+
+        public double DistanceFromObstacleX(GameStats gameStat, double playerDirectionX, double playerCurrentX, double playerWidth)
+        {
+            double obstacleLeft = this.PositionX;
+            double obstacleRight = this.PositionX + this.Width;
+
+            double playerLeft = playerCurrentX;
+            double playerRight = playerCurrentX + playerWidth;
+
+            if (playerDirectionX > 0)
+            {
+                // Player is moving right
+                double distanceToObstacle = obstacleLeft - playerRight;
+                return distanceToObstacle < gameStat.PlayerSpeed ? distanceToObstacle : 0;
+            }
+            else if (playerDirectionX < 0)
+            {
+                // Player is moving left
+                double distanceToObstacle = playerLeft - obstacleRight;
+                return distanceToObstacle > -gameStat.PlayerSpeed ? distanceToObstacle : 0;
+            }
+            else
+            {
+                // Player is not moving horizontally
+                return 0;
+            }
+        }
+
+        public double DistanceFromObstacleY(GameStats gameStat, double playerDirectionY, double playerCurrentY, double playerHeight)
+        {
+            double obstacleTop = this.PositionY;
+            double obstacleBottom = this.PositionY + this.Height;
+
+            double playerTop = playerCurrentY;
+            double playerBottom = playerCurrentY + playerHeight;
+
+            if (playerDirectionY > 0)
+            {
+                // Player is moving down
+                double distanceToObstacle = obstacleTop - playerBottom;
+                return distanceToObstacle < gameStat.PlayerSpeed ? distanceToObstacle : 0;
+            }
+            else if (playerDirectionY < 0)
+            {
+                // Player is moving up
+                double distanceToObstacle = playerTop - obstacleBottom;
+                return distanceToObstacle > -gameStat.PlayerSpeed ? distanceToObstacle : 0;
+            }
+            else
+            {
+                // Player is not moving vertically
+                return 0;
+            }
+        }
+        public double DistanceFromShieldX(GameStats gameStat, double playerDirectionX, double playerCurrentX, double playerWidth)
+        {
+            double shieldLeft = this.PositionX;
+            double shieldRight = this.PositionX + this.Width;
+
+            double playerLeft = playerCurrentX;
+            double playerRight = playerCurrentX + playerWidth;
+
+            if (playerDirectionX > 0)
+            {
+                // Player is moving right
+                double distanceToShield = shieldLeft - playerRight;
+                return distanceToShield < gameStat.PlayerSpeed ? distanceToShield : 0;
+            }
+            else if (playerDirectionX < 0)
+            {
+                // Player is moving left
+                double distanceToShield = playerLeft - shieldRight;
+                return distanceToShield > -gameStat.PlayerSpeed ? distanceToShield : 0;
+            }
+            else
+            {
+                // Player is not moving horizontally
+                return 0;
+            }
+        }
+
+        public double DistanceFromShieldY(GameStats gameStat, double playerDirectionY, double playerCurrentY, double playerHeight)
+        {
+            double shieldTop = this.PositionY;
+            double shieldBottom = this.PositionY + this.Height;
+
+            double playerTop = playerCurrentY;
+            double playerBottom = playerCurrentY + playerHeight;
+
+            if (playerDirectionY > 0)
+            {
+                // Player is moving down
+                double distanceToShield = shieldTop - playerBottom;
+                return distanceToShield < gameStat.PlayerSpeed ? distanceToShield : 0;
+            }
+            else if (playerDirectionY < 0)
+            {
+                // Player is moving up
+                double distanceToShield = playerTop - shieldBottom;
+                return distanceToShield > -gameStat.PlayerSpeed ? distanceToShield : 0;
+            }
+            else
+            {
+                // Player is not moving vertically
+                return 0;
+            }
+        }
+
+
         public override string ToString()
         {
             return $"{Width}:{Height}:{PositionX}:{PositionY}";
