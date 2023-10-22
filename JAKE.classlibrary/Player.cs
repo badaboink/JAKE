@@ -38,8 +38,7 @@ namespace JAKE.classlibrary
             }
              
         }
-        
-        
+           
         public Player()
         {
             _id = -1;
