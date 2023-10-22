@@ -57,7 +57,10 @@ namespace JAKE.client
         private bool shieldOn = false;
         private bool OverlapMove = false;
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
-
+        private static List<Zombie> miniZombieList = new List<Zombie>();
+        private BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
+        
+        //TODO: zombie visual, main iskvietimai, gavimai responses, judejimas, logika ar veikia
         private bool isCollidingWithHealthBoost = false;
 
 
@@ -916,10 +919,6 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= coinY &&
                         playerY <= coinY + coinRect.Height)
                     {
-                        //TODO: kazkoki metoda viena turi turet visi objects bet jam reiktu paduot player, o prie jo nesaugom points ir visa kita
-                        //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
-                        //coin.Interact(player, coin.Points);
-                        //gameStat.PlayerScore += coin.Points;
                         coin.Interact(gameStat);
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
                         Base text = new Base(currentPlayer);
@@ -940,12 +939,10 @@ namespace JAKE.client
 
                         // Convert the dictionary to a JSON string
                         string jsonString = JsonConvert.SerializeObject(jsonObject);
-                        IStringAdapter jsonAdapter = new JsonAdapter();
-                        
-                        string coinString = jsonAdapter.Convert(jsonString);
+                        ServerString server = new ServerString(jsonString);
                         
                         //-----------
-                        await connection.SendAsync("SendPickedCoin", coinString);  //coin.ToString()
+                        await connection.SendAsync("SendPickedCoin", server.ConvertedString);  //coin.ToString()
                     }
                 }
             }

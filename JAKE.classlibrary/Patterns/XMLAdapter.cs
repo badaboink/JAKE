@@ -9,20 +9,11 @@ namespace JAKE.classlibrary.Patterns
 {
     public class XMLAdapter : IStringAdapter
     {
-        public string Convert(string xmlString)
+        private XMLAdaptee _xmlConverter = new XMLAdaptee();
+
+        public string Convert(string inputString)
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            xmlDoc.LoadXml(xmlString);
-
-            // Extract values from XML
-            List<string> values = new List<string>();
-            foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes)
-            {
-                values.Add(node.InnerText);
-            }
-
-            // Convert values to specific format
-            return string.Join(":", values);
+            return _xmlConverter.ConvertFromXML(inputString);
         }
     }
 }

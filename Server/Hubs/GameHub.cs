@@ -106,6 +106,10 @@ namespace Server.Hubs
                 {
                     _gameDataService.AddSpeedBoost(5);
                 }
+                if (_gameDataService.GetBossNull())
+                {
+                    _gameDataService.AddBossZombie("Sefas", 200);
+                }
             }
             List<string> enemies = _gameDataService.GetEnemies();
             if (enemies.Count > 0)
@@ -133,6 +137,12 @@ namespace Server.Hubs
             {
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleSpeedBoosts(speedBoosts);
             }
+            List<string> boss = _gameDataService.GetBossZombie();
+            if (boss.Count > 0)
+            {
+                await _gameDataService.GetObservers()[Context.ConnectionId].HandleBossZombie(boss);
+            }
+
 
         }
         public async Task SendPickedCoin(string coin)
@@ -288,6 +298,46 @@ namespace Server.Hubs
                     if (connectionId != Context.ConnectionId)
                     {
                         await observer.HandleDeadEnemy(id, color);
+                    }
+                }
+            }
+        }
+
+        public async Task SendDeadBossZombie(string boss)
+        {
+            string[] parts = boss.Split(':');
+            if (parts.Length == 5)
+            {
+                string name = parts[0];
+                _gameDataService.RemoveBossZombie();
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var connectionId = observerEntry.Key;
+                    var observer = observerEntry.Value;
+                    if (connectionId != Context.ConnectionId)
+                    {
+                        await observer.HandleDeadBossZombie(name);
+                    }
+                }
+            }
+        }
+
+        public async Task SendDeadMiniZombie(string boss)
+        {
+            string[] parts = boss.Split(':');
+            if (parts.Length == 5)
+            {
+                string name = parts[0];
+                _gameDataService.RemoveMiniZombie();
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var connectionId = observerEntry.Key;
+                    var observer = observerEntry.Value;
+                    if (connectionId != Context.ConnectionId)
+                    {
+                        await observer.HandleDeadMiniZombie(name);
                     }
                 }
             }

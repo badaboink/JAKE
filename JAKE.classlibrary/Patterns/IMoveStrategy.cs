@@ -9,5 +9,6 @@ namespace JAKE.classlibrary.Patterns
     public interface IMoveStrategy
     {
         void Move(Enemy enemy, List<Player> players);
+        void MoveZombie(Zombie zombie, List<Player> players);
     }
 }
