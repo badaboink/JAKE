@@ -10,6 +10,12 @@ namespace JAKE.classlibrary.Patterns
     {
         private Player player = new Player();
 
+        public IBuilder<Player> New()
+        {
+            player = new Player();
+            return this;
+        }
+
         public IBuilder<Player> SetId(int id)
         {
             player.SetId(id);

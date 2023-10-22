@@ -8,6 +8,7 @@ namespace JAKE.classlibrary.Patterns
 {
     public interface IBuilder<T>
     {
+        IBuilder<T> New();
         IBuilder<T> SetId(int id);
         IBuilder<T> SetColor(string color);
         IBuilder<T> SetCurrentPosition(double x, double y);

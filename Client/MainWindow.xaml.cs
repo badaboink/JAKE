@@ -604,37 +604,38 @@ namespace JAKE.client
             {
                 int deltaX = 0;
                 int deltaY = 0;
-
+                bool move = false;
                 // Handle arrow key presses here and update the player's position
                 // based on the arrow key input.
                 if (e.Key == Key.Left)
                 {
+                    move = true;
                     deltaX = -1;
                     playerDirectionX = deltaX; // Store the player's direction
                     playerDirectionY = 0;
-                    if (!OverlapMove) UpdateTextLabelPosition(-10, 0, 30, 45);
                 }
                 else if (e.Key == Key.Right)
                 {
+                    move = true;
                     deltaX = 1;
                     playerDirectionX = deltaX; // Store the player's direction
                     playerDirectionY = 0;
-                    if (!OverlapMove) UpdateTextLabelPosition(10, 0, 10, 45);
                 }
                 else if (e.Key == Key.Up)
                 {
+                    move = true;
                     deltaY = -1;
                     playerDirectionY = deltaY; // Store the player's direction
                     playerDirectionX = 0;
-                    if (!OverlapMove) UpdateTextLabelPosition(0, -10, 20, 35);
                 }
                 else if (e.Key == Key.Down)
                 {
+                    move = true;
                     deltaY = 1;
                     playerDirectionY = deltaY; // Store the player's direction
                     playerDirectionX = 0;
-                    if (!OverlapMove) UpdateTextLabelPosition(0, 10, 20, 55);
-                }              
+                }
+                
 
                 if (e.Key == Key.Space)
                 {
@@ -692,7 +693,7 @@ namespace JAKE.client
                 }
 
 
-                if (!overlap)
+                if (!overlap && move)
                 {
                     double minX = 0; // Minimum X-coordinate
                     double minY = 0; // Minimum Y-coordinate
@@ -704,13 +705,13 @@ namespace JAKE.client
                     // Ensure player stays within the boundaries
                     newX = Math.Max(minX, Math.Min(newX, maxX));
                     newY = Math.Max(minY, Math.Min(newY, maxY));
-
                     Move(newX, newY);
                     OverlapMove = false;
                 }
 
 
 
+                UpdateTextLabelPosition();
                 HandleEnemyCollisions(playerVisuals[currentPlayer]);
                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
                 HandleShieldsCollisions(playerVisuals[currentPlayer]);
@@ -719,14 +720,11 @@ namespace JAKE.client
             }
         }
 
-        private void UpdateTextLabelPosition(int posX, int posY, int posHeartX, int posHeartY)
+        private void UpdateTextLabelPosition()
         {
             // pastoviai updatinama, kad tekstas sekiotu zaideja
             double playerX = currentPlayer.GetCurrentX();
             double playerY = currentPlayer.GetCurrentY();
-
-            playerX += playerDirectionX * gameStat.PlayerSpeed;
-            playerY += playerDirectionY * gameStat.PlayerSpeed;
 
             // object paemimo text
             Canvas.SetLeft(testLabel, playerX);
