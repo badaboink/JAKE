@@ -35,5 +35,9 @@ namespace JAKE.classlibrary.Patterns
                 enemy.SetCurrentPosition(newX, newY);
             }
         }
+        public void MoveZombie(Zombie zombie, List<Player> players)
+        {
+
+        }
     }
 }

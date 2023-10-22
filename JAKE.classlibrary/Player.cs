@@ -16,10 +16,28 @@ namespace JAKE.classlibrary
         private int _id;
         private string _name;
         private string _color;
-        private double _currentX;
-        private double _currentY;
+        private Coordinates _currentDirection = new(0, 1);
+        private Coordinates _currentCoords = new(0, 0);
+        private Stack<Coordinates> _history = new Stack<Coordinates>();
         private int _speed;
         public string Ability { get; set; }
+        private class Coordinates
+        {
+            public double x;
+            public double y;
+
+            public Coordinates()
+            {
+            }
+
+            public Coordinates(double x, double y)
+            {
+                this.x = x;
+                this.y = y;
+            }
+
+
+        }
 
         public Player(int id, string name, string color)
         {
@@ -74,27 +92,51 @@ namespace JAKE.classlibrary
 
         public double GetCurrentX()
         {
-            return _currentX;
+            return _currentCoords.x;
         }
-
-        public int GetSpeed()
-        {
-            return _speed; ;
-        }
-
         public double GetCurrentY()
         {
-            return _currentY;
+            return _currentCoords.y;
         }
+
+        public void SetCurrentPosition(double x, double y)
+        {
+            _history.Push(new Coordinates(_currentCoords.x, _currentCoords.y));
+            _currentCoords.x = x;
+            _currentCoords.y = y;
+        }
+
+        public double GetDirectionX()
+        {
+            return _currentDirection.x;
+        }
+
+        public double GetDirectionY()
+        {
+            return _currentDirection.y;
+        }
+
+        public void SetCurrentDirection(double x, double y)
+        {
+            _currentDirection.x = x;
+            _currentDirection.y = y;
+        }
+        public int GetSpeed()
+        {
+            return _speed;
+        }
+
         public string GetConnectionId()
         {
             return _connectionid;
         }
 
-        public void SetCurrentPosition(double x, double y)
+        public void Undo()
         {
-            _currentX = x;
-            _currentY = y;
+            if (_history.Count > 0)
+            {
+                _currentCoords = _history.Pop();
+            }
         }
         public void SetConnectionId(string id)
         {

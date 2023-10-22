@@ -23,6 +23,9 @@ namespace Server.GameData
         public MapObjectFactory objectFactory = new MapObjectFactory();
 
         public Director director;
+
+        private static List<Zombie> minions = new List<Zombie>();
+        private BossZombie boss = new BossZombie("", 0, 0, 0,0, minions);
         public InMemoryGameDataService()
         {
             // Generate obstacles when the service is created
@@ -48,27 +51,6 @@ namespace Server.GameData
             players.Remove(playerToRemove);
             return playerToRemove;
         }
-        //IMapObject healthBoost = objectFactory.CreateMapObject("healthboost");
-        //IMapObject coin = objectFactory.CreateMapObject("coin");
-        //IMapObject weapon = objectFactory.CreateMapObject("weapon");
-        //IMapObject shield = objectFactory.CreateMapObject("shield");
-        //IMapObject speedBoost = objectFactory.CreateMapObject("speedboost");
-
-        //Player player = new Player();
-
-        //healthBoost.Interact(player);
-        //coin.Interact(player);
-        //weapon.Interact(player);
-        //shield.Interact(player);
-        //speedBoost.Interact(player);
-
-        //KAIP DARYT>?? 1) nurodyt points string ir is anksto tik galimos reiksmes 2)priskirt points ne per konstruktoriu o tiesiai
-        //jei skirtingi laukai nei interfac'e, tai kaip juos priskirt?
-        //ar lists turi but interface tipo ar klases?
-        //image priskirt jau mainwindow? 
-        //kurioj vietoj laikom points ir health? prie player? 
-        //gamedata kuo skiriasi kiekvienam faile metodai? kur jie naudojasi?
-        //gamehub sedcoins?
         
 
         public void EditPlayerPosition(int id, double x, double y)
@@ -148,6 +130,90 @@ namespace Server.GameData
                 }
                 return enemies.Select(enemy => enemy.ToString()).ToList();
             }
+        }
+
+        public BossZombie AddBossZombie(string name, int health)
+        {
+
+            Random random = new Random();
+            BossZombie bossZombie = new BossZombie(name, health, 0,0, 70, new List<Zombie>());
+            int maxAttempts = 100;
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            {
+                double spawnX = random.Next(bossZombie.Size, 1920 - 60 - bossZombie.Size);
+                double spawnY = random.Next(bossZombie.Size, 1080 - 80 - bossZombie.Size);
+
+                bool positionClear = GameFunctions.IsPositionClear(spawnX, spawnY, obstacles, bossZombie.Size);
+
+                if (positionClear)
+                {
+                    bossZombie.SetCurrentPosition(spawnX, spawnY);
+                    break;
+                }
+            }
+            // Add 8 mini zombies around the boss zombie in a circular pattern
+            for (int i = 0; i < 8; i++)
+            {
+                double angle = 2 * Math.PI * i / 8; // Divide the circle into 8 equal parts
+                bossZombie.AddMinion(new MiniZombie($"Minion {i + 1}", 50, 0, 0,10), angle, 3); // Radius set to 3 for example
+            }
+
+            var zombies = new List<Zombie>
+            {
+                bossZombie
+            };
+
+            bossZombie.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - bossZombie.Size, 1080 - 80 - bossZombie.Size, 3, obstacles));
+
+            boss = bossZombie;
+            minions = zombies;
+            return bossZombie;
+
+        }
+
+        public void UpdateBossZombie(int health, bool mini)
+        { 
+            boss.Health = health;
+           // if (!mini) minions.Clear();
+        }
+
+        public void RemoveBossZombie()
+        {
+            boss = null;
+        }
+        public void RemoveMiniZombie()
+        {
+            minions.Clear();
+        }
+        public List<string> GetBossZombie()
+        {
+            List<string> zombies = new List<string>();
+            zombies.Add(boss.ToString());
+            zombies.AddRange(minions.Select(minion => minion.ToString())); // Add minions to the list
+
+            return zombies;
+        }
+        public bool GetBossNull()
+        {
+            return boss == null;
+        }
+        // strategy pattern
+        // strategy for movement changes after xxx amount of time has passed
+        public List<string> UpdateBossZombiePosition() //List<string>
+        {
+            boss.Move(players);
+                foreach (var minion in minions)
+                {
+                    minion.Move(players);
+                }
+
+            List<string> zombies = new List<string>();
+            zombies.Add(boss.ToString()); 
+            zombies.AddRange(minions.Select(minion => minion.ToString())); // Add minions to the list
+
+            return zombies;
+
+            //return boss.ToString();
         }
         public DateTime GetCurrentGameTime()
         {

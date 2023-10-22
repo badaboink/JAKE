@@ -8,23 +8,12 @@ namespace JAKE.classlibrary.Patterns
 {
     public class ConsoleAdapter : IStringAdapter
     {
-        public string Convert(string consoleString)
+        private ConsoleAdaptee _consoleConverter = new ConsoleAdaptee();
+
+        public string Convert(string inputString)
         {
-            // Extract values from console input
-            List<string> values = new List<string>();
-            string[] pairs = consoleString.Split(',');
-
-            foreach (var pair in pairs)
-            {
-                string[] keyValue = pair.Trim().Split(':');
-                if (keyValue.Length == 2)
-                {
-                    values.Add(keyValue[1].Trim());
-                }
-            }
-
-            // Convert values to specific format
-            return string.Join(":", values);
+            return _consoleConverter.ConvertFromConsole(inputString);
         }
+       
     }
 }

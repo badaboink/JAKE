@@ -13,5 +13,9 @@ namespace JAKE.classlibrary.Patterns
         {
 
         }
+        public void MoveZombie(Zombie zombie, List<Player> players)
+        {
+
+        }
     }
 }
