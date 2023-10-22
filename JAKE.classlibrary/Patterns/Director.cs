@@ -24,6 +24,7 @@ namespace JAKE.classlibrary.Patterns
         public Player ConstructPlayer(int id, string color)
         {
             return playerBuilder
+                .New()
                 .SetId(id)
                 .SetColor(color)
                 .Build();

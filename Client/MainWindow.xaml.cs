@@ -55,7 +55,6 @@ namespace JAKE.client
         private List<Weapon> weapons = new List<Weapon>();
         private readonly object enemyListLock = new object();
         private bool shieldOn = false;
-        private bool OverlapMove = false;
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         private static List<Zombie> miniZombieList = new List<Zombie>();
         private BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
@@ -172,7 +171,7 @@ namespace JAKE.client
                             Dispatcher.Invoke(() =>
                             {
                                 PlayerVisual playerVisual = playerVisuals[playerInfo];
-                                playerInfo.SetCurrentPosition(x, y);
+                                //playerInfo.SetCurrentPosition(x, y);
                                 Canvas.SetLeft(playerVisual, x);
                                 Canvas.SetTop(playerVisual, y);
                             });
@@ -203,7 +202,7 @@ namespace JAKE.client
                     
                     Dispatcher.Invoke(() =>
                     {
-                        playerInfoList[playerId - 1].SetCurrentPosition(x, y);
+                        //playerInfoList[playerId - 1].SetCurrentPosition(x, y);
 
                         Player playerInfo = playerInfoList[playerId - 1];
                         PlayerVisual playerVisual = playerVisuals[playerInfo];
@@ -597,123 +596,54 @@ namespace JAKE.client
             return input.Substring(index);
         }
 
-        private int playerDirectionX = 0;
-        private int playerDirectionY = 0;
+        //private int playerDirectionX = 0;
+        //private int playerDirectionY = 0;
         //private int score = 0;
         //private int health = 100;
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (gamestarted)
             {
-                int deltaX = 0;
-                int deltaY = 0;
-
+                Controller controller = new Controller();
                 // Handle arrow key presses here and update the player's position
                 // based on the arrow key input.
-                if (e.Key == Key.Left)
+                bool execute = true;
+                switch (e.Key)
                 {
-                    deltaX = -1;
-                    playerDirectionX = deltaX; // Store the player's direction
-                    playerDirectionY = 0;
-                    if (!OverlapMove) UpdateTextLabelPosition(-10, 0, 30, 45);
-                }
-                else if (e.Key == Key.Right)
-                {
-                    deltaX = 1;
-                    playerDirectionX = deltaX; // Store the player's direction
-                    playerDirectionY = 0;
-                    if (!OverlapMove) UpdateTextLabelPosition(10, 0, 10, 45);
-                }
-                else if (e.Key == Key.Up)
-                {
-                    deltaY = -1;
-                    playerDirectionY = deltaY; // Store the player's direction
-                    playerDirectionX = 0;
-                    if (!OverlapMove) UpdateTextLabelPosition(0, -10, 20, 35);
-                }
-                else if (e.Key == Key.Down)
-                {
-                    deltaY = 1;
-                    playerDirectionY = deltaY; // Store the player's direction
-                    playerDirectionX = 0;
-                    if (!OverlapMove) UpdateTextLabelPosition(0, 10, 20, 55);
-                }              
-
-                if (e.Key == Key.Space)
-                {
-                    // Use the stored direction for shooting
-                    Shoot(playerDirectionX, playerDirectionY);
-                }
-
-                double playerCurrentX = currentPlayer.GetCurrentX();
-                double playerCurrentY = currentPlayer.GetCurrentY();
-                double stepSize = gameStat.PlayerSpeed; // Step size can be adjusted as needed
-
-                double newX = playerCurrentX + playerDirectionX * stepSize;
-                double newY = playerCurrentY + playerDirectionY * stepSize;
-                bool overlap = false;
-                OverlapMove = false;
-
-                foreach (Obstacle obstacle in obstacles)
-                {
-                    if (obstacle.WouldOverlap(newX, newY, 50, 50))
-                    {
-                        overlap = true;
-                        OverlapMove = true;
-                        double distanceX = obstacle.DistanceFromObstacleX(gameStat, playerDirectionX, playerCurrentX, 50);
-                        double distanceY = obstacle.DistanceFromObstacleY(gameStat, playerDirectionY, playerCurrentY, 50);
-
-                        // Move player to the closest edge of the obstacle
-                        newX = playerCurrentX + distanceX;
-                        newY = playerCurrentY + distanceY;
-
-                        // Adjust player position so that its side touches the obstacle's side
-                        if (playerDirectionX > 0)
-                        {
-                            // Player is moving right, adjust X position
-                            newX -= 50;
-                        }
-                        else if (playerDirectionX < 0)
-                        {
-                            // Player is moving left, adjust X position
-                            newX += obstacle.Width;
-                        }
-
-                        if (playerDirectionY > 0)
-                        {
-                            // Player is moving down, adjust Y position
-                            newY -= 50;
-                        }
-                        else if (playerDirectionY < 0)
-                        {
-                            // Player is moving up, adjust Y position
-                            newY += obstacle.Height;
-                        }
-
+                    case Key.Left:
+                        controller.SetCommand(new MoveLeft(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
+                        //move = true;
                         break;
-                    }
+                    case Key.Right:
+                        controller.SetCommand(new MoveRight(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
+                        //move = true;
+                        break;
+                    case Key.Up:
+                        controller.SetCommand(new MoveUp(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
+                        //move = true;
+                        break;
+                    case Key.Down:
+                        controller.SetCommand(new MoveDown(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
+                        //move = true;
+                        break;
+                    case Key.Z:
+                        controller.SetCommand(new Undo(currentPlayer));
+                        break;
+                    case Key.Space:
+                        controller.SetCommand(new ShootCommand(currentPlayer, this));
+                        break;
+                    default:
+                        execute = false;
+                        break;
                 }
-
-
-                if (!overlap)
+                
+                if (execute)
                 {
-                    double minX = 0; // Minimum X-coordinate
-                    double minY = 0; // Minimum Y-coordinate
-                    double windowWidth = this.ActualWidth;
-                    double windowHeight = this.ActualHeight;
-                    double maxX = windowWidth - 60; // Maximum X-coordinate
-                    double maxY = windowHeight - 80; // Maximum Y-coordinate
-
-                    // Ensure player stays within the boundaries
-                    newX = Math.Max(minX, Math.Min(newX, maxX));
-                    newY = Math.Max(minY, Math.Min(newY, maxY));
-
-                    Move(newX, newY);
-                    OverlapMove = false;
+                    controller.Execute();
                 }
 
-
-
+                Move(currentPlayer.GetCurrentX(), currentPlayer.GetCurrentY());
+                UpdateTextLabelPosition();
                 HandleEnemyCollisions(playerVisuals[currentPlayer]);
                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
                 HandleShieldsCollisions(playerVisuals[currentPlayer]);
@@ -722,14 +652,42 @@ namespace JAKE.client
             }
         }
 
-        private void UpdateTextLabelPosition(int posX, int posY, int posHeartX, int posHeartY)
+        private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
+        {
+            Canvas.SetLeft(playerVisual, moveX);
+            Canvas.SetTop(playerVisual, moveY);
+        }
+
+        private async void Move(double newX, double newY)
+        {
+            UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
+            await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
+        }
+
+        private class ShootCommand : Command
+        {
+            MainWindow window;
+            public ShootCommand(Player player, MainWindow mainWindow) : base(player)
+            {
+                this.window = mainWindow;
+            }
+
+            public override void Execute()
+            {
+                window.Shoot((int)player.GetDirectionX(), (int)player.GetDirectionY());
+            }
+        }
+
+        protected void Shoot(int deltaX, int deltaY)
+        {
+            CreateShot(playerVisuals[currentPlayer], deltaX, deltaY);
+        }
+
+        private void UpdateTextLabelPosition()
         {
             // pastoviai updatinama, kad tekstas sekiotu zaideja
             double playerX = currentPlayer.GetCurrentX();
             double playerY = currentPlayer.GetCurrentY();
-
-            playerX += playerDirectionX * gameStat.PlayerSpeed;
-            playerY += playerDirectionY * gameStat.PlayerSpeed;
 
             // object paemimo text
             Canvas.SetLeft(testLabel, playerX);
@@ -1073,16 +1031,6 @@ namespace JAKE.client
             }
         }
 
-        private async void Move(double newX, double newY)
-        {
-            UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
-            await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
-        }
-
-        private void Shoot(int deltaX, int deltaY)
-        {
-            CreateShot(playerVisuals[currentPlayer], deltaX, deltaY);
-        }
 
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
         {
@@ -1255,13 +1203,7 @@ namespace JAKE.client
         }
 
 
-        private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
-        {
-            Canvas.SetLeft(playerVisual, moveX);
-            Canvas.SetTop(playerVisual, moveY);
-
-            currentPlayer.SetCurrentPosition(moveX, moveY);
-        }
+        
 
         /*
          
