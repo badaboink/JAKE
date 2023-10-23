@@ -51,11 +51,11 @@ namespace Server.Hubs
         }
         private object syncLock = new object();
         
-        public async Task SendColor(string color, string name)
+        public async Task SendColor(string color, string name, string shotColor, string shotShape)  //keiciau
         {
             try
             {
-                Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId);
+                Player newPlayer = _gameDataService.AddPlayer(name, color, shotColor, shotShape, Context.ConnectionId);  //keiciau
                 Console.WriteLine($"Player {newPlayer.ToString()}");
 
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
@@ -270,7 +270,7 @@ namespace Server.Hubs
             }
         }
 
-        public async Task ShotFired(int player_id, double directionX, double directionY)
+        public async Task ShotFired(int player_id, double directionX, double directionY, string shotColor, string shotShape)
         {
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
@@ -279,7 +279,7 @@ namespace Server.Hubs
                 var observer = observerEntry.Value;
                 if (connectionId != Context.ConnectionId)
                 {
-                    await observer.HandleShotFired(player_id, directionX, directionY);
+                    await observer.HandleShotFired(player_id, directionX, directionY, shotColor, shotShape);
                 }
             }
         }

@@ -30,6 +30,7 @@ namespace JAKE.Client
         public static readonly DependencyProperty PlayerNameProperty =
             DependencyProperty.Register("PlayerName", typeof(string), typeof(PlayerVisual), new PropertyMetadata("PlayerName"));
 
+
         public Brush PlayerColor
         {
             get { return (Brush)GetValue(PlayerColorProperty); }

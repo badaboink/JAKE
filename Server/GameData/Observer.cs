@@ -28,9 +28,9 @@ namespace Server.GameData
             await clientProxy.SendAsync("UpdateEnemyHealth", id, color, health);
         }
 
-        public async Task HandleShotFired(int player_id, double directionX, double directionY)
+        public async Task HandleShotFired(int player_id, double directionX, double directionY, string shotColor, string shotShape)
         {
-            await clientProxy.SendAsync("UpdateShotsFired", player_id, directionX, directionY);
+            await clientProxy.SendAsync("UpdateShotsFired", player_id, directionX, directionY, shotColor, shotShape);
         }
 
         public async Task HandleDeadEnemy(int id, string color)
@@ -39,7 +39,7 @@ namespace Server.GameData
         }
         public async Task GameStart(Player newPlayer, string obstacles)
         {
-            await clientProxy.SendAsync("GameStart", newPlayer.GetId(), newPlayer.GetName(), newPlayer.GetColor(), obstacles);
+            await clientProxy.SendAsync("GameStart", newPlayer.GetId(), newPlayer.GetName(), newPlayer.GetColor(), newPlayer.GetShotColor(), newPlayer.GetShotShape(), obstacles);
         }
         public async Task HandleEnemies(List<string> enemies)
         {

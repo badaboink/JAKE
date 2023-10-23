@@ -202,7 +202,7 @@ namespace JAKE.classlibrary
         {
             return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetShotColor()}:{GetShotShape()}";
         }
-
+        // :{GetShotColor()}:{GetShotShape()}
         //public void IncreaseHealth(int health)
         //{
         //    //health padidint 

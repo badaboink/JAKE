@@ -5,7 +5,7 @@ namespace Server.GameData
     public interface IGameDataService
     {
         // Add a new player and return the player object
-        Player AddPlayer(string playerName, string playerColor, string connectionID);
+        Player AddPlayer(string playerName, string playerColor, string shotColor, string shotShape, string connectionID); // keiciau
 
         Player RemovePlayer(string connectionID);
 
