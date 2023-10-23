@@ -24,10 +24,33 @@ namespace JAKE.Client
     {
         public string SelectedColor { get; private set; }
         public string Name { get; private set; }
+        public string ShotColor { get; private set; }
+        public string ShotShape { get; private set; }
 
         public ColorChoiceForm()
         {
             InitializeComponent();
+        }
+
+        private void RedRound_Click(object sender, RoutedEventArgs e)
+        {
+            ShotColor = "red";
+            ShotShape = "round";
+        }
+        private void BlueRound_Click(object sender, RoutedEventArgs e)
+        {
+            ShotColor = "blue";
+            ShotShape = "round";
+        }
+        private void RedTriangle_Click(object sender, RoutedEventArgs e)
+        {
+            ShotColor = "red";
+            ShotShape = "triangle";
+        }
+        private void BlueTriangle_Click(object sender, RoutedEventArgs e)
+        {
+            ShotColor = "blue";
+            ShotShape = "triangle";
         }
 
         private void GreenButton_Click(object sender, RoutedEventArgs e)

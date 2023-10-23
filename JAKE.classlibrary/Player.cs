@@ -20,6 +20,8 @@ namespace JAKE.classlibrary
         private Coordinates _currentCoords = new(0, 0);
         private Stack<Coordinates> _history = new Stack<Coordinates>();
         private int _speed;
+        private string _shotColor;
+        private string _shotShape;
         public string Ability { get; set; }
         private class Coordinates
         {
@@ -39,12 +41,14 @@ namespace JAKE.classlibrary
 
         }
 
-        public Player(int id, string name, string color)
+        public Player(int id, string name, string color, string shotColor, string shotShape)
         {
             _id = id;
             _name = name;
             _color = color;
             _speed = 10;
+            _shotColor = shotColor;
+            _shotShape = shotShape;
             SetCurrentPosition(0, 0);
             if (ColorToAbilityMap.TryGetValue(color, out var ability))
             {
@@ -116,6 +120,16 @@ namespace JAKE.classlibrary
             return _currentDirection.y;
         }
 
+        public string GetShotColor()
+        {
+            return _shotColor;
+        }
+
+        public string GetShotShape()
+        {
+            return _shotShape;
+        }
+
         public void SetCurrentDirection(double x, double y)
         {
             _currentDirection.x = x;
@@ -150,6 +164,14 @@ namespace JAKE.classlibrary
         {
             _speed = speed;
         }
+        public void SetShotColor(string color)
+        {
+            _shotColor = color;
+        }
+        public void SetShotShape(string shape)
+        {
+            _shotShape = shape;
+        }
         private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
         {
             { "Green", "heal" },
@@ -178,7 +200,7 @@ namespace JAKE.classlibrary
         }
         public override string ToString()
         {
-            return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}";
+            return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetShotColor()}:{GetShotShape()}";
         }
 
         //public void IncreaseHealth(int health)
