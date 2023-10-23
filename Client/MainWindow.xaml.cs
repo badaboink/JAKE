@@ -101,7 +101,9 @@ namespace JAKE.client
 
             await GameStart();
         }
-
+        IBuilderVisual<PlayerVisual> playerVisualBuilder = new PlayerVisualBuilder();
+        IBuilderVisual<EnemyVisual> enemyVisualBuilder = new EnemyVisualBuilder();
+        IBuilderVisual<ShotVisual> shotVisualBuilder = new ShotVisualBuilder();
         private async Task GameStart()
         {            
             // Create and show the ColorChoiceForm as a pop-up
@@ -112,8 +114,8 @@ namespace JAKE.client
             string shotColor = colorChoiceForm.ShotColor;
             string shotShape = colorChoiceForm.ShotShape;
 
-            await connection.SendAsync("SendColor", selectedColor, name, shotColor, shotShape); // keiciau
-            connection.On<int, string, string, string, string, string>("GameStart", (id, name, color, shotColor, shotShape, obstacleData) =>
+            await connection.SendAsync("SendColor", selectedColor, name, shotColor, shotShape);
+            connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
                 currentPlayer = new Player(id, name, color, shotColor, shotShape);
                 gamestarted = true;
@@ -161,17 +163,13 @@ namespace JAKE.client
                             Debug.WriteLine("PRIDEJO " + playerInfo.GetId() + " LIST COUNT DABAR " +  playerInfoList.Count);
                             Dispatcher.Invoke(() =>
                             {
-                                PlayerVisual playerVisual = new PlayerVisual();
-                                ColorConverter converter = new ColorConverter();
-                                Color playerColor = (Color)ColorConverter.ConvertFromString(playerInfo.GetColor());
-                                SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
-                                playerVisual.PlayerName = playerInfo.GetName();
-                                playerVisual.PlayerColor = solidColorBrush;
-                                playerVisual.UpdateColor(solidColorBrush);
-
+                                PlayerVisual playerVisual = playerVisualBuilder.New()
+                                .SetName(playerInfo.GetName())
+                                .SetColor(playerInfo.GetColor())
+                                .SetPosition(x, y)
+                                .Build();
                                 playerVisuals[playerInfo] = playerVisual;
-                                Canvas.SetLeft(playerVisual, x);
-                                Canvas.SetTop(playerVisual, y);
+
                                 playersContainer.Items.Add(playerVisual);
                             });
                         }
@@ -209,24 +207,20 @@ namespace JAKE.client
                     string shotShape = parts[6];
                     Debug.WriteLine("LSITO COUNT again" + playerInfoList.Count);
                     Debug.WriteLine("PLAYERIO ID again" + playerId);
-                    playerInfoList[playerId - 1].SetCurrentPosition(x, y);
-                    playerInfoList[playerId - 1].SetShotColor(shotColor);  // keiciau
-                    playerInfoList[playerId - 1].SetShotShape(shotShape);
+                    Player playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
+                    playerInfo.SetCurrentPosition(x, y);
                     
                     Dispatcher.Invoke(() =>
                     {
-                        //playerInfoList[playerId - 1].SetCurrentPosition(x, y);
-
-                        Player playerInfo = playerInfoList[playerId - 1];
                         PlayerVisual playerVisual = playerVisuals[playerInfo];
+
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
 
-                        playerVisual.PlayerName = playerName;
-                        Color shotColor = (Color)ColorConverter.ConvertFromString(playerColor);
-                        SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
-                        playerVisual.PlayerColor = solidColorBrush;
-                        playerVisual.UpdateColor(solidColorBrush);
+                        if(playerName == "DEAD")
+                        {
+                            HandlePlayerDeath(playerInfo);
+                        }
                     });
                 }
             });
@@ -256,19 +250,13 @@ namespace JAKE.client
                             {
                                 Dispatcher.Invoke(() =>
                                 {
-                                    Debug.WriteLine("enemy spalva: " + enemy.GetColor());
-                                    EnemyVisual enemyVisual = new EnemyVisual();
-                                    ColorConverter converter = new ColorConverter();
-                                    Color enemyColor = (Color)ColorConverter.ConvertFromString(enemy.GetColor());
-
-                                    SolidColorBrush solidColorBrush = new SolidColorBrush(enemyColor);
-                                    enemyVisual.FillColor = solidColorBrush;
-                                    enemyVisual.EllipseSize = enemy.GetSize();
-                                    enemyVisual.UpdateEnemy(solidColorBrush);
+                                    EnemyVisual enemyVisual = enemyVisualBuilder.New()
+                                    .SetColor(enemyColor)
+                                    .SetSize(size)
+                                    .SetPosition(enemyX, enemyY)
+                                    .Build();
 
                                     enemyVisuals[enemy] = enemyVisual;
-                                    Canvas.SetLeft(enemyVisual, enemyX);
-                                    Canvas.SetTop(enemyVisual, enemyY);
                                     EnemyContainer.Children.Add(enemyVisual);
 
                                     HandleEnemyCollisions(playerVisuals[currentPlayer]);
@@ -298,12 +286,12 @@ namespace JAKE.client
                     collisionCheckedEnemies[enemy] = false;
                 }
             });
-            connection.On<int, double, double, string, string>("UpdateShotsFired", (playerid, X, Y, shotColor, shotShape) =>
+            connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
             {
                 Player playerToUpdate = playerInfoList.FirstOrDefault(player => player.MatchesId(playerid));
                 if (playerToUpdate != null)
                 {
-                    CreateShot(playerVisuals[playerToUpdate], X, Y, shotColor, shotShape);
+                    CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
                 }
             });
             connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
@@ -912,7 +900,7 @@ namespace JAKE.client
 
                 if (gameStat.PlayerHealth <= 0)
                 {
-                    HandlePlayerDeath();
+                    HandlePlayerDeath(currentPlayer);
                     await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
                 }
             }
@@ -934,22 +922,26 @@ namespace JAKE.client
 
                 if (gameStat.PlayerHealth <= 0)
                 {
-                    HandlePlayerDeath();
+                    HandlePlayerDeath(currentPlayer);
                     await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
                 }
             }
         }
 
-        private void HandlePlayerDeath()
+        private void HandlePlayerDeath(Player player)
         {
-            gamestarted = false;
-            deadLabel.Text = "DEAD!";
-            healthLabel.Text = $"Health: {0}";
-            playerVisuals[currentPlayer].PlayerName = "DEAD";
+            if(player.Equals(currentPlayer))
+            {
+                gamestarted = false;
+                deadLabel.Text = "DEAD!";
+                healthLabel.Text = $"Health: {0}";
+            }
+            
+            playerVisuals[player].PlayerName = "DEAD";
             Color shotColor = (Color)ColorConverter.ConvertFromString("black");
             SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
-            playerVisuals[currentPlayer].PlayerColor = solidColorBrush;
-            playerVisuals[currentPlayer].UpdateColor(solidColorBrush);
+            playerVisuals[player].PlayerColor = solidColorBrush;
+            playerVisuals[player].UpdateColor(solidColorBrush);
         }
 
 
@@ -1144,32 +1136,18 @@ namespace JAKE.client
             {
                 Dispatcher.Invoke(() =>
                 {
-                    // Create a new shot visual element (e.g., a bullet or projectile)
-                    ShotVisual shotVisual;
                     Shot shot;
-                    SolidColorBrush solidColorBrush;
-
                     double playerX = Canvas.GetLeft(playerVisual);
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
-                    //string chosenShotColor = currentPlayer.GetShotColor();
-                    //string chosenShotShape = currentPlayer.GetShotShape();
 
                     SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
-
-                    Color shotColor = (Color)ColorConverter.ConvertFromString(shot.getColor());
-                    solidColorBrush = new SolidColorBrush(shotColor);
-
-                    shotVisual = new ShotVisual();
-                    shotVisual.EllipseSize = shot.getSize();
-                    shotVisual.PolygonSize = shot.getSize();
-                    shotVisual.FillColor = solidColorBrush;
-                    shotVisual.UpdateShot(solidColorBrush, shot.getShape());
-
-                    // Set the initial position of the shot at the center of the player
-                    Canvas.SetLeft(shotVisual, shot.getX());
-                    Canvas.SetTop(shotVisual, shot.getY());
+                    ShotVisual shotVisual = shotVisualBuilder.New()
+                                .SetColor($"{color},{shape}")
+                                .SetSize(shot.getSize())
+                                .SetPosition(shot.getX(), shot.getY())
+                                .Build();
 
                     // Add the shot to the ShotContainer (Canvas)
                     ShotContainer.Children.Add(shotVisual);

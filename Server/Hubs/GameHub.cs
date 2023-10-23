@@ -51,11 +51,11 @@ namespace Server.Hubs
         }
         private object syncLock = new object();
         
-        public async Task SendColor(string color, string name, string shotColor, string shotShape)  //keiciau
+        public async Task SendColor(string color, string name, string shotcolor, string shotshape)
         {
             try
             {
-                Player newPlayer = _gameDataService.AddPlayer(name, color, shotColor, shotShape, Context.ConnectionId);  //keiciau
+                Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId, shotcolor, shotshape);
                 Console.WriteLine($"Player {newPlayer.ToString()}");
 
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
@@ -219,7 +219,7 @@ namespace Server.Hubs
 
         public async Task UpdateDeadPlayer(int id)
         {
-            _gameDataService.UpdateDeadPlayer(id - 1);
+            _gameDataService.UpdateDeadPlayer(id);
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {
@@ -228,13 +228,13 @@ namespace Server.Hubs
 
                 if (connectionId != Context.ConnectionId)
                 {
-                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id - 1));
+                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id));
                 }
             }
         }
         public async Task SendMove(int id, double x, double y)
         {
-            _gameDataService.EditPlayerPosition(id - 1, x, y);
+            _gameDataService.EditPlayerPosition(id, x, y);
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {
@@ -243,7 +243,7 @@ namespace Server.Hubs
 
                 if (connectionId != Context.ConnectionId)
                 {
-                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id - 1));
+                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id));
                 }
             }
         }
@@ -271,7 +271,7 @@ namespace Server.Hubs
             }
         }
 
-        public async Task ShotFired(int player_id, double directionX, double directionY, string shotColor, string shotShape)
+        public async Task ShotFired(int player_id, double directionX, double directionY)
         {
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
@@ -280,7 +280,7 @@ namespace Server.Hubs
                 var observer = observerEntry.Value;
                 if (connectionId != Context.ConnectionId)
                 {
-                    await observer.HandleShotFired(player_id, directionX, directionY, shotColor, shotShape);
+                    await observer.HandleShotFired(player_id, directionX, directionY);
                 }
             }
         }

@@ -22,7 +22,6 @@ namespace Server.GameData
         private List<Weapon> weapons = new List<Weapon>();
         public MapObjectFactory objectFactory = new MapObjectFactory();
 
-        public Director director;
 
         private static List<Zombie> minions = new List<Zombie>();
         private BossZombie boss = new BossZombie("", 0, 0, 0,0, minions);
@@ -30,18 +29,24 @@ namespace Server.GameData
         {
             // Generate obstacles when the service is created
             obstacles = GameFunctions.GenerateObstacles();
-            var playerBuilder = new PlayerBuilder();
-            director = new Director(playerBuilder);
         }
-        public Player AddPlayer(string playerName, string playerColor, string shotColor, string shotShape, string connectionID)
+        Random random = new Random();
+        int minId = 1;
+        int maxId = Int32.MaxValue;
+        HashSet<int> usedIds = new HashSet<int>();
+        HashSet<int> usedIdsEnemies = new HashSet<int>();
+        public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
+            int playerId = 0;
             Console.WriteLine("addplayer inmemory");
-            int playerId = players.Count + 1;
-            Player newPlayer = director.ConstructPlayer(playerId, playerColor);
+            do
+            {
+                playerId = new Random().Next(minId, maxId);
+            } while (usedIds.Contains(playerId));
+            usedIds.Add(playerId);
+            Player newPlayer = new Player(playerId, playerName, playerColor, shotcolor, shotshape);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
-            newPlayer.SetShotColor(shotColor);  // keiciau
-            newPlayer.SetShotShape(shotShape);
             players.Add(newPlayer);
             Console.WriteLine("playerscount inmemorydataservce: " + players.Count);
             return newPlayer;
@@ -50,6 +55,7 @@ namespace Server.GameData
         public Player RemovePlayer(string connectionID)
         {
             Player playerToRemove = players.FirstOrDefault(player => player.GetConnectionId() == connectionID);
+            usedIds.Remove(playerToRemove.GetId());
             players.Remove(playerToRemove);
             return playerToRemove;
         }
@@ -57,12 +63,15 @@ namespace Server.GameData
 
         public void EditPlayerPosition(int id, double x, double y)
         {
-            players[id].SetCurrentPosition(x, y);
+            Player playerToEdit = players.FirstOrDefault(p => p.GetId() == id);
+            playerToEdit.SetCurrentPosition(x, y);
         }
 
         public string GetPlayerData(int id)
         {
-            return players[id].ToString();
+            Player player = players.FirstOrDefault(p => p.GetId() == id);
+
+            return player.ToString();
         }
 
         public List<string> GetPlayerList()
@@ -80,7 +89,13 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
-                Enemy newEnemy = GameFunctions.GenerateEnemy(enemies.Count + 1, obstacles);
+                int enemyId = 0;
+                do
+                {
+                    enemyId = new Random().Next(minId, maxId);
+                } while (usedIdsEnemies.Contains(enemyId));
+                usedIdsEnemies.Add(enemyId);
+                Enemy newEnemy = GameFunctions.GenerateEnemy(enemyId, obstacles);
                 // TODO - nzn kokios maxX ir maxY reiksmes
                 newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80-newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
@@ -106,6 +121,7 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
+                usedIdsEnemies.Remove(id);
                 Enemy enemyToRemove = enemies.FirstOrDefault(enemy => enemy.MatchesId(id));
                 if (enemyToRemove != null)
                 {
@@ -298,8 +314,10 @@ namespace Server.GameData
         }
         public void UpdateDeadPlayer(int id)
         {
-            players[id].SetName("DEAD");
-            players[id].SetColor("Black");
+            Player playerToUpdate = players.FirstOrDefault(p => p.GetId() == id);
+
+            playerToUpdate.SetName("DEAD");
+            playerToUpdate.SetColor("Black");
         }
         private readonly object coinsListLock = new object();
         public Coin AddCoin(int points)
