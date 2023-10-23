@@ -218,7 +218,7 @@ namespace Server.Hubs
 
         public async Task UpdateDeadPlayer(int id)
         {
-            _gameDataService.UpdateDeadPlayer(id - 1);
+            _gameDataService.UpdateDeadPlayer(id);
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {
@@ -227,13 +227,13 @@ namespace Server.Hubs
 
                 if (connectionId != Context.ConnectionId)
                 {
-                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id - 1));
+                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id));
                 }
             }
         }
         public async Task SendMove(int id, double x, double y)
         {
-            _gameDataService.EditPlayerPosition(id - 1, x, y);
+            _gameDataService.EditPlayerPosition(id, x, y);
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {
@@ -242,7 +242,7 @@ namespace Server.Hubs
 
                 if (connectionId != Context.ConnectionId)
                 {
-                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id - 1));
+                    await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id));
                 }
             }
         }

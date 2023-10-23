@@ -206,11 +206,11 @@ namespace JAKE.client
                     string shotShape = parts[6];
                     Debug.WriteLine("LSITO COUNT again" + playerInfoList.Count);
                     Debug.WriteLine("PLAYERIO ID again" + playerId);
-                    playerInfoList[playerId - 1].SetCurrentPosition(x, y);
+                    Player playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
+                    playerInfo.SetCurrentPosition(x, y);
                     
                     Dispatcher.Invoke(() =>
                     {
-                        Player playerInfo = playerInfoList[playerId - 1];
                         PlayerVisual playerVisual = playerVisuals[playerInfo];
 
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());

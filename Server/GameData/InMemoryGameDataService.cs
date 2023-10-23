@@ -33,10 +33,19 @@ namespace Server.GameData
             var playerBuilder = new PlayerBuilder();
             director = new Director(playerBuilder);
         }
+        Random random = new Random();
+        int minId = 1;
+        int maxId = 100;
+        HashSet<int> usedIds = new HashSet<int>();
         public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
+            int playerId = 0;
             Console.WriteLine("addplayer inmemory");
-            int playerId = players.Count + 1;
+            do
+            {
+                playerId = new Random().Next(minId, maxId + 1);
+            } while (usedIds.Contains(playerId));
+            usedIds.Add(playerId);
             Player newPlayer = director.ConstructPlayer(playerId, playerColor);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
@@ -50,6 +59,7 @@ namespace Server.GameData
         public Player RemovePlayer(string connectionID)
         {
             Player playerToRemove = players.FirstOrDefault(player => player.GetConnectionId() == connectionID);
+            usedIds.Remove(playerToRemove.GetId());
             players.Remove(playerToRemove);
             return playerToRemove;
         }
@@ -57,12 +67,15 @@ namespace Server.GameData
 
         public void EditPlayerPosition(int id, double x, double y)
         {
-            players[id].SetCurrentPosition(x, y);
+            Player playerToEdit = players.FirstOrDefault(p => p.GetId() == id);
+            playerToEdit.SetCurrentPosition(x, y);
         }
 
         public string GetPlayerData(int id)
         {
-            return players[id].ToString();
+            Player player = players.FirstOrDefault(p => p.GetId() == id);
+
+            return player.ToString();
         }
 
         public List<string> GetPlayerList()
@@ -245,8 +258,10 @@ namespace Server.GameData
         }
         public void UpdateDeadPlayer(int id)
         {
-            players[id].SetName("DEAD");
-            players[id].SetColor("Black");
+            Player playerToUpdate = players.FirstOrDefault(p => p.GetId() == id);
+
+            playerToUpdate.SetName("DEAD");
+            playerToUpdate.SetColor("Black");
         }
         private readonly object coinsListLock = new object();
         public Coin AddCoin(int points)
