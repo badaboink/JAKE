@@ -32,15 +32,16 @@ namespace Server.GameData
         }
         Random random = new Random();
         int minId = 1;
-        int maxId = 100;
+        int maxId = Int32.MaxValue;
         HashSet<int> usedIds = new HashSet<int>();
+        HashSet<int> usedIdsEnemies = new HashSet<int>();
         public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
             int playerId = 0;
             Console.WriteLine("addplayer inmemory");
             do
             {
-                playerId = new Random().Next(minId, maxId + 1);
+                playerId = new Random().Next(minId, maxId);
             } while (usedIds.Contains(playerId));
             usedIds.Add(playerId);
             Player newPlayer = new Player(playerId, playerName, playerColor, shotcolor, shotshape);
@@ -88,7 +89,13 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
-                Enemy newEnemy = GameFunctions.GenerateEnemy(enemies.Count + 1, obstacles);
+                int enemyId = 0;
+                do
+                {
+                    enemyId = new Random().Next(minId, maxId);
+                } while (usedIdsEnemies.Contains(enemyId));
+                usedIdsEnemies.Add(enemyId);
+                Enemy newEnemy = GameFunctions.GenerateEnemy(enemyId, obstacles);
                 // TODO - nzn kokios maxX ir maxY reiksmes
                 newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80-newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
@@ -114,6 +121,7 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
+                usedIdsEnemies.Remove(id);
                 Enemy enemyToRemove = enemies.FirstOrDefault(enemy => enemy.MatchesId(id));
                 if (enemyToRemove != null)
                 {
