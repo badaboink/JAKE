@@ -34,7 +34,7 @@ namespace JAKE.client
     public partial class MainWindow : Window
     {
         private Player currentPlayer;
-        private bool gamestarted = false;
+        public bool gamestarted = false;
         private List<Player> playerInfoList = new List<Player>();
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
@@ -898,7 +898,7 @@ namespace JAKE.client
                 }
             }
         }
-        private async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
+        public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             if (!gameStat.ShieldOn)
             {
@@ -940,7 +940,7 @@ namespace JAKE.client
             }
         }
 
-        private void HandlePlayerDeath()
+        public void HandlePlayerDeath()
         {
             gamestarted = false;
             deadLabel.Text = "DEAD!";
