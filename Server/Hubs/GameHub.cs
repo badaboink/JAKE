@@ -51,11 +51,11 @@ namespace Server.Hubs
         }
         private object syncLock = new object();
         
-        public async Task SendColor(string color, string name)
+        public async Task SendColor(string color, string name, string shotcolor, string shotshape)
         {
             try
             {
-                Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId);
+                Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId, shotcolor, shotshape);
                 Console.WriteLine($"Player {newPlayer.ToString()}");
 
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();

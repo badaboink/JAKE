@@ -113,7 +113,7 @@ namespace JAKE.client
             string shotColor = colorChoiceForm.ShotColor;
             string shotShape = colorChoiceForm.ShotShape;
 
-            await connection.SendAsync("SendColor", selectedColor, name);
+            await connection.SendAsync("SendColor", selectedColor, name, shotColor, shotShape);
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
                 currentPlayer = new Player(id, name, color, shotColor, shotShape);
@@ -195,7 +195,7 @@ namespace JAKE.client
             {
                 string[] parts = player.Split(':');
 
-                if (parts.Length == 5)
+                if (parts.Length == 7)
                 {
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
@@ -288,7 +288,7 @@ namespace JAKE.client
                 Player playerToUpdate = playerInfoList.FirstOrDefault(player => player.MatchesId(playerid));
                 if (playerToUpdate != null)
                 {
-                    CreateShot(playerVisuals[playerToUpdate], X, Y);
+                    CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
                 }
             });
             connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
@@ -745,7 +745,7 @@ namespace JAKE.client
 
         protected void Shoot(int deltaX, int deltaY)
         {
-            CreateShot(playerVisuals[currentPlayer], deltaX, deltaY);
+            CreateShot(playerVisuals[currentPlayer], deltaX, deltaY, currentPlayer.GetShotColor(), currentPlayer.GetShotShape());
         }
 
         private void UpdateTextLabelPosition()
@@ -1169,7 +1169,7 @@ namespace JAKE.client
         }
 
 
-        public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY)
+        public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
         {
             bool CountKills = false;
             if (playerVisual == playerVisuals[currentPlayer])
@@ -1190,10 +1190,8 @@ namespace JAKE.client
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
-                    string chosenShotColor = currentPlayer.GetShotColor();
-                    string chosenShotShape = currentPlayer.GetShotShape();
                     
-                    SingleShot(playerX, playerY, playerWidth, playerHeight, chosenShotColor, chosenShotShape, out shot);
+                    SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
 
                     Color shotColor = (Color)ColorConverter.ConvertFromString(shot.getColor());
                     solidColorBrush = new SolidColorBrush(shotColor);

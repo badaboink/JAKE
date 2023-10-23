@@ -33,13 +33,15 @@ namespace Server.GameData
             var playerBuilder = new PlayerBuilder();
             director = new Director(playerBuilder);
         }
-        public Player AddPlayer(string playerName, string playerColor, string connectionID)
+        public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
             Console.WriteLine("addplayer inmemory");
             int playerId = players.Count + 1;
             Player newPlayer = director.ConstructPlayer(playerId, playerColor);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
+            newPlayer.SetShotColor(shotcolor);
+            newPlayer.SetShotShape(shotshape);
             players.Add(newPlayer);
             Console.WriteLine("playerscount inmemorydataservce: " + players.Count);
             return newPlayer;
