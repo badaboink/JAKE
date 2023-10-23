@@ -9,6 +9,19 @@
 
   <ItemGroup>
     <None Remove="coin.png" />
+    <None Remove="images\healthboost.png" />
+    <None Remove="images\shield.png" />
+    <None Remove="images\speedboost.png" />
+    <None Remove="images\zombie.png" />
+    <None Remove="images\zombie2.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="images\healthboost.png" />
+    <Content Include="images\shield.png" />
+    <Content Include="images\speedboost.png" />
+    <Content Include="images\zombie.png" />
+    <Content Include="images\zombie2.png" />
   </ItemGroup>
 
   <ItemGroup>

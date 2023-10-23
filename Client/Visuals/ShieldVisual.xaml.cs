@@ -63,7 +63,7 @@ namespace JAKE.client
         public ShieldVisual()
         {
             InitializeComponent();
-            shieldCircle.Fill = new SolidColorBrush(Colors.Black);
+            //shieldCircle.Fill = new SolidColorBrush(Colors.Black);
         }
     }
 }

@@ -24,6 +24,7 @@ using System.Windows.Threading;
 using System.Xml.Linq;
 using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
+using JAKE.client.Visuals;
 using JAKE.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
@@ -57,8 +58,11 @@ namespace JAKE.client
         private bool shieldOn = false;
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         private static List<Zombie> miniZombieList = new List<Zombie>();
+        private Dictionary<Zombie, ZombiesVisual> zombieVisuals = new Dictionary<Zombie, ZombiesVisual>();
         private BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
-        
+        ZombiesVisual bossVisual = new ZombiesVisual();
+
+
         //TODO: zombie visual, main iskvietimai, gavimai responses, judejimas, logika ar veikia
         private bool isCollidingWithHealthBoost = false;
 
@@ -553,6 +557,74 @@ namespace JAKE.client
                     }      
                 });
             });
+
+            connection.On<List<string>>("SendingBossZombie", (bossdata) =>
+            {
+                Debug.WriteLine("bossdata: " + bossdata[0]);
+                if (boss.Name == "")
+                {
+                    string image = "boss.png";
+                    List<Zombie> miniZombieListLocal = new List<Zombie>();
+                    BossZombie bossLocal = new BossZombie("", 0, 0, 0, 0, miniZombieListLocal);
+                    for (int i = 0; i < bossdata.Count; i++)
+                    {
+                        string data = bossdata[i];
+                        string[] parts = data.Split(':');
+                        if (parts.Length == 5)
+                        {
+                            string name = parts[0];
+                            double zombieX = double.Parse(parts[1]);
+                            double zombieY = double.Parse(parts[2]);
+                            int zombieSize = int.Parse(parts[3]);
+                            int zombieHealth = int.Parse(parts[4]);
+                            if (i == 0) //bosas
+                            {
+                                boss = new BossZombie(name, zombieHealth, zombieX, zombieY, zombieSize, miniZombieListLocal);
+                                Dispatcher.Invoke(() =>
+                                {
+
+                                    ZombiesVisual zombieVisual = new ZombiesVisual();
+                                    zombieVisual.ZombieSize = zombieSize;
+                                    zombieVisual.ZombieName = name;
+                                    Debug.WriteLine("zombiesize : " + zombieVisual.ZombieSize);
+                                    Canvas.SetLeft(zombieVisual, zombieX);
+                                    Canvas.SetTop(zombieVisual, zombieY);
+                                    bossVisual = zombieVisual;
+                                    ZombieContainer.Children.Add(zombieVisual);
+                                    Debug.WriteLine("isvisiblezombie : " + zombieVisual.IsVisible);
+                                    HandleZombieCollisions(playerVisuals[currentPlayer]);
+                                });
+
+                            }
+                            else //minions
+                            {
+                                Zombie mini = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
+                                miniZombieListLocal.Add(mini);
+                                Dispatcher.Invoke(() =>
+                                {
+
+                                    ZombiesVisual zombieVisual = new ZombiesVisual();
+                                    zombieVisual.ZombieSize = zombieSize;
+                                    zombieVisual.ZombieName = name;
+                                    Canvas.SetLeft(zombieVisual, zombieX);
+                                    Canvas.SetTop(zombieVisual, zombieY);
+                                    zombieVisuals[mini] = zombieVisual;
+                                    ZombieContainer.Children.Add(zombieVisual);
+                                    HandleZombieCollisions(playerVisuals[currentPlayer]);
+                                });
+                            }
+
+                        }
+                    }
+                    miniZombieList = miniZombieListLocal;
+                    boss.minions = miniZombieList;
+                }
+                else
+                {
+                    //TODO: judejimas? atnaujint coordinates?
+                }
+
+            });
         }
 
         private async void CheckElapsedTimeMove(object state)
@@ -596,10 +668,6 @@ namespace JAKE.client
             return input.Substring(index);
         }
 
-        //private int playerDirectionX = 0;
-        //private int playerDirectionY = 0;
-        //private int score = 0;
-        //private int health = 100;
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
             if (gamestarted)
@@ -649,6 +717,7 @@ namespace JAKE.client
                 HandleShieldsCollisions(playerVisuals[currentPlayer]);
                 HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
                 HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
+                HandleZombieCollisions(playerVisuals[currentPlayer]);
             }
         }
 
@@ -834,7 +903,38 @@ namespace JAKE.client
                 }
             }
         }
+        private async void HandleZombieCollisions(PlayerVisual playerVisual)
+        {
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
 
+            foreach (Zombie mini in miniZombieList)
+            {
+                if (zombieVisuals.ContainsKey(mini))
+                {
+                    ZombiesVisual miniRect = zombieVisuals[mini];
+                    double miniX = Canvas.GetLeft(miniRect);
+                    double miniY = Canvas.GetTop(miniRect);
+
+                    if (CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
+                                                       miniX, miniY, miniRect.Width, miniRect.Height))
+                    {
+                        await HandleCollisionZ(10);
+                    }
+                }
+            }
+            if (bossVisual.Name != "")
+            {
+                double miniX = Canvas.GetLeft(bossVisual);
+                double miniY = Canvas.GetTop(bossVisual);
+
+                if (CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
+                                                   miniX, miniY, bossVisual.Width, bossVisual.Height))
+                {
+                    await HandleCollisionZ(30);
+                }
+            }
+        }
         private async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             if (!gameStat.ShieldOn)
@@ -855,6 +955,26 @@ namespace JAKE.client
             }
 
             collisionCheckedEnemies[enemy] = true;
+        }
+        //TODO: tikrint kai saudo i zombie kad dingtu visi ir tada boss, padaryt kad size nusistatytu zombievisual
+        private async Task HandleCollisionZ(int damage)
+        {
+            if (!gameStat.ShieldOn)
+            {
+                gameStat.PlayerHealth -= damage;
+                healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+
+                HealthAdd healthObj = new HealthAdd(currentPlayer);
+                healthBar.Width = gameStat.PlayerHealth <= 0
+                                    ? healthObj.DisplayHealth(0).health
+                                    : healthObj.DisplayHealth(gameStat.PlayerHealth / 2).health;
+
+                if (gameStat.PlayerHealth <= 0)
+                {
+                    HandlePlayerDeath();
+                    await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
+                }
+            }
         }
 
         private void HandlePlayerDeath()
@@ -1218,27 +1338,5 @@ namespace JAKE.client
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;
         }
-
-
-        
-
-        /*
-         
-           MapObjectFactory objectFactory = new MapObjectFactory();
-        
-        IMapObject healthBoost = objectFactory.CreateMapObject("healthboost");
-        IMapObject coin = objectFactory.CreateMapObject("coin");
-        IMapObject weapon = objectFactory.CreateMapObject("weapon");
-        IMapObject shield = objectFactory.CreateMapObject("shield");
-        IMapObject speedBoost = objectFactory.CreateMapObject("speedboost");
-        
-        Player player = new Player(); 
-        
-        healthBoost.Interact(player);
-        coin.Interact(player);
-        weapon.Interact(player);
-        shield.Interact(player);
-        speedBoost.Interact(player);
-        */
     }
 }

@@ -188,14 +188,17 @@ namespace Server.GameData
         public List<string> GetBossZombie()
         {
             List<string> zombies = new List<string>();
-            zombies.Add(boss.ToString());
-            zombies.AddRange(minions.Select(minion => minion.ToString())); // Add minions to the list
+            if(boss.Name != "")
+            {
+                zombies.Add(boss.ToString());
+                zombies.AddRange(minions.Select(minion => minion.ToString())); // Add minions to the list
+            }
 
             return zombies;
         }
         public bool GetBossNull()
         {
-            return boss == null;
+            return boss.Name == "";
         }
         // strategy pattern
         // strategy for movement changes after xxx amount of time has passed

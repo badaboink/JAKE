@@ -6,9 +6,14 @@
              xmlns:local="clr-namespace:JAKE.client"
              mc:Ignorable="d" 
               Height="20" Width="20">
-    <Grid>
+    <!--<Grid>
         <Ellipse x:Name="HealthBoostCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>
-    </Grid>
+    </Grid>-->
+    <Image x:Name="healthBoostCircle" Margin="-5,-2,-7,-5">
+        <Image.Source>
+            <BitmapImage DecodePixelWidth="300" UriSource="/images/healthboost.png" />
+        </Image.Source>
+    </Image>
     <!--Height="{Binding HealthBoostImageHeight}" Width="{Binding HealthBoostImageWidth}">
 
     <Grid>
