@@ -9,7 +9,7 @@
     <!--<Grid>
         <Ellipse x:Name="SpeedBoostCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>
     </Grid>-->
-    <Image x:Name="speedBoostCircle" Margin="-0,-2,-0,-2">
+    <Image x:Name="speedBoostCircle" Margin="-7,-4,-7,-4">
         <Image.Source>
             <BitmapImage DecodePixelWidth="300" UriSource="/images/speedboost.png" />
         </Image.Source>

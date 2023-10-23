@@ -9,7 +9,7 @@
     <!--<Grid>
         <Ellipse x:Name="HealthBoostCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>
     </Grid>-->
-    <Image x:Name="healthBoostCircle" Margin="-5,-2,-7,-5">
+    <Image x:Name="healthBoostCircle" Margin="-4,-4,-4,-4">
         <Image.Source>
             <BitmapImage DecodePixelWidth="300" UriSource="/images/healthboost.png" />
         </Image.Source>
