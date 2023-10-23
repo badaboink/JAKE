@@ -110,11 +110,13 @@ namespace JAKE.client
             colorChoiceForm.ShowDialog();
             string selectedColor = colorChoiceForm.SelectedColor;
             string name = colorChoiceForm.Name;
+            string shotColor = colorChoiceForm.ShotColor;
+            string shotShape = colorChoiceForm.ShotShape;
 
             await connection.SendAsync("SendColor", selectedColor, name);
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
-                currentPlayer = new Player(id, name, color);
+                currentPlayer = new Player(id, name, color, shotColor, shotShape);
                 gamestarted = true;
                 string[] obstaclemessages = obstacleData.Split(',');
                 foreach (string obs in obstaclemessages)
@@ -140,14 +142,17 @@ namespace JAKE.client
                 {
                     string[] parts = playerEntry.Split(':');
 
-                    if (parts.Length == 5)
+                    if (parts.Length == 7)
                     {
                         int playerId = int.Parse(parts[0]);
                         string playerName = parts[1];
                         string playerColor = parts[2];
                         int x = int.Parse(parts[3]);
                         int y = int.Parse(parts[4]);
-                        Player playerInfo = new Player(playerId, playerName, playerColor);
+                        string shotColor = parts[5];
+                        string shotShape = parts[6];
+
+                        Player playerInfo = new Player(playerId, playerName, playerColor, shotColor, shotShape);
                         playerInfo.SetCurrentPosition(x, y);
 
                         if (!playerInfoList.Contains(playerInfo))
@@ -308,14 +313,16 @@ namespace JAKE.client
             connection.On<string>("DisconnectedPlayer", (player) =>
             {
                 string[] parts = player.Split(':');
-                if (parts.Length == 5)
+                if (parts.Length == 7)
                 {
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
                     string playerColor = parts[2];
                     int x = int.Parse(parts[3]);
                     int y = int.Parse(parts[4]);
-                    Player playerToDelete = new Player(playerId, playerName, playerColor);
+                    string shotColor = parts[5];
+                    string shotShape = parts[6];
+                    Player playerToDelete = new Player(playerId, playerName, playerColor, shotColor, shotShape);
                     Dispatcher.Invoke(() =>
                     {
                         PlayerVisual playerVisual = playerVisuals[playerToDelete];
@@ -1183,8 +1190,10 @@ namespace JAKE.client
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
+                    string chosenShotColor = currentPlayer.GetShotColor();
+                    string chosenShotShape = currentPlayer.GetShotShape();
                     
-                    SingleShot(playerX, playerY, playerWidth, playerHeight, out shot);
+                    SingleShot(playerX, playerY, playerWidth, playerHeight, chosenShotColor, chosenShotShape, out shot);
 
                     Color shotColor = (Color)ColorConverter.ConvertFromString(shot.getColor());
                     solidColorBrush = new SolidColorBrush(shotColor);
@@ -1313,15 +1322,27 @@ namespace JAKE.client
             return shot;
         }
 
-        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, out Shot shot)
+        public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, string color, string shape, out Shot shot)
         {
             // choose shot color
-            //IColor shotColor = new BlueColor();
-            IColor shotColor = new RedColor();
-
-            // choose shot shape
-            //IShape shotShape = new RoundShot();
-            IShape shotShape = new TriangleShot();
+            IColor shotColor;
+            if (color == "red")
+            {
+                shotColor = new RedColor();
+            }
+            else
+            {
+                shotColor = new BlueColor();
+            }
+            IShape shotShape;
+            if (shape == "triangle")
+            {
+                shotShape = new TriangleShot();
+            }
+            else
+            {
+                shotShape = new RoundShot();
+            }
 
             Shot localShot = new Shot(shotColor, shotShape, 5, 10, 5);
 
