@@ -105,10 +105,12 @@ namespace Server.Hubs
                 if (_gameDataService.GetSpeedBoosts().Count <= 2)
                 {
                     _gameDataService.AddSpeedBoost(5);
+                    Console.WriteLine("pridejo speed5");
                 }
                 if (_gameDataService.GetBossNull())
                 {
                     _gameDataService.AddBossZombie("Sefas", 200);
+                    Console.WriteLine("pridejo sefa");
                 }
             }
             List<string> enemies = _gameDataService.GetEnemies();

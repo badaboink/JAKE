@@ -9,10 +9,11 @@
 
   <ItemGroup>
     <None Remove="coin.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="images\coin.png" />
+    <None Remove="images\coin.png" />
+    <None Remove="images\healthboost.png" />
+    <None Remove="images\shield.png" />
+    <None Remove="images\speedboost.png" />
+    <None Remove="images\zombie2.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -23,6 +24,14 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JAKE.classlibrary\JAKE.classlibrary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="images\coin.png" />
+    <Resource Include="images\healthboost.png" />
+    <Resource Include="images\shield.png" />
+    <Resource Include="images\speedboost.png" />
+    <Resource Include="images\zombie2.png" />
   </ItemGroup>
 
 </Project>

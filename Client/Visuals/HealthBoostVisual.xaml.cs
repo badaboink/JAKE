@@ -63,7 +63,7 @@ namespace JAKE.client
         public HealthBoostVisual()
         {
             InitializeComponent();
-            HealthBoostCircle.Fill = new SolidColorBrush(Colors.Pink);
+           // healthBoostCircle.Fill = new SolidColorBrush(Colors.Pink);
         }
 
 

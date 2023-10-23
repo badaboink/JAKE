@@ -6,9 +6,14 @@
              xmlns:local="clr-namespace:JAKE.client"
              mc:Ignorable="d" 
               Height="20" Width="20">
-    <Grid>
+    <!--<Grid>
         <Ellipse x:Name="SpeedBoostCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>
-    </Grid>
+    </Grid>-->
+    <Image x:Name="speedBoostCircle" Margin="-7,-4,-7,-4">
+        <Image.Source>
+            <BitmapImage DecodePixelWidth="300" UriSource="/images/speedboost.png" />
+        </Image.Source>
+    </Image>
            <!--Height="{Binding SpeedBoostImageHeight}" Width="{Binding SpeedBoostImageWidth}">
 
     <Grid>

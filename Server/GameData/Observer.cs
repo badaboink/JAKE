@@ -87,7 +87,7 @@ namespace Server.GameData
 
         public async Task HandleBossZombie(List<string> boss)
         {
-            await clientProxy.SendAsync("SendingZombieBoss", boss);
+            await clientProxy.SendAsync("SendingBossZombie", boss);
         }
         public async Task HandleDeadBossZombie(string name)
         {
