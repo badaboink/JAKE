@@ -625,7 +625,7 @@ namespace JAKE.client
                                         Canvas.SetLeft(zombieVisual, zombieX);
                                         Canvas.SetTop(zombieVisual, zombieY);
                                         zombieVisuals[mini] = zombieVisual;
-                                        ZombieContainer.Children.Add(zombieVisual);
+                                        MiniZombieContainer.Children.Add(zombieVisual);
                                         HandleZombieCollisions(playerVisuals[currentPlayer]);
                                     });
                                 }
@@ -1123,7 +1123,7 @@ namespace JAKE.client
             }
         }
 
-
+        private object miniZombiesListLock = new object();
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
         {
             bool CountKills = false;
@@ -1252,6 +1252,152 @@ namespace JAKE.client
 
                 });
             }
+
+            //TODO : KAD VEIKTU, simplify JORIUI ACIU
+            //lock (miniZombiesListLock)
+            //{
+            //    Dispatcher.Invoke(() =>
+            //    {
+            //        Shot shot;
+            //        double playerX = Canvas.GetLeft(playerVisual);
+            //        double playerY = Canvas.GetTop(playerVisual);
+            //        double playerWidth = playerVisual.Width;
+            //        double playerHeight = playerVisual.Height;
+
+            //        SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
+            //        ShotVisual shotVisual = shotVisualBuilder.New()
+            //                    .SetColor($"{color},{shape}")
+            //                    .SetSize(shot.getSize())
+            //                    .SetPosition(shot.getX(), shot.getY())
+            //                    .Build();
+
+            //        // Add the shot to the ShotContainer (Canvas)
+            //        ShotContainer.Children.Add(shotVisual);
+
+            //        // Update the shot's position based on the direction and speed
+            //        bool shouldRender = true;
+
+
+            //        CompositionTarget.Rendering += async (sender, e) =>
+            //        {
+            //            if (!shouldRender) return;
+            //            double currentX = Canvas.GetLeft(shotVisual);
+            //            double currentY = Canvas.GetTop(shotVisual);
+
+            //            double newX = currentX + directionX * shot.getSpeed();
+            //            double newY = currentY + directionY * shot.getSpeed();
+
+            //            // Check for collisions with obstacles
+            //            // TO-DO: shotvisual does not set width and height for some reason... will fix in future maybe
+            //            foreach (Obstacle obstacle in obstacles)
+            //            {
+            //                double elipse = shotVisual.EllipseSize;
+            //                shot = RemoveShot(shot, newX, newY, obstacle, elipse);
+            //                if (shot == null) //obstacle.WouldOverlap(newX, newY, shotVisual.EllipseSize, shotVisual.EllipseSize)
+            //                {
+            //                    // Remove the shot and break out of the loop
+            //                    ShotContainer.Children.Remove(shotVisual);
+            //                    shouldRender = false;
+            //                    return;
+            //                }
+            //            }
+
+
+            //            bool shotHitEnemy = false;
+            //            bool overlapWithEnemy = false;
+
+            //            for (int i = 0; i < miniZombieList.Count; i++)
+            //            {
+            //                Zombie zombie = miniZombieList[i];
+            //                if (zombieVisuals.ContainsKey(zombie))
+            //                {
+            //                    MiniZombieVisual enemyRect = zombieVisuals[zombie];
+            //                    double enemyXx = Canvas.GetLeft(enemyRect);
+            //                    double enemyYy = Canvas.GetTop(enemyRect);
+
+            //                    if (newX + shotVisual.EllipseSize >= enemyXx &&
+            //                        newX <= enemyXx + enemyRect.Width &&
+            //                        newY + shotVisual.EllipseSize >= enemyYy &&
+            //                        newY <= enemyYy + enemyRect.Height)
+            //                    {
+
+            //                        zombie.Health -= (int)shot.getPoints();  // Reduce the enemy's health
+            //                        miniZombieList[i] = zombie;
+            //                        boss.minions = miniZombieList;
+            //                        gameStat.PlayerScore += 8;
+            //                        Debug.WriteLine("score: " + gameStat.PlayerScore);
+            //                        scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
+            //                        Debug.WriteLine("pataike i minizombie");
+            //                        await connection.SendAsync("SendZombieUpdate", boss.ToString()); //nusiuncia pasikeitusi minions sarasa TODO
+            //                        if (zombie.Health <= 0)
+            //                        {
+
+            //                            miniZombieList = new List<Zombie>();
+            //                            zombieVisuals = new Dictionary<Zombie, MiniZombieVisual>();
+            //                            //EnemyContainer.Children.Remove(enemyRect);
+            //                            MiniZombieContainer.Children.Clear();
+
+            //                            Debug.WriteLine("mire zombie list");
+            //                            await connection.SendAsync("SendDeadMini"); //TODO: servery pasalint
+            //                        }
+            //                    }
+            //                    shotHitEnemy = true;
+            //                    shouldRender = false;
+            //                    break;
+            //                }
+            //            }
+
+            //            //TODO: padaryt tikrinima su boss zombie
+
+            //            double enemyX = Canvas.GetLeft(bossVisual);
+            //            double enemyY = Canvas.GetTop(bossVisual);
+
+            //            if (newX + shotVisual.EllipseSize >= enemyX &&
+            //                newX <= enemyX + bossVisual.Width &&
+            //                newY + shotVisual.EllipseSize >= enemyY &&
+            //                newY <= enemyY + bossVisual.Height)
+            //            {
+
+            //                boss.Health -= (int)shot.getPoints();  // Reduce the enemy's health
+
+            //                gameStat.PlayerScore += 10;
+            //                Debug.WriteLine("score: " + gameStat.PlayerScore);
+            //                scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
+            //                Debug.WriteLine("pataike i bosszombie");
+            //                await connection.SendAsync("SendZombieUpdate", boss.ToString()); //nusiuncia pasikeitusi minions sarasa TODO
+            //                if (boss.Health <= 0)
+            //                {
+
+            //                    boss = new BossZombie("", 0, 0, 0, 0, miniZombieList);
+            //                    bossVisual = new ZombiesVisual();
+            //                    //EnemyContainer.Children.Remove(enemyRect);
+            //                    ZombieContainer.Children.Clear();
+
+            //                    Debug.WriteLine("mire zombieBOSS");
+            //                    await connection.SendAsync("SendDeadBoss"); //TODO: servery pasalint
+            //                }
+            //                shotHitEnemy = true;
+            //                shouldRender = false;
+            //            }
+
+
+
+            //            if (!shotHitEnemy)
+            //            {
+            //                //Debug.WriteLine("paskutinis if");
+            //                Canvas.SetLeft(shotVisual, newX);
+            //                Canvas.SetTop(shotVisual, newY);
+
+            //                // Remove the shot if it goes out of bounds
+            //                if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
+            //                {
+            //                    ShotContainer.Children.Remove(shotVisual);
+            //                }
+            //            }
+            //        };
+
+            //    });
+            //}
         }
 
         public static Shot RemoveShot(Shot shot, double newX, double newY, Obstacle obstacle, double elipse)
