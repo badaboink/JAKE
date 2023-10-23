@@ -102,6 +102,7 @@ namespace JAKE.client
             await GameStart();
         }
         IBuilderVisual<PlayerVisual> playerVisualBuilder = new PlayerVisualBuilder();
+        IBuilderVisual<EnemyVisual> enemyVisualBuilder = new EnemyVisualBuilder();
         private async Task GameStart()
         {            
             // Create and show the ColorChoiceForm as a pop-up
@@ -156,17 +157,6 @@ namespace JAKE.client
                             Debug.WriteLine("PRIDEJO " + playerInfo.GetId() + " LIST COUNT DABAR " +  playerInfoList.Count);
                             Dispatcher.Invoke(() =>
                             {
-                                //PlayerVisual playerVisual = new PlayerVisual();
-                                //ColorConverter converter = new ColorConverter();
-                                //Color playerColor = (Color)ColorConverter.ConvertFromString(playerInfo.GetColor());
-                                //SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
-                                //playerVisual.PlayerName = playerInfo.GetName();
-                                //playerVisual.PlayerColor = solidColorBrush;
-                                //playerVisual.UpdateColor(solidColorBrush);
-
-                                //playerVisuals[playerInfo] = playerVisual;
-                                //Canvas.SetLeft(playerVisual, x);
-                                //Canvas.SetTop(playerVisual, y);
                                 PlayerVisual playerVisual = playerVisualBuilder.New()
                                 .SetName(playerInfo.GetName())
                                 .SetColor(playerInfo.GetColor())
@@ -213,18 +203,16 @@ namespace JAKE.client
                     
                     Dispatcher.Invoke(() =>
                     {
-                        //playerInfoList[playerId - 1].SetCurrentPosition(x, y);
-
                         Player playerInfo = playerInfoList[playerId - 1];
                         PlayerVisual playerVisual = playerVisuals[playerInfo];
+
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
 
-                        playerVisual.PlayerName = playerName;
-                        Color shotColor = (Color)ColorConverter.ConvertFromString(playerColor);
-                        SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
-                        playerVisual.PlayerColor = solidColorBrush;
-                        playerVisual.UpdateColor(solidColorBrush);
+                        if(playerName == "DEAD")
+                        {
+                            HandlePlayerDeath(playerInfo);
+                        }
                     });
                 }
             });
@@ -254,19 +242,13 @@ namespace JAKE.client
                             {
                                 Dispatcher.Invoke(() =>
                                 {
-                                    Debug.WriteLine("enemy spalva: " + enemy.GetColor());
-                                    EnemyVisual enemyVisual = new EnemyVisual();
-                                    ColorConverter converter = new ColorConverter();
-                                    Color enemyColor = (Color)ColorConverter.ConvertFromString(enemy.GetColor());
-
-                                    SolidColorBrush solidColorBrush = new SolidColorBrush(enemyColor);
-                                    enemyVisual.FillColor = solidColorBrush;
-                                    enemyVisual.EllipseSize = enemy.GetSize();
-                                    enemyVisual.UpdateEnemy(solidColorBrush);
+                                    EnemyVisual enemyVisual = enemyVisualBuilder.New()
+                                    .SetColor(enemyColor)
+                                    .SetSize(size)
+                                    .SetPosition(enemyX, enemyY)
+                                    .Build();
 
                                     enemyVisuals[enemy] = enemyVisual;
-                                    Canvas.SetLeft(enemyVisual, enemyX);
-                                    Canvas.SetTop(enemyVisual, enemyY);
                                     EnemyContainer.Children.Add(enemyVisual);
 
                                     HandleEnemyCollisions(playerVisuals[currentPlayer]);
@@ -568,7 +550,8 @@ namespace JAKE.client
             connection.On<List<string>>("SendingBossZombie", (bossdata) =>
             {
                 Debug.WriteLine("bossdata: " + bossdata[0]);
-               
+                if (boss.Name == "")
+                {
                     string image = "boss.png";
                     List<Zombie> miniZombieListLocal = new List<Zombie>();
                     BossZombie bossLocal = new BossZombie("", 0, 0, 0, 0, miniZombieListLocal);
@@ -583,77 +566,53 @@ namespace JAKE.client
                             double zombieY = double.Parse(parts[2]);
                             int zombieSize = int.Parse(parts[3]);
                             int zombieHealth = int.Parse(parts[4]);
-                            Zombie zombie = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
                             if (i == 0) //bosas
                             {
-                                if (boss.Name == "") //naujas
+                                boss = new BossZombie(name, zombieHealth, zombieX, zombieY, zombieSize, miniZombieListLocal);
+                                Dispatcher.Invoke(() =>
                                 {
-                                    boss = new BossZombie(name, zombieHealth, zombieX, zombieY, zombieSize, miniZombieListLocal);
-                                    Dispatcher.Invoke(() =>
-                                    {
 
-                                        ZombiesVisual zombieVisual = new ZombiesVisual();
-                                        zombieVisual.ZombieSize = zombieSize;
-                                        zombieVisual.ZombieName = name;
-                                        Debug.WriteLine("zombiesize : " + zombieVisual.ZombieSize);
-                                        Canvas.SetLeft(zombieVisual, zombieX);
-                                        Canvas.SetTop(zombieVisual, zombieY);
-                                        bossVisual = zombieVisual;
-                                        ZombieContainer.Children.Add(zombieVisual);
-                                        Debug.WriteLine("isvisiblezombie : " + zombieVisual.IsVisible);
-                                        HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
-                                else //atnaujint bosa
-                                {
-                                    Dispatcher.Invoke(() =>
-                                    {
-                                        boss.Health = zombieHealth;
-                                        boss.SetCurrentPosition(zombieX, zombieY);
-                                        Canvas.SetLeft(bossVisual, zombieX);
-                                        Canvas.SetTop(bossVisual, zombieY);
-
-                                        HandleEnemyCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
+                                    ZombiesVisual zombieVisual = new ZombiesVisual();
+                                    zombieVisual.ZombieSize = zombieSize;
+                                    zombieVisual.ZombieName = name;
+                                    Debug.WriteLine("zombiesize : " + zombieVisual.ZombieSize);
+                                    Canvas.SetLeft(zombieVisual, zombieX);
+                                    Canvas.SetTop(zombieVisual, zombieY);
+                                    bossVisual = zombieVisual;
+                                    ZombieContainer.Children.Add(zombieVisual);
+                                    Debug.WriteLine("isvisiblezombie : " + zombieVisual.IsVisible);
+                                    HandleZombieCollisions(playerVisuals[currentPlayer]);
+                                });
 
                             }
                             else //minions
                             {
-                                if (!miniZombieList.Contains(zombie)) //naujas minion
+                                Zombie mini = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
+                                miniZombieListLocal.Add(mini);
+                                Dispatcher.Invoke(() =>
                                 {
-                                    Zombie mini = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
-                                    miniZombieListLocal.Add(mini);
-                                    Dispatcher.Invoke(() =>
-                                    {
 
-                                        ZombiesVisual zombieVisual = new ZombiesVisual();
-                                        zombieVisual.ZombieSize = zombieSize;
-                                        zombieVisual.ZombieName = name;
-                                        Canvas.SetLeft(zombieVisual, zombieX);
-                                        Canvas.SetTop(zombieVisual, zombieY);
-                                        zombieVisuals[mini] = zombieVisual;
-                                        ZombieContainer.Children.Add(zombieVisual);
-                                        HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
-                                else //atnaujint minion
-                                {
-                                    ZombiesVisual zombieVisual = zombieVisuals[zombie];
-                                    zombie.Health = zombieHealth;
-                                    zombie.SetCurrentPosition(zombieX, zombieY);
+                                    ZombiesVisual zombieVisual = new ZombiesVisual();
+                                    zombieVisual.ZombieSize = zombieSize;
+                                    zombieVisual.ZombieName = name;
                                     Canvas.SetLeft(zombieVisual, zombieX);
                                     Canvas.SetTop(zombieVisual, zombieY);
-
+                                    zombieVisuals[mini] = zombieVisual;
+                                    ZombieContainer.Children.Add(zombieVisual);
                                     HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                }
+                                });
                             }
 
                         }
                     }
                     miniZombieList = miniZombieListLocal;
                     boss.minions = miniZombieList;
- 
+                }
+                else
+                {
+                    //TODO: judejimas? atnaujint coordinates?
+                }
+
             });
         }
 
@@ -799,6 +758,77 @@ namespace JAKE.client
             Canvas.SetTop(shieldBorder, playerY);
         }
 
+        //private void UpdateTextLabelPosition(int posX, int posY, int posHeartX, int posHeartY)
+        //{
+        //    // Get the current player position
+        //    double playerX = currentPlayer.GetCurrentX();
+        //    double playerY = currentPlayer.GetCurrentY();
+
+        //    // Calculate the new player position
+        //    double newX = playerX + playerDirectionX * gameStat.PlayerSpeed;
+        //    double newY = playerY + playerDirectionY * gameStat.PlayerSpeed;
+        //    bool overlap = false;
+
+        //    // Check for obstacles and adjust player position
+        //    foreach (Obstacle obstacle in obstacles)
+        //    {
+        //        double distanceX = obstacle.DistanceFromShieldX(gameStat, playerDirectionX, newX, 50);
+        //        double distanceY = obstacle.DistanceFromShieldY(gameStat, playerDirectionY, newY, 50);
+
+        //        // If there is an overlap, move the player to the edge of the obstacle
+        //        if (distanceX != 0 || distanceY != 0)
+        //        {
+        //            overlap = true;
+        //            newX += distanceX;
+        //            newY += distanceY;
+        //        }
+        //    }
+
+        //    // If there is no overlap, move the player to the new position
+        //    if (!overlap)
+        //    {
+        //        double minX = 0; // Minimum X-coordinate
+        //        double minY = 0; // Minimum Y-coordinate
+        //        double windowWidth = this.ActualWidth;
+        //        double windowHeight = this.ActualHeight;
+        //        double maxX = windowWidth - 60; // Maximum X-coordinate
+        //        double maxY = windowHeight - 80; // Maximum Y-coordinate
+
+        //        newX = Math.Max(minX, Math.Min(newX, maxX));
+        //        newY = Math.Max(minY, Math.Min(newY, maxY));
+
+        //        // Set the player position
+        //        Move(newX, newY);
+        //    }
+
+        //    // Set the label positions based on the new player position
+        //    Canvas.SetLeft(testLabel, newX);
+        //    Canvas.SetTop(testLabel, newY - 30);
+        //    Canvas.SetLeft(heart2Label, newX);
+        //    Canvas.SetTop(heart2Label, newY + posHeartY);
+
+        //    // Move the shield as close as possible to the player without overlapping obstacles
+        //    double shieldX = newX + playerDirectionX * gameStat.PlayerSpeed;
+        //    double shieldY = newY + playerDirectionY * gameStat.PlayerSpeed;
+
+        //    // Check for obstacles and adjust shield position
+        //    foreach (Obstacle obstacle in obstacles)
+        //    {
+        //        double distanceX = obstacle.DistanceFromShieldX(gameStat, playerDirectionX, shieldX, 50);
+        //        double distanceY = obstacle.DistanceFromShieldY(gameStat, playerDirectionY, shieldY, 50);
+
+        //        // If there is an overlap, move the shield to the edge of the obstacle
+        //        if (distanceX != 0 || distanceY != 0)
+        //        {
+        //            shieldX += distanceX;
+        //            shieldY += distanceY;
+        //        }
+        //    }
+
+        //    // Set the shield position
+        //    Canvas.SetLeft(shieldBorder, shieldX);
+        //    Canvas.SetTop(shieldBorder, shieldY);
+        //}
 
 
         private void HideDisplay()
@@ -908,14 +938,14 @@ namespace JAKE.client
 
                 if (gameStat.PlayerHealth <= 0)
                 {
-                    HandlePlayerDeath();
+                    HandlePlayerDeath(currentPlayer);
                     await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
                 }
             }
 
             collisionCheckedEnemies[enemy] = true;
         }
-   
+        //TODO: tikrint kai saudo i zombie kad dingtu visi ir tada boss, padaryt kad size nusistatytu zombievisual
         private async Task HandleCollisionZ(int damage)
         {
             if (!gameStat.ShieldOn)
@@ -930,22 +960,26 @@ namespace JAKE.client
 
                 if (gameStat.PlayerHealth <= 0)
                 {
-                    HandlePlayerDeath();
+                    HandlePlayerDeath(currentPlayer);
                     await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
                 }
             }
         }
 
-        private void HandlePlayerDeath()
+        private void HandlePlayerDeath(Player player)
         {
-            gamestarted = false;
-            deadLabel.Text = "DEAD!";
-            healthLabel.Text = $"Health: {0}";
-            playerVisuals[currentPlayer].PlayerName = "DEAD";
+            if(player.Equals(currentPlayer))
+            {
+                gamestarted = false;
+                deadLabel.Text = "DEAD!";
+                healthLabel.Text = $"Health: {0}";
+            }
+            
+            playerVisuals[player].PlayerName = "DEAD";
             Color shotColor = (Color)ColorConverter.ConvertFromString("black");
             SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
-            playerVisuals[currentPlayer].PlayerColor = solidColorBrush;
-            playerVisuals[currentPlayer].UpdateColor(solidColorBrush);
+            playerVisuals[player].PlayerColor = solidColorBrush;
+            playerVisuals[player].UpdateColor(solidColorBrush);
         }
 
 

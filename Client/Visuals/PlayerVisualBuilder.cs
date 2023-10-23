@@ -27,10 +27,14 @@ namespace JAKE.classlibrary.Patterns
             playerVisual.UpdateColor(solidColorBrush);
             return this;
         }
-
         public IBuilderVisual<PlayerVisual> SetName(string name)
         {
             playerVisual.PlayerName = name;
+            return this;
+        }
+
+        public IBuilderVisual<PlayerVisual> SetSize(int size)
+        {
             return this;
         }
 
