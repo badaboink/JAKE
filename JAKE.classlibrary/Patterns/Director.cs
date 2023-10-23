@@ -30,13 +30,5 @@ namespace JAKE.classlibrary.Patterns
                 .Build();
         }
 
-        public Enemy ConstructEnemy(int id, string color, string name, double x, double y)
-        {
-            return enemyBuilder
-                .SetId(id)
-                .SetColor(color)
-                .SetCurrentPosition(x, y)
-                .Build();
-        }
     }
 }

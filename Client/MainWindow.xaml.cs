@@ -101,7 +101,7 @@ namespace JAKE.client
 
             await GameStart();
         }
-
+        IBuilderVisual<PlayerVisual> playerVisualBuilder = new PlayerVisualBuilder();
         private async Task GameStart()
         {            
             // Create and show the ColorChoiceForm as a pop-up
@@ -156,17 +156,24 @@ namespace JAKE.client
                             Debug.WriteLine("PRIDEJO " + playerInfo.GetId() + " LIST COUNT DABAR " +  playerInfoList.Count);
                             Dispatcher.Invoke(() =>
                             {
-                                PlayerVisual playerVisual = new PlayerVisual();
-                                ColorConverter converter = new ColorConverter();
-                                Color playerColor = (Color)ColorConverter.ConvertFromString(playerInfo.GetColor());
-                                SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
-                                playerVisual.PlayerName = playerInfo.GetName();
-                                playerVisual.PlayerColor = solidColorBrush;
-                                playerVisual.UpdateColor(solidColorBrush);
+                                //PlayerVisual playerVisual = new PlayerVisual();
+                                //ColorConverter converter = new ColorConverter();
+                                //Color playerColor = (Color)ColorConverter.ConvertFromString(playerInfo.GetColor());
+                                //SolidColorBrush solidColorBrush = new SolidColorBrush(playerColor);
+                                //playerVisual.PlayerName = playerInfo.GetName();
+                                //playerVisual.PlayerColor = solidColorBrush;
+                                //playerVisual.UpdateColor(solidColorBrush);
 
+                                //playerVisuals[playerInfo] = playerVisual;
+                                //Canvas.SetLeft(playerVisual, x);
+                                //Canvas.SetTop(playerVisual, y);
+                                PlayerVisual playerVisual = playerVisualBuilder.New()
+                                .SetName(playerInfo.GetName())
+                                .SetColor(playerInfo.GetColor())
+                                .SetPosition(x, y)
+                                .Build();
                                 playerVisuals[playerInfo] = playerVisual;
-                                Canvas.SetLeft(playerVisual, x);
-                                Canvas.SetTop(playerVisual, y);
+
                                 playersContainer.Items.Add(playerVisual);
                             });
                         }
