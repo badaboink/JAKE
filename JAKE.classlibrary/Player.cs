@@ -88,7 +88,6 @@ namespace JAKE.classlibrary
         {
             _name = name;
         }
-
         public string GetColor()
         {
             return _color;

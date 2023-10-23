@@ -12,13 +12,13 @@ namespace JAKE.classlibrary
     public class Shot
     {
         private double _speed;
-        private double _size;
+        private int _size;
         private double _points;
         private double _x;
         private double _y;
         private IColor _color;
         private IShape _shape;
-        public Shot(IColor color, IShape shape, double speed, double size, double points)
+        public Shot(IColor color, IShape shape, double speed, int size, double points)
         {         
             _color = color;
             _shape = shape;
@@ -38,7 +38,7 @@ namespace JAKE.classlibrary
         {
             return _speed;
         }
-        public double getSize()
+        public int getSize()
         { 
             return _size;
         }
@@ -68,7 +68,7 @@ namespace JAKE.classlibrary
         {
             _shape = shape;
         }
-        public void setSize(double size) 
+        public void setSize(int size) 
         {
             _size = size;
         }
