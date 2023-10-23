@@ -58,7 +58,7 @@ namespace JAKE.client
         private bool shieldOn = false;
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         private static List<Zombie> miniZombieList = new List<Zombie>();
-        private Dictionary<Zombie, ZombiesVisual> zombieVisuals = new Dictionary<Zombie, ZombiesVisual>();
+        private Dictionary<Zombie, MiniZombieVisual> zombieVisuals = new Dictionary<Zombie, MiniZombieVisual>();
         private BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
         ZombiesVisual bossVisual = new ZombiesVisual();
 
@@ -568,18 +568,19 @@ namespace JAKE.client
                     }      
                 });
             });
-
+            //TODO: sukuria du bosszmobie, bet ne minions, grazina tik boss info
             connection.On<List<string>>("SendingBossZombie", (bossdata) =>
             {
                 Debug.WriteLine("bossdata: " + bossdata[0]);
-               
-                    string image = "boss.png";
+                Debug.WriteLine("vbossdatacount: " + bossdata.Count);
+                string image = "boss.png";
                     List<Zombie> miniZombieListLocal = new List<Zombie>();
                     BossZombie bossLocal = new BossZombie("", 0, 0, 0, 0, miniZombieListLocal);
                     for (int i = 0; i < bossdata.Count; i++)
                     {
                         string data = bossdata[i];
-                        string[] parts = data.Split(':');
+                    Debug.WriteLine("vienas zombie info: " + bossdata[i]);
+                    string[] parts = data.Split(':');
                         if (parts.Length == 5)
                         {
                             string name = parts[0];
@@ -624,6 +625,7 @@ namespace JAKE.client
                             }
                             else //minions
                             {
+                            Debug.WriteLine("vienas minion");
                                 if (!miniZombieList.Contains(zombie)) //naujas minion
                                 {
                                     Zombie mini = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
@@ -631,9 +633,7 @@ namespace JAKE.client
                                     Dispatcher.Invoke(() =>
                                     {
 
-                                        ZombiesVisual zombieVisual = new ZombiesVisual();
-                                        zombieVisual.ZombieSize = zombieSize;
-                                        zombieVisual.ZombieName = name;
+                                        MiniZombieVisual zombieVisual = new MiniZombieVisual();
                                         Canvas.SetLeft(zombieVisual, zombieX);
                                         Canvas.SetTop(zombieVisual, zombieY);
                                         zombieVisuals[mini] = zombieVisual;
@@ -643,7 +643,7 @@ namespace JAKE.client
                                 }
                                 else //atnaujint minion
                                 {
-                                    ZombiesVisual zombieVisual = zombieVisuals[zombie];
+                                    MiniZombieVisual zombieVisual = zombieVisuals[zombie];
                                     zombie.Health = zombieHealth;
                                     zombie.SetCurrentPosition(zombieX, zombieY);
                                     Canvas.SetLeft(zombieVisual, zombieX);
@@ -875,7 +875,7 @@ namespace JAKE.client
             {
                 if (zombieVisuals.ContainsKey(mini))
                 {
-                    ZombiesVisual miniRect = zombieVisuals[mini];
+                    MiniZombieVisual miniRect = zombieVisuals[mini];
                     double miniX = Canvas.GetLeft(miniRect);
                     double miniY = Canvas.GetTop(miniRect);
 

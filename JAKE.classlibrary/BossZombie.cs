@@ -30,17 +30,26 @@ namespace JAKE.classlibrary
             return new BossZombie(Name, Health, X, Y, Size, clonedMinions);
         }
 
-        public void AddMinion(MiniZombie minion, double angle, double radius)
+        public void AddMinion(MiniZombie minion, double angleInDegrees, double radius, double x, double y)
         {
-            // Calculate minion position around the boss zombie
-            int x = (int)(X + radius * Math.Cos(angle));
-            int y = (int)(Y + radius * Math.Sin(angle));
+            double angleInRadians = angleInDegrees * (Math.PI / 180);
 
-            minion.SetCurrentPosition(x, y);
+            // Ensure the angle is within the range [0, 2*pi]
+            angleInRadians = angleInRadians % (2 * Math.PI);
+
+            // Calculate minion position around the boss zombie
+            int xx = (int)(X + radius * Math.Cos(angleInRadians)); //gal padaryt kad nuo praeito mini zombio pozicijos pridet kazkiek laipsniu???
+            int yy = (int)(Y + radius * Math.Sin(angleInRadians));
+
+            minion.SetCurrentPosition(xx, yy);
 
             minions.Add(minion);
         }
-
+        public void AddMinionX(MiniZombie minion)
+        {
+         
+            minions.Add(minion);
+        }
         public override void TakeDamage(int damage)
         {
             // Damage the boss zombie

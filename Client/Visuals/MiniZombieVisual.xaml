@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="JAKE.client.Visuals.MiniZombieVisual"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:JAKE.client.Visuals"
+             mc:Ignorable="d" 
+              Width="25" Height="25">
+    <Grid>
+        <Image x:Name="miniZombieCircle" Margin="-1,-1,-1,-1">
+            <Image.Source>
+                <BitmapImage DecodePixelWidth="300" UriSource="/images/zombie.png" />
+            </Image.Source>
+        </Image>
+    </Grid>
+</UserControl>
