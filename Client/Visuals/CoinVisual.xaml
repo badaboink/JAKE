@@ -18,7 +18,7 @@
     <!--{Binding CoinWidth}  {Binding CoinHeight}-->
     <Grid>
         <!--<Ellipse x:Name="coinCircle" Width="{Binding EllipseSizeC}" Height="{Binding EllipseSizeC}"/>-->
-        <Image x:Name="coinCircle" Margin="-7,-7,-7,-7">
+        <Image x:Name="coinCircle" Margin="-4,-4,-4,-4">
             <Image.Source>
                 <BitmapImage DecodePixelWidth="300" UriSource="/images/coin.png" />
             </Image.Source>

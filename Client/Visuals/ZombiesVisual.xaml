@@ -5,13 +5,13 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:JAKE.client.Visuals"
              mc:Ignorable="d"
-             Width="20" Height="20">
+             Width="70" Height="70">
 
     <!--<Grid>
         <Rectangle x:Name="zombieRectangle" Width="{Binding ZombieSize}" Height="{Binding ZombieSize}"/>
         <TextBlock Text="{Binding ZombieName}" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White" FontSize="12"/>
     </Grid>-->
-    <Image x:Name="zombieCircle" Margin="-5,-1,-7,-3">
+    <Image x:Name="zombieCircle" Margin="-5,-5,-5,-5">
         <Image.Source>
             <BitmapImage DecodePixelWidth="300" UriSource="/images/zombie2.png" />
         </Image.Source>
