@@ -207,8 +207,6 @@ namespace JAKE.client
                     Debug.WriteLine("LSITO COUNT again" + playerInfoList.Count);
                     Debug.WriteLine("PLAYERIO ID again" + playerId);
                     playerInfoList[playerId - 1].SetCurrentPosition(x, y);
-                    playerInfoList[playerId - 1].SetShotColor(shotColor);  // keiciau
-                    playerInfoList[playerId - 1].SetShotShape(shotShape);
                     
                     Dispatcher.Invoke(() =>
                     {
@@ -287,7 +285,7 @@ namespace JAKE.client
                     collisionCheckedEnemies[enemy] = false;
                 }
             });
-            connection.On<int, double, double, string, string>("UpdateShotsFired", (playerid, X, Y, shotColor, shotShape) =>
+            connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
             {
                 Player playerToUpdate = playerInfoList.FirstOrDefault(player => player.MatchesId(playerid));
                 if (playerToUpdate != null)
