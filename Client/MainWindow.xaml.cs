@@ -103,6 +103,7 @@ namespace JAKE.client
         }
         IBuilderVisual<PlayerVisual> playerVisualBuilder = new PlayerVisualBuilder();
         IBuilderVisual<EnemyVisual> enemyVisualBuilder = new EnemyVisualBuilder();
+        IBuilderVisual<ShotVisual> shotVisualBuilder = new ShotVisualBuilder();
         private async Task GameStart()
         {            
             // Create and show the ColorChoiceForm as a pop-up
@@ -1135,30 +1136,18 @@ namespace JAKE.client
             {
                 Dispatcher.Invoke(() =>
                 {
-                    // Create a new shot visual element (e.g., a bullet or projectile)
-                    ShotVisual shotVisual;
                     Shot shot;
-                    SolidColorBrush solidColorBrush;
-
                     double playerX = Canvas.GetLeft(playerVisual);
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
-                    
+
                     SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
-
-                    Color shotColor = (Color)ColorConverter.ConvertFromString(shot.getColor());
-                    solidColorBrush = new SolidColorBrush(shotColor);
-
-                    shotVisual = new ShotVisual();
-                    shotVisual.EllipseSize = shot.getSize();
-                    shotVisual.PolygonSize = shot.getSize();
-                    shotVisual.FillColor = solidColorBrush;
-                    shotVisual.UpdateShot(solidColorBrush, shot.getShape());
-
-                    // Set the initial position of the shot at the center of the player
-                    Canvas.SetLeft(shotVisual, shot.getX());
-                    Canvas.SetTop(shotVisual, shot.getY());
+                    ShotVisual shotVisual = shotVisualBuilder.New()
+                                .SetColor($"{color},{shape}")
+                                .SetSize(shot.getSize())
+                                .SetPosition(shot.getX(), shot.getY())
+                                .Build();
 
                     // Add the shot to the ShotContainer (Canvas)
                     ShotContainer.Children.Add(shotVisual);

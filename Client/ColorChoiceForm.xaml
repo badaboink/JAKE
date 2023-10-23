@@ -7,11 +7,11 @@
         mc:Ignorable="d"
         Title="ColorChoiceForm" Height="450" Width="800">
     <Grid>
-        <TextBox x:Name="NameTextBox" Text="Name" HorizontalAlignment="Center" Margin="0,117,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" AutomationProperties.HelpText="Enter your name here" AutomationProperties.Name=""/>
-        <Button Content="Green" HorizontalAlignment="Left" Margin="225,0,0,0" VerticalAlignment="Center" Background="Green" Height="75" Width="75" Click="GreenButton_Click"/>
-        <Button Content="Blue" HorizontalAlignment="Center" VerticalAlignment="Center" Background="Blue" Height="75" Width="76" Click="BlueButton_Click"/>
-        <Button Content="Red" HorizontalAlignment="Left" VerticalAlignment="Center" Background="Red" Height="75" Width="76" Margin="498,0,0,0" Click="RedButton_Click"/>
-        <Button Content="RedTriangle" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40" Width="58" Margin="225,301,0,0" Click="RedTriangle_Click" RenderTransformOrigin="1,1">
+        <TextBox x:Name="NameTextBox" Text="Name" HorizontalAlignment="Center" Margin="0,128,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" AutomationProperties.HelpText="Enter your name here" AutomationProperties.Name=""/>
+        <Button Content="Green" HorizontalAlignment="Left" Margin="224,250,0,0" VerticalAlignment="Top" Background="Green" Height="75" Width="75" Click="GreenButton_Click"/>
+        <Button Content="Blue" HorizontalAlignment="Center" VerticalAlignment="Top" Background="Blue" Height="75" Width="76" Click="BlueButton_Click" Margin="0,250,0,0"/>
+        <Button Content="Red" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Red" Height="75" Width="76" Margin="497,250,0,0" Click="RedButton_Click"/>
+        <Button Content="RedTriangle" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40" Width="58" Margin="246,177,0,0" Click="RedTriangle_Click" RenderTransformOrigin="1,1">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Polygon x:Name="RedTriangle" Points="0,75 37.5,0 75,75" Fill="Red" Stroke="Red" StrokeThickness="2"/>
@@ -23,7 +23,7 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <Button Content="BlueTriangle" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40" Width="58" Margin="380,301,0,0" Click="BlueTriangle_Click" RenderTransformOrigin="1,1">
+        <Button Content="BlueTriangle" HorizontalAlignment="Left" VerticalAlignment="Top" Height="40" Width="58" Margin="401,177,0,0" Click="BlueTriangle_Click" RenderTransformOrigin="1,1">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Polygon x:Name="BlueTriangle" Points="0,75 37.5,0 75,75" Fill="Blue" Stroke="Blue" StrokeThickness="2"/>
@@ -35,7 +35,7 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <Button Content="BlueRound" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Blue" Height="40" Width="42" Margin="317,301,0,0" Click="BlueRound_Click" RenderTransformOrigin="1,1">
+        <Button Content="BlueRound" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Blue" Height="40" Width="42" Margin="338,177,0,0" Click="BlueRound_Click" RenderTransformOrigin="1,1">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Ellipse x:Name="BlueRound" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Fill="Blue"/>
@@ -47,7 +47,7 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <Button Content="RedRound" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Red" Height="40" Width="42" Margin="476,301,0,0" Click="RedRound_Click" RenderTransformOrigin="1,1">
+        <Button Content="RedRound" HorizontalAlignment="Left" VerticalAlignment="Top" Background="Red" Height="40" Width="42" Margin="497,177,0,0" Click="RedRound_Click" RenderTransformOrigin="1,1">
             <Button.Template>
                 <ControlTemplate TargetType="Button">
                     <Ellipse x:Name="RedRound" Width="{TemplateBinding Width}" Height="{TemplateBinding Height}" Fill="Red"/>

@@ -22,7 +22,6 @@ namespace Server.GameData
         private List<Weapon> weapons = new List<Weapon>();
         public MapObjectFactory objectFactory = new MapObjectFactory();
 
-        public Director director;
 
         private static List<Zombie> minions = new List<Zombie>();
         private BossZombie boss = new BossZombie("", 0, 0, 0,0, minions);
@@ -30,8 +29,6 @@ namespace Server.GameData
         {
             // Generate obstacles when the service is created
             obstacles = GameFunctions.GenerateObstacles();
-            var playerBuilder = new PlayerBuilder();
-            director = new Director(playerBuilder);
         }
         Random random = new Random();
         int minId = 1;
@@ -46,11 +43,9 @@ namespace Server.GameData
                 playerId = new Random().Next(minId, maxId + 1);
             } while (usedIds.Contains(playerId));
             usedIds.Add(playerId);
-            Player newPlayer = director.ConstructPlayer(playerId, playerColor);
+            Player newPlayer = new Player(playerId, playerName, playerColor, shotcolor, shotshape);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
-            newPlayer.SetShotColor(shotcolor);
-            newPlayer.SetShotShape(shotshape);
             players.Add(newPlayer);
             Console.WriteLine("playerscount inmemorydataservce: " + players.Count);
             return newPlayer;
