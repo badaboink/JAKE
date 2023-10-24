@@ -33,6 +33,7 @@ namespace Server.GameData
         Random random = new Random();
         int minId = 1;
         int maxId = 100;
+        public int MaxId => maxId;
         HashSet<int> usedIds = new HashSet<int>();
         public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {

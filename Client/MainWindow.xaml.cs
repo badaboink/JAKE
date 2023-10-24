@@ -1026,7 +1026,7 @@ namespace JAKE.client
                         if (shieldVisible)
                         {
                             shieldBorder.Visibility = Visibility.Visible;
-                            gameStat.ShieldOn = true; //i gamestat perkelt
+                            gameStat.ShieldOn = true; 
                             shield.Interact(gameStat);
                         }
                         HideDisplay();
