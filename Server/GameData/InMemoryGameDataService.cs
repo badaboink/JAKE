@@ -291,6 +291,11 @@ namespace Server.GameData
 
             //return boss.ToString();
         }
+
+        public Coin returnCoin(int id)
+        {
+            return coins.FirstOrDefault(coin => coin.id == id);
+        }
         public DateTime GetCurrentGameTime()
         {
             return gametime;

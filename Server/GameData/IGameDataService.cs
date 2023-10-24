@@ -52,5 +52,7 @@ namespace Server.GameData
         bool GetBossNull();
         List<string> UpdateBossZombiePosition();
 
+        Coin returnCoin(int id);
+
     }
 }

@@ -383,23 +383,26 @@ namespace JAKE.client
 
             });
 
-            connection.On<int>("SendingPickedCoin", (coinid) =>
+            connection.On<string>("SendingPickedCoin", (coinObj) =>
             {
+                string coinString = new ServerString(coinObj).ConvertedString;
+                string[] parts = coinString.Split(':');
+                int id = int.Parse(parts[1]);
                 Dispatcher.Invoke(() =>
                 {
-                        foreach (var pair in coinVisuals)
-                        {
-                            Coin coin = pair.Key;
-                            CoinVisual coinVisual = pair.Value;
+                    foreach (var pair in coinVisuals)
+                    {
+                        Coin coin = pair.Key;
+                        CoinVisual coinVisual = pair.Value;
 
-                            if (coin.id == coinid)
-                            {
-                                coins.Remove(coin);
-                                coinVisuals.Remove(coin);
-                                CoinContainer.Children.Remove(coinVisual);
-                                break;
-                            }
+                        if (coin.id == id)
+                        {
+                            coins.Remove(coin);
+                            coinVisuals.Remove(coin);
+                            CoinContainer.Children.Remove(coinVisual);
+                            break;
                         }
+                    }
                        
                 });
             });
@@ -997,24 +1000,11 @@ namespace JAKE.client
                         testLabel.Text = text.DisplayObject("coin").text;
                         HideDisplay();
 
-                        //------------- JSONAdapter
-                        Dictionary<string, object> jsonObject = new Dictionary<string, object>();
-
-                        // Add key-value pairs to the dictionary
-                        jsonObject["id"] = coin.id;
-                        jsonObject["x"] = coin.X;
-                        jsonObject["y"] = coin.Y;
-                        jsonObject["width"] = coin.Width;
-                        jsonObject["height"] = coin.Height;
-                        jsonObject["points"] = coin.Points;
-
-
-                        // Convert the dictionary to a JSON string
-                        string jsonString = JsonConvert.SerializeObject(jsonObject);
-                        ServerString server = new ServerString(jsonString);
-                        
+                        // Convert coin to a JSON string
+                        string json = JsonConvert.SerializeObject(coin);
+ 
                         //-----------
-                        await connection.SendAsync("SendPickedCoin", server.ConvertedString);  //coin.ToString()
+                        await connection.SendAsync("SendPickedCoin", json);
                     }
                 }
             }
