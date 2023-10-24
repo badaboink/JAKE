@@ -9,13 +9,9 @@ namespace JAKE.classlibrary
 {
     public class TriangleShot : Shot
     {
-        public TriangleShot(Shot shot, IColor color) : base(shot)
+        public TriangleShot(Shot shot) : base(shot)
         {
             base.setShape("triangle");
-            base.setColor(color);
-            base.setSpeed(5);
-            base.setSize(10);
-            base.setPoints(5);
         }
     }
 }

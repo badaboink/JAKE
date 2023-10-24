@@ -1183,7 +1183,7 @@ namespace JAKE.client
                         }
                         double currentX = Canvas.GetLeft(shotVisual);
                         double currentY = Canvas.GetTop(shotVisual);
-                        double delta = 1; //shot.DeltaTime;
+                        double delta = shot.DeltaTime;
                         double newX = currentX + directionX * shot.getSpeed() * delta;
                         double newY = currentY + directionY * shot.getSpeed() * delta;
                         // Check for collisions with obstacles
@@ -1448,11 +1448,11 @@ namespace JAKE.client
 
             if (shape == "triangle")
             {
-                localShot = new TriangleShot(localShot, shotColor);
+                localShot = new TriangleShot(localShot);
             }
             else
             {
-                localShot = new RoundShot(localShot, shotColor);
+                localShot = new RoundShot(localShot);
             }     
 
             double playerCenterX = playerX + playerWidth / 2;

@@ -10,13 +10,9 @@ namespace JAKE.classlibrary
 {
     public class RoundShot : Shot
     {
-       public RoundShot(Shot shot, IColor color) : base(shot)
+       public RoundShot(Shot shot) : base(shot)
         {
             base.setShape("round");
-            base.setColor(color);
-            base.setSpeed(5);
-            base.setSize(10);
-            base.setPoints(5);
         }
     }
 }

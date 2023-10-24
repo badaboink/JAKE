@@ -32,16 +32,20 @@ namespace JAKE.classlibrary
 
         public Shot(Shot shot)
         {
-            this.shot = shot;
+            _color = shot.getColor();
+            _speed = shot.getSpeed();
+            _size = shot.getSize();
+            _points = shot.getPoints();
+            _previousUpdate = DateTime.Now;
         }
 
         public string getShape()
         {
             return _shape;
         }
-        public string getColor()
+        public IColor getColor()
         {
-            return _color.GetColor();
+            return _color;
         }
         public double getSpeed()
         {
@@ -93,6 +97,10 @@ namespace JAKE.classlibrary
         public override string ToString()
         {
             return $"{getX()}:{getY()}";
+        }
+        public void SetPreviousUpdate(DateTime time)
+        {
+            _previousUpdate = time;
         }
 
         public double DeltaTime
