@@ -7,11 +7,11 @@ using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary
 {
-    public class TriangleShot : IShape
+    public class TriangleShot : Shot
     {
-        public string GetShape()
+        public TriangleShot(Shot shot) : base(shot)
         {
-            return "triangle";
+            base.setShape("triangle");
         }
     }
 }

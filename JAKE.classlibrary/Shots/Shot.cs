@@ -18,13 +18,12 @@ namespace JAKE.classlibrary
         private double _y;
         private DateTime _previousUpdate;
         private IColor _color;
-        private IShape _shape;
+        private string _shape;
         private Shot shot;
 
-        public Shot(IColor color, IShape shape, double speed, int size, double points)
+        public Shot(IColor color, double speed, int size, double points)
         {         
             _color = color;
-            _shape = shape;
             _speed = speed;
             _size = size;
             _points = points;
@@ -38,7 +37,7 @@ namespace JAKE.classlibrary
 
         public string getShape()
         {
-            return _shape.GetShape();
+            return _shape;
         }
         public string getColor()
         {
@@ -74,7 +73,7 @@ namespace JAKE.classlibrary
         {
             _color = color;
         }
-        public void setShape(IShape shape)
+        public void setShape(string shape)
         {
             _shape = shape;
         }

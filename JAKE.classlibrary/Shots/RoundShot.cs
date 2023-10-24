@@ -7,11 +7,11 @@ using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary
 {
-    public class RoundShot : IShape
+    public class RoundShot : Shot
     {
-        public string GetShape()
+       public RoundShot(Shot shot) : base(shot)
         {
-            return "round";
+            base.setShape("round");
         }
     }
 }
