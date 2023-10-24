@@ -1,4 +1,7 @@
 ﻿using JAKE.classlibrary;
+using JAKE.classlibrary.Enemies;
+using JAKE.classlibrary.Collectibles;
+
 
 namespace Server.GameData
 {

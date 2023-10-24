@@ -5,8 +5,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JAKE.classlibrary.Patterns.Strategies;
 
-namespace JAKE.classlibrary
+namespace JAKE.classlibrary.Enemies
 {
     public class BossZombie : Zombie
     {

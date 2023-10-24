@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JAKE.classlibrary.Patterns.Strategies;
 
-namespace JAKE.classlibrary
+namespace JAKE.classlibrary.Enemies
 {
-    public class Zombie
+    public class Zombie 
     {
         private IMoveStrategy movementStrategy;
 

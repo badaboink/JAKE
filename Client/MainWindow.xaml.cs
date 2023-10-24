@@ -28,7 +28,10 @@ using JAKE.client.Visuals;
 using JAKE.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
-
+using JAKE.classlibrary.Enemies;
+using JAKE.classlibrary.Shots;
+using JAKE.classlibrary.Colors;
+using JAKE.classlibrary.Collectibles;
 namespace JAKE.client
 {
     public partial class MainWindow : Window
@@ -189,7 +192,7 @@ namespace JAKE.client
                 lastGameTime = gametime;
             });
         }
-        private Timer timer;
+        private Timer? timer;
         private async Task ListenForGameUpdates()
         {
             connection.On<string>("UpdateUsers", (player) =>
@@ -205,9 +208,11 @@ namespace JAKE.client
                     int y = int.Parse(parts[4]);
                     string shotColor = parts[5];
                     string shotShape = parts[6];
-                    Debug.WriteLine("LSITO COUNT again" + playerInfoList.Count);
-                    Debug.WriteLine("PLAYERIO ID again" + playerId);
-                    Player playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
+                    Player? playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
+                    if (playerInfo == null)
+                    {
+                        throw new Exception("PlayerInfo is null");
+                    }
                     playerInfo.SetCurrentPosition(x, y);
                     
                     Dispatcher.Invoke(() =>
@@ -288,7 +293,7 @@ namespace JAKE.client
             });
             connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
             {
-                Player playerToUpdate = playerInfoList.FirstOrDefault(player => player.MatchesId(playerid));
+                Player? playerToUpdate = playerInfoList.FirstOrDefault(player => player.MatchesId(playerid));
                 if (playerToUpdate != null)
                 {
                     CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
@@ -296,18 +301,18 @@ namespace JAKE.client
             });
             connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
             {
-                Dispatcher.Invoke(() =>
+                Dispatcher.Invoke((Action)(() =>
                 {
                     Enemy enemy = new Enemy(enemyid, enemycolor);
                     EnemyVisual enemyRect = enemyVisuals[enemy];
                     enemies.Remove(enemy);
                     enemyVisuals.Remove(enemy);
                     EnemyContainer.Children.Remove(enemyRect);
-                });
+                }));
             });
             connection.On<int, string, int>("UpdateEnemyHealth", (enemyid, enemycolor, enemyhealth) =>
             {
-                Enemy enemyToUpdate = enemies.FirstOrDefault(enemy => enemy.MatchesId(enemyid));
+                Enemy? enemyToUpdate = enemies.FirstOrDefault(enemy => enemy.MatchesId(enemyid));
                 if (enemyToUpdate != null)
                 {
                     enemyToUpdate.SetHealth(enemyhealth);

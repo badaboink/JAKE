@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using JAKE.classlibrary.Patterns;
 
-namespace JAKE.classlibrary
+namespace JAKE.classlibrary.Collectibles
 {
     public class Coin : IMapObject
     {

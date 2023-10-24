@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Xunit;
 using System.Windows.Media;
 using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Shots;
+using JAKE.classlibrary.Colors;
 
 namespace Class_library_tests
 {
@@ -24,7 +26,7 @@ namespace Class_library_tests
             //MainWindow a = new MainWindow();
 
             // Act
-            MainWindow.SingleShot(10,10,10,10, out shot);  // spalvos kodas cia (melyna)
+            MainWindow.SingleShot(10,10,10,10,"red", "triangle", out shot);  // spalvos kodas cia (melyna)
 
             // Assert
             Assert.NotNull(shot);

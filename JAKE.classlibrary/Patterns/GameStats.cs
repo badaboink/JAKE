@@ -8,7 +8,7 @@ namespace JAKE.classlibrary.Patterns
 {
     public class GameStats
     {
-        private static GameStats instance = null;
+        private static GameStats? instance = null;
         private static readonly object lockObject = new object();
 
         private int playersCount;

@@ -10,7 +10,7 @@ namespace JAKE.classlibrary
 {
     public class Controller
     {
-        Command slot;
+        Command? slot;
 
         public Controller()
         {
@@ -24,6 +24,10 @@ namespace JAKE.classlibrary
 
         public void Execute()
         {
+            if (slot == null)
+            {
+                return;
+            }
             slot.Execute();
         }
     }

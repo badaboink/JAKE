@@ -1,5 +1,6 @@
 ﻿using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Enemies;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Protocol;

@@ -1,5 +1,8 @@
 ﻿using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Patterns.Strategies;
+using JAKE.classlibrary.Enemies;
+using JAKE.classlibrary.Collectibles;
 using Microsoft.AspNetCore.SignalR;
 using Server.Hubs;
 using System.Reflection.Emit;

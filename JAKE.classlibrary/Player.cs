@@ -20,11 +20,11 @@ namespace JAKE.classlibrary
         private Coordinates _currentCoords = new(0, 0);
         private Stack<Coordinates> _history = new Stack<Coordinates>();
         private int _speed;
-        private string _shotColor;
-        private string _shotShape;
+        private string? _shotColor;
+        private string? _shotShape;
         private bool _isShooting = false;
         private double _attackSpeed;
-        public string Ability { get; set; }
+        public string? Ability { get; set; }
         private class Coordinates
         {
             public double x;
@@ -123,12 +123,12 @@ namespace JAKE.classlibrary
             return _currentDirection.y;
         }
 
-        public string GetShotColor()
+        public string? GetShotColor()
         {
             return _shotColor;
         }
 
-        public string GetShotShape()
+        public string? GetShotShape()
         {
             return _shotShape;
         }
@@ -143,7 +143,7 @@ namespace JAKE.classlibrary
             return _speed;
         }
 
-        public string GetConnectionId()
+        public string? GetConnectionId()
         {
             return _connectionid;
         }
@@ -210,7 +210,7 @@ namespace JAKE.classlibrary
         {
             return (text, health, shieldOn);
         }
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is Player otherPlayer)
             {
