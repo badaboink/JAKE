@@ -176,7 +176,7 @@ namespace Server.GameData
                 MiniZombie originalMiniZombie = new MiniZombie("mini", 80, 0.0, 0.0, 20);
                 Console.WriteLine("originalminizombiename: " + originalMiniZombie.Name);
 
-                MiniZombie previousMiniZombie = originalMiniZombie;
+                //MiniZombie previousMiniZombie = originalMiniZombie;
 
                 //for (int i = 0; i < 8; i++)
                 //{
@@ -217,13 +217,15 @@ namespace Server.GameData
                     {
 
                         MiniZombie shallowCopyMiniZombie = originalMiniZombie.Clone() as MiniZombie;
+
+                        bool areHashCodesEqual = originalMiniZombie.GetHashCode() == shallowCopyMiniZombie.GetHashCode();
+                        Console.WriteLine($"original and shallow Hash Codes Are Equal: {areHashCodesEqual}");
+
                         bossZombie.AddMinion(shallowCopyMiniZombie, angle, 3, shallowCopyMiniZombie.X, shallowCopyMiniZombie.Y); // Radius set to 3 for example
                         miniZombies.Add(shallowCopyMiniZombie);
-                        Console.WriteLine("copyminizombie" + i + ": " + shallowCopyMiniZombie.Name);
-                    }
-                   
-
                     
+                    }
+   
 
                 }
 

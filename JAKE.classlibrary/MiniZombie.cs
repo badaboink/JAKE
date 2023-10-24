@@ -45,5 +45,10 @@ namespace JAKE.classlibrary
         {
             return $"{Name}:{X}:{Y}:{Size}:{Health}";
         }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Health, X, Y, Size);
+        }
     }
 }

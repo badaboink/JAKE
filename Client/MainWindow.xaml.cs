@@ -59,7 +59,8 @@ namespace JAKE.client
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         private static List<Zombie> miniZombieList = new List<Zombie>();
         private Dictionary<Zombie, MiniZombieVisual> zombieVisuals = new Dictionary<Zombie, MiniZombieVisual>();
-        private BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
+        private static BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
+        private BossZombie nextBoss = (BossZombie)boss.Clone();
         ZombiesVisual bossVisual = new ZombiesVisual();
 
 
@@ -138,6 +139,10 @@ namespace JAKE.client
             });
             connection.On<List<string>, DateTime>("GameUpdate", (userData, gametime) =>
             {
+                bool areHashCodesEqual = boss.GetHashCode() == nextBoss.GetHashCode();
+
+                // Print the result (for testing purposes)
+                Debug.WriteLine($"BOSS IR NEXTBOSS Hash Codes Are Equal: {areHashCodesEqual}");
                 Debug.WriteLine("gameupdate userdata count: " + userData.Count);
                 foreach (string playerEntry in userData)
                 {
@@ -582,7 +587,8 @@ namespace JAKE.client
                                 if (boss.Name == "") //naujas
                                 {
                                     boss = new BossZombie(name, zombieHealth, zombieX, zombieY, zombieSize, miniZombieListLocal);
-                                    Dispatcher.Invoke(() =>
+                                    nextBoss = (BossZombie)boss.Clone();
+                                Dispatcher.Invoke(() =>
                                     {
 
                                         ZombiesVisual zombieVisual = new ZombiesVisual();
@@ -1367,8 +1373,8 @@ namespace JAKE.client
             //                await connection.SendAsync("SendZombieUpdate", boss.ToString()); //nusiuncia pasikeitusi minions sarasa TODO
             //                if (boss.Health <= 0)
             //                {
-
-            //                    boss = new BossZombie("", 0, 0, 0, 0, miniZombieList);
+            //                    
+            //                    boss = nextBoss; //new BossZombie("", 0, 0, 0, 0, miniZombieList);
             //                    bossVisual = new ZombiesVisual();
             //                    //EnemyContainer.Children.Remove(enemyRect);
             //                    ZombieContainer.Children.Clear();
