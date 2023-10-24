@@ -110,6 +110,7 @@ namespace Server.Hubs
                 if (_gameDataService.GetBossNull())
                 {
                     _gameDataService.AddBossZombie("Sefas", 200);
+                    
                     Console.WriteLine("pridejo sefa");
                 }
             }

@@ -13,6 +13,7 @@
     <None Remove="images\healthboost.png" />
     <None Remove="images\shield.png" />
     <None Remove="images\speedboost.png" />
+    <None Remove="images\zombie.png" />
     <None Remove="images\zombie2.png" />
   </ItemGroup>
 
@@ -31,6 +32,7 @@
     <Resource Include="images\healthboost.png" />
     <Resource Include="images\shield.png" />
     <Resource Include="images\speedboost.png" />
+    <Resource Include="images\zombie.png" />
     <Resource Include="images\zombie2.png" />
   </ItemGroup>
 

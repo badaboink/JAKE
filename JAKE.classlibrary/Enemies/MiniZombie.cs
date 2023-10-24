@@ -12,11 +12,21 @@ namespace JAKE.classlibrary
         private IMoveStrategy movementStrategy;
         public MiniZombie(string name, int health, double x, double y, int size) : base(name, health, x, y, size)
         {
+            Name = name;
+            Health = health;
+            X = x;
+            Y = y;
+            Size = size;
         }
+
+        //public override Zombie Clone()
+        //{
+        //    return new MiniZombie(Name, Health, X, Y, Size);
+        //}
 
         public override Zombie Clone()
         {
-            return new MiniZombie(Name, Health, X, Y, Size);
+            return MemberwiseClone() as MiniZombie;
         }
 
         public void SetMovementStrategy(IMoveStrategy movementStrategy)

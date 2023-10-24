@@ -22,7 +22,16 @@ namespace JAKE.classlibrary.Patterns
 
         public IBuilderVisual<ShotVisual> SetColor(string colorshape)
         {
+
             string[] data = colorshape.Split(',');
+            if (data[1] == "")
+            {
+                data[1] = "round";
+            }
+            if (data[0] == "")
+            {
+                data[0] = "blue";
+            }
             SolidColorBrush solidColorBrush;
             Color shotColor = (Color)ColorConverter.ConvertFromString(data[0]);
             solidColorBrush = new SolidColorBrush(shotColor);

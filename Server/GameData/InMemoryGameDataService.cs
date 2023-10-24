@@ -32,16 +32,16 @@ namespace Server.GameData
         }
         Random random = new Random();
         int minId = 1;
-        int maxId = 100;
-        public int MaxId => maxId;
+        int maxId = Int32.MaxValue;
         HashSet<int> usedIds = new HashSet<int>();
+        HashSet<int> usedIdsEnemies = new HashSet<int>();
         public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
             int playerId = 0;
             Console.WriteLine("addplayer inmemory");
             do
             {
-                playerId = new Random().Next(minId, maxId + 1);
+                playerId = new Random().Next(minId, maxId);
             } while (usedIds.Contains(playerId));
             usedIds.Add(playerId);
             Player newPlayer = new Player(playerId, playerName, playerColor, shotcolor, shotshape);
@@ -89,7 +89,13 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
-                Enemy newEnemy = GameFunctions.GenerateEnemy(enemies.Count + 1, obstacles);
+                int enemyId = 0;
+                do
+                {
+                    enemyId = new Random().Next(minId, maxId);
+                } while (usedIdsEnemies.Contains(enemyId));
+                usedIdsEnemies.Add(enemyId);
+                Enemy newEnemy = GameFunctions.GenerateEnemy(enemyId, obstacles);
                 // TODO - nzn kokios maxX ir maxY reiksmes
                 newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80-newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
@@ -115,6 +121,7 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
+                usedIdsEnemies.Remove(id);
                 Enemy enemyToRemove = enemies.FirstOrDefault(enemy => enemy.MatchesId(id));
                 if (enemyToRemove != null)
                 {
@@ -142,43 +149,96 @@ namespace Server.GameData
                 return enemies.Select(enemy => enemy.ToString()).ToList();
             }
         }
-
+        //TODO: kodel du kartus prideda sefa???? ir tada 15 minions gaunasi
         public BossZombie AddBossZombie(string name, int health)
         {
-
-            Random random = new Random();
-            BossZombie bossZombie = new BossZombie(name, health, 0,0, 70, new List<Zombie>());
-            int maxAttempts = 100;
-            for (int attempt = 0; attempt < maxAttempts; attempt++)
+            List<Zombie> miniZombies = new List<Zombie>();
+            BossZombie bossZombie = new BossZombie(name, health, 0, 0, 70, miniZombies);
+            if (boss.minions.Count<1)
             {
-                double spawnX = random.Next(bossZombie.Size, 1920 - 60 - bossZombie.Size);
-                double spawnY = random.Next(bossZombie.Size, 1080 - 80 - bossZombie.Size);
-
-                bool positionClear = GameFunctions.IsPositionClear(spawnX, spawnY, obstacles, bossZombie.Size);
-
-                if (positionClear)
+                Random random = new Random();
+                
+                int maxAttempts = 100;
+                for (int attempt = 0; attempt < maxAttempts; attempt++)
                 {
-                    bossZombie.SetCurrentPosition(spawnX, spawnY);
-                    break;
+                    double spawnX = random.Next(bossZombie.Size, 1920 - 60 - bossZombie.Size);
+                    double spawnY = random.Next(bossZombie.Size, 1080 - 80 - bossZombie.Size);
+
+                    bool positionClear = GameFunctions.IsPositionClear(spawnX, spawnY, obstacles, bossZombie.Size);
+
+                    if (positionClear)
+                    {
+                        bossZombie.SetCurrentPosition(spawnX, spawnY);
+                        break;
+                    }
                 }
+                // Add 8 mini zombies around the boss zombie in a circular pattern
+                MiniZombie originalMiniZombie = new MiniZombie("mini", 80, 0.0, 0.0, 20);
+                Console.WriteLine("originalminizombiename: " + originalMiniZombie.Name);
+
+                MiniZombie previousMiniZombie = originalMiniZombie;
+
+                //for (int i = 0; i < 8; i++)
+                //{
+                //    double angle = 2 * Math.PI * i / 8; // Divide the circle into 8 equal parts
+                //    if (i == 0)
+                //    {
+                //        bossZombie.AddMinion(originalMiniZombie, angle, 3, originalMiniZombie.X, originalMiniZombie.Y);
+                //    }
+
+
+                //    // Shallow copy the previous mini zombie
+                //    MiniZombie currentMiniZombie = previousMiniZombie.Clone() as MiniZombie;
+
+                //    // Modify the coordinates of the current mini zombie
+                //    int x = (int)(previousMiniZombie.X + 3 * Math.Cos(angle));
+                //    int y = (int)(previousMiniZombie.Y + 3 * Math.Sin(angle));
+
+                //    // Set the modified coordinates for the current mini zombie
+                //    currentMiniZombie.SetCurrentPosition(x, y);
+
+                //    // Pass the current mini zombie with modified coordinates for the next iteration
+                //    previousMiniZombie = currentMiniZombie;
+
+                //    // Now you can use the currentMiniZombie as needed, such as adding it to a list or using it in other logic.
+                //    miniZombies.Add(currentMiniZombie);
+                //    bossZombie.AddMinionX(currentMiniZombie);
+
+                //  Console.WriteLine("copyminizombie" + i + ": " + currentMiniZombie.Name);
+                //}
+                for (int i = 0; i < 8; i++)
+                {
+                    double angle = 2 * Math.PI * i / 8; // Divide the circle into 8 equal parts
+                    if (i == 0)
+                    {
+                        bossZombie.AddMinion(originalMiniZombie, angle, 3, originalMiniZombie.X, originalMiniZombie.Y);
+                    }
+                    else
+                    {
+
+                        MiniZombie shallowCopyMiniZombie = originalMiniZombie.Clone() as MiniZombie;
+                        bossZombie.AddMinion(shallowCopyMiniZombie, angle, 3, shallowCopyMiniZombie.X, shallowCopyMiniZombie.Y); // Radius set to 3 for example
+                        miniZombies.Add(shallowCopyMiniZombie);
+                        Console.WriteLine("copyminizombie" + i + ": " + shallowCopyMiniZombie.Name);
+                    }
+                   
+
+                    
+
+                }
+
+                bossZombie.minions = miniZombies;
+
+                bossZombie.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - bossZombie.Size, 1080 - 80 - bossZombie.Size, 3, obstacles));
+
+                boss = bossZombie;
+
+                minions = miniZombies;
+                Console.WriteLine("minions count: " + minions.Count);
+                Console.WriteLine("bossminions count: " + boss.minions.Count);
+                return bossZombie;
             }
-            // Add 8 mini zombies around the boss zombie in a circular pattern
-            for (int i = 0; i < 8; i++)
-            {
-                double angle = 2 * Math.PI * i / 8; // Divide the circle into 8 equal parts
-                bossZombie.AddMinion(new MiniZombie($"Minion {i + 1}", 50, 0, 0,10), angle, 3); // Radius set to 3 for example
-            }
-
-            var zombies = new List<Zombie>
-            {
-                bossZombie
-            };
-
-            bossZombie.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - bossZombie.Size, 1080 - 80 - bossZombie.Size, 3, obstacles));
-
-            boss = bossZombie;
-            minions = zombies;
-            return bossZombie;
+            return boss;
 
         }
 
@@ -209,7 +269,7 @@ namespace Server.GameData
         }
         public bool GetBossNull()
         {
-            return boss.Name == "";
+            return boss.Name == "" && minions.Count==0;
         }
         // strategy pattern
         // strategy for movement changes after xxx amount of time has passed
