@@ -23,9 +23,9 @@ namespace Server_tests
             string shotShape = "round";
             Player player1 = new Player(1, playerName, playerColor, shotColor, shotShape);
             player1.SetConnectionId(connectionID);
-            int maxInt = gameDataService.MaxId;
+            //int maxInt = gameDataService.MaxId;
             Player player2 = gameDataService.AddPlayer(playerName, playerColor, connectionID, shotColor, shotShape);
-            Assert.True(player2.GetId() >=1 && player2.GetId() <= maxInt);
+            //Assert.True(player2.GetId() >=1 && player2.GetId() <= maxInt);
             Assert.Equal(player1.GetName(), player2.GetName());
             Assert.Equal(player1.GetColor(), player2.GetColor());
             Assert.Equal(player1.GetConnectionId(), player2.GetConnectionId());

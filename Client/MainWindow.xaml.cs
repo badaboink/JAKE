@@ -83,6 +83,7 @@ namespace JAKE.client
             {
                 collisionCheckedEnemies[enemy] = false;
             }
+            Debug.WriteLine("naujas instance " + gameStat);
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -802,12 +803,25 @@ namespace JAKE.client
         {
             // tekstas dingsta po puse sekundes
             var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(8);
+            timer.Interval = TimeSpan.FromSeconds(0.5);
             timer.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
                 //heartLabel.Visibility = Visibility.Hidden;
                 //shieldBorder.Visibility = Visibility.Hidden;
+                timer.Stop();
+            };
+
+            timer.Start();
+        }
+        private void StopSpeed()
+        {
+            // tekstas dingsta po puse sekundes
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Tick += (sender, args) =>
+            {
+                gameStat.PlayerSpeed = 10;
                 timer.Stop();
             };
 
@@ -1067,7 +1081,7 @@ namespace JAKE.client
                             Base text = new Base(currentPlayer);
                             testLabel.Text = text.DisplayObject("speed").text;
                             HideDisplay();
-
+                            StopSpeed();
                             await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
                         }
 
