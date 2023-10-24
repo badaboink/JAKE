@@ -151,7 +151,6 @@ namespace Server.Hubs
         }
         public async Task SendPickedCoin(string coin)
         {
-           
             string coinString = new ServerString(coin).ConvertedString;
             string[] parts = coinString.Split(':');
             if (parts.Length == 7)

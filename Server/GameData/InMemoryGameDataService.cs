@@ -175,6 +175,7 @@ namespace Server.GameData
                 // Add 8 mini zombies around the boss zombie in a circular pattern
                 MiniZombie originalMiniZombie = new MiniZombie("mini", 80, 0.0, 0.0, 20);
                 Console.WriteLine("originalminizombiename: " + originalMiniZombie.Name);
+                Console.WriteLine("originalminihashcode: " + originalMiniZombie.GetHashCode());
 
                 //MiniZombie previousMiniZombie = originalMiniZombie;
 
@@ -217,9 +218,7 @@ namespace Server.GameData
                     {
 
                         MiniZombie shallowCopyMiniZombie = originalMiniZombie.Clone() as MiniZombie;
-
-                        bool areHashCodesEqual = originalMiniZombie.GetHashCode() == shallowCopyMiniZombie.GetHashCode();
-                        Console.WriteLine($"original and shallow Hash Codes Are Equal: {areHashCodesEqual}");
+                        Console.WriteLine("shallowminihashcode: " + shallowCopyMiniZombie.GetHashCode());
 
                         bossZombie.AddMinion(shallowCopyMiniZombie, angle, 3, shallowCopyMiniZombie.X, shallowCopyMiniZombie.Y); // Radius set to 3 for example
                         miniZombies.Add(shallowCopyMiniZombie);

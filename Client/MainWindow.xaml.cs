@@ -145,6 +145,8 @@ namespace JAKE.client
                 // Print the result (for testing purposes)
                 Debug.WriteLine($"BOSS IR NEXTBOSS Hash Codes Are Equal: {areHashCodesEqual}");
                 Debug.WriteLine("gameupdate userdata count: " + userData.Count);
+                Debug.WriteLine("boss hashcode: " + boss.GetHashCode());
+                Debug.WriteLine("nextboss hashcode: " + nextBoss.GetHashCode());
                 foreach (string playerEntry in userData)
                 {
                     string[] parts = playerEntry.Split(':');
