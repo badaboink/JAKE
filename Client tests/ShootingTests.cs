@@ -55,8 +55,8 @@ namespace Class_library_tests
 
             Obstacle obstacle = new Obstacle(obstacleWidth, obstacleHeight, obstacleX, obstacleY);
             IColor color = new RedColor();
-            IShape shape = new RoundShot();
-            Shot shot = new Shot(color, shape, 5, 10, 5);
+            //IShape shape = new RoundShot();
+            Shot shot = new Shot(color, 5, 10, 5);
 
             // Act
             Shot result = MainWindow.RemoveShot(shot, playerX, playerY, obstacle, playerSize);
@@ -79,8 +79,8 @@ namespace Class_library_tests
 
             Obstacle obstacle = new Obstacle(obstacleWidth, obstacleHeight, obstacleX, obstacleY);
             IColor color = new RedColor();
-            IShape shape = new RoundShot();
-            Shot shot = new Shot(color, shape, 5, 10, 5);
+            //IShape shape = new RoundShot();
+            Shot shot = new Shot(color, 5, 10, 5);
 
             // Act
             Shot result = MainWindow.RemoveShot(shot, playerX, playerY, obstacle, playerSize);

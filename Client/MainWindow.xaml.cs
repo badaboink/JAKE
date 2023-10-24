@@ -1158,8 +1158,9 @@ namespace JAKE.client
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
-
+                    Debug.WriteLine("SHEIPAS create shot" + shape);
                     SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
+                    Debug.WriteLine("SHEIPAS po single shot" + shape);
                     ShotVisual shotVisual = shotVisualBuilder.New()
                                 .SetColor($"{color},{shape}")
                                 .SetSize(shot.getSize())
@@ -1440,23 +1441,26 @@ namespace JAKE.client
             {
                 shotColor = new BlueColor();
             }
-            IShape shotShape;
+
+            Shot localShot = new Shot(shotColor, 5, 10, 5);
+
             if (shape == "triangle")
             {
-                shotShape = new TriangleShot();
+                localShot = new TriangleShot(localShot);
             }
             else
             {
-                shotShape = new RoundShot();
-            }
-
-            Shot localShot = new Shot(shotColor, shotShape, 5, 10, 5);
+                localShot = new RoundShot(localShot);
+            }     
 
             double playerCenterX = playerX + playerWidth / 2;
             double playerCenterY = playerY + playerHeight / 2;
 
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;
+            Debug.WriteLine("SHOTAS " + localShot.getY());
+
+
         }
     }
 }
