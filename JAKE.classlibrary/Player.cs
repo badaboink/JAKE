@@ -22,6 +22,8 @@ namespace JAKE.classlibrary
         private int _speed;
         private string _shotColor;
         private string _shotShape;
+        private bool _isShooting = false;
+        private double _attackSpeed;
         public string Ability { get; set; }
         private class Coordinates
         {
@@ -46,6 +48,7 @@ namespace JAKE.classlibrary
             _id = id;
             _name = name;
             _color = color;
+            _attackSpeed = 5;
             _speed = 10;
             _shotColor = shotColor;
             _shotShape = shotShape;
@@ -67,6 +70,7 @@ namespace JAKE.classlibrary
             _name = "";
             _color = "red";
             _speed = 10;
+            _attackSpeed = 5;
         }
 
         public int GetId()
@@ -163,6 +167,27 @@ namespace JAKE.classlibrary
         {
             _speed = speed;
         }
+
+        public void SetShooting(bool shoot)
+        {
+            _isShooting = shoot;
+        }
+
+        public bool IsShooting
+        {
+            get{return _isShooting;}
+        }
+
+        public void SetAttackSpeed(double speed)
+        {
+            _attackSpeed = speed;
+        }
+
+        public double GetAttackSpeed
+        {
+            get{return _attackSpeed;}
+        }
+
         public void SetShotColor(string color)
         {
             _shotColor = color;

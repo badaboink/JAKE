@@ -24,7 +24,7 @@ namespace Class_library_tests
             //MainWindow a = new MainWindow();
 
             // Act
-            MainWindow.SingleShot(10,10,10,10, out shot);  // spalvos kodas cia (melyna)
+            MainWindow.SingleShot(10,10,10,10, "red", "triangle", out shot);  // spalvos kodas cia (melyna)
 
             // Assert
             Assert.NotNull(shot);
@@ -33,6 +33,8 @@ namespace Class_library_tests
             Assert.Equal("triangle", shot.getShape());
             Assert.Equal(10, shot.getX());
             Assert.Equal(10, shot.getY());
+            Assert.Equal(5, shot.getPoints());
+            Assert.Equal(5, shot.getSpeed());
 
             // jeigu testas nepraeina vadinasi nustatyta kitoks shape ir color MainWindow
             // kol kas shape ir color keiciami paciam kode

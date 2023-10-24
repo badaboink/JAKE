@@ -16,8 +16,11 @@ namespace JAKE.classlibrary
         private double _points;
         private double _x;
         private double _y;
+        private DateTime _previousUpdate;
         private IColor _color;
         private IShape _shape;
+        private Shot shot;
+
         public Shot(IColor color, IShape shape, double speed, int size, double points)
         {         
             _color = color;
@@ -25,7 +28,14 @@ namespace JAKE.classlibrary
             _speed = speed;
             _size = size;
             _points = points;
+            _previousUpdate = DateTime.Now;
         }
+
+        public Shot(Shot shot)
+        {
+            this.shot = shot;
+        }
+
         public string getShape()
         {
             return _shape.GetShape();
@@ -84,6 +94,16 @@ namespace JAKE.classlibrary
         public override string ToString()
         {
             return $"{getX()}:{getY()}";
+        }
+
+        public double DeltaTime
+        {
+            get
+            {
+                double delta = DateTime.Now.Subtract(_previousUpdate).TotalMilliseconds;
+                _previousUpdate = DateTime.Now;
+                return delta/10f;
+            }
         }
     }
 }

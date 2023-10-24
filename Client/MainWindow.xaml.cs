@@ -34,7 +34,7 @@ namespace JAKE.client
     public partial class MainWindow : Window
     {
         private Player currentPlayer;
-        private bool gamestarted = false;
+        public bool gamestarted = false;
         private List<Player> playerInfoList = new List<Player>();
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
@@ -84,6 +84,7 @@ namespace JAKE.client
             {
                 collisionCheckedEnemies[enemy] = false;
             }
+            Debug.WriteLine("naujas instance " + gameStat);
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -771,13 +772,18 @@ namespace JAKE.client
 
             public override void Execute()
             {
-                window.Shoot((int)player.GetDirectionX(), (int)player.GetDirectionY());
+                window.Shoot();
             }
         }
 
-        protected void Shoot(int deltaX, int deltaY)
+        protected void Shoot()
         {
-            CreateShot(playerVisuals[currentPlayer], deltaX, deltaY, currentPlayer.GetShotColor(), currentPlayer.GetShotShape());
+            if (!currentPlayer.IsShooting)
+            {
+                currentPlayer.SetShooting(true);
+                CreateShot(playerVisuals[currentPlayer], currentPlayer.GetDirectionX(), currentPlayer.GetDirectionY(), currentPlayer.GetShotColor(), currentPlayer.GetShotShape());
+                Task.Delay(TimeSpan.FromSeconds(1 / currentPlayer.GetAttackSpeed)).ContinueWith(t => currentPlayer.SetShooting(false));
+            }
         }
 
         private void UpdateTextLabelPosition()
@@ -803,12 +809,25 @@ namespace JAKE.client
         {
             // tekstas dingsta po puse sekundes
             var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(8);
+            timer.Interval = TimeSpan.FromSeconds(0.5);
             timer.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
                 //heartLabel.Visibility = Visibility.Hidden;
                 //shieldBorder.Visibility = Visibility.Hidden;
+                timer.Stop();
+            };
+
+            timer.Start();
+        }
+        private void StopSpeed()
+        {
+            // tekstas dingsta po puse sekundes
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Tick += (sender, args) =>
+            {
+                gameStat.PlayerSpeed = 10;
                 timer.Stop();
             };
 
@@ -892,7 +911,7 @@ namespace JAKE.client
                 }
             }
         }
-        private async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
+        public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             if (!gameStat.ShieldOn)
             {
@@ -1032,7 +1051,7 @@ namespace JAKE.client
                         if (shieldVisible)
                         {
                             shieldBorder.Visibility = Visibility.Visible;
-                            gameStat.ShieldOn = true; //i gamestat perkelt
+                            gameStat.ShieldOn = true; 
                             shield.Interact(gameStat);
                         }
                         HideDisplay();
@@ -1068,7 +1087,7 @@ namespace JAKE.client
                             Base text = new Base(currentPlayer);
                             testLabel.Text = text.DisplayObject("speed").text;
                             HideDisplay();
-
+                            StopSpeed();
                             await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
                         }
 
@@ -1161,16 +1180,17 @@ namespace JAKE.client
                     // Update the shot's position based on the direction and speed
                     bool shouldRender = true;
 
-
                     CompositionTarget.Rendering += async (sender, e) =>
                     {
-                        if (!shouldRender) return;
+                        if (!shouldRender)
+                        {
+                            return;
+                        }
                         double currentX = Canvas.GetLeft(shotVisual);
                         double currentY = Canvas.GetTop(shotVisual);
-
-                        double newX = currentX + directionX * shot.getSpeed();
-                        double newY = currentY + directionY * shot.getSpeed();
-
+                        double delta = shot.DeltaTime;
+                        double newX = currentX + directionX * shot.getSpeed() * delta;
+                        double newY = currentY + directionY * shot.getSpeed() * delta;
                         // Check for collisions with obstacles
                         // TO-DO: shotvisual does not set width and height for some reason... will fix in future maybe
                         foreach (Obstacle obstacle in obstacles)
@@ -1240,7 +1260,6 @@ namespace JAKE.client
                             Debug.WriteLine("removed enemy");
                         }
 
-
                         // Update the shot's position
                         if (!shotHitEnemy)
                         {
@@ -1252,6 +1271,8 @@ namespace JAKE.client
                             if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
                             {
                                 ShotContainer.Children.Remove(shotVisual);
+                                shouldRender = false;
+                                return;
                             }
                         }
                     };

@@ -23,9 +23,9 @@ namespace Class_library_tests
         [Fact]
         public void Test_Closest_Player_1()
         {
-            Player player1 = new Player(1, "a", "red");
-            Player player2 = new Player(2, "a", "red");
-            Player player3 = new Player(3, "a", "red");
+            Player player1 = new Player(1, "a", "red", "red", "round");
+            Player player2 = new Player(2, "a", "red", "red", "round");
+            Player player3 = new Player(3, "a", "red", "red", "round");
             player1.SetCurrentPosition(1, 1);
             player2.SetCurrentPosition(1, 0);
             player3.SetCurrentPosition(2, 1);
@@ -101,9 +101,9 @@ namespace Class_library_tests
             enemy.SetSpeed(5.0);
             var strategy = new ChasePlayerStrategy(obstacles);
 
-            Player player1 = new Player(1, "a", "red");
-            Player player2 = new Player(2, "a", "red");
-            Player player3 = new Player(3, "a", "red");
+            Player player1 = new Player(1, "a", "red", "red", "round");
+            Player player2 = new Player(2, "a", "red", "red", "round");
+            Player player3 = new Player(3, "a", "red", "red", "round");
             player1.SetCurrentPosition(1, 1);
             player2.SetCurrentPosition(100, 100);
             player3.SetCurrentPosition(25, 25);
