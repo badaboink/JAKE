@@ -13,6 +13,7 @@ using System.Net.Sockets;
 using System.Numerics;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using JAKE.classlibrary.Collectibles;
 
 namespace Server.Hubs
 {
