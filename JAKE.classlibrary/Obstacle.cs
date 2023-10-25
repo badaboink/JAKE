@@ -43,6 +43,21 @@ namespace JAKE.classlibrary
             return overlapX && overlapY;
         }
 
+        public bool WouldOverlap(double newX, double newY)
+        {
+            // Calculate the boundaries of the obstacle
+            double obstacleLeft = PositionX;
+            double obstacleRight = PositionX + Width;
+            double obstacleTop = PositionY;
+            double obstacleBottom = PositionY + Height;
+
+            // Check for overlap
+            bool overlapX = newX < obstacleRight && newX > obstacleLeft;
+            bool overlapY = newY < obstacleBottom && newY > obstacleTop;
+
+            return overlapX && overlapY;
+        }
+
         public double DistanceFromObstacle(int x, int y, double playerX, double playerY, double playerWidth, double playerHeight)
         {
             double distance = 0;

@@ -6,6 +6,7 @@ using JAKE.classlibrary.Collectibles;
 using Microsoft.AspNetCore.SignalR;
 using Server.Hubs;
 using System.Reflection.Emit;
+using System.Diagnostics;
 
 namespace Server.GameData
 {
@@ -24,14 +25,18 @@ namespace Server.GameData
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
         private List<Weapon> weapons = new List<Weapon>();
         public MapObjectFactory objectFactory = new MapObjectFactory();
-
-
+        public ZombieFactory zombieFactory = new ZombieFactory();
+        public ObstacleChecker obstacleChecker;
+        public Spawner spawner;
         private static List<Zombie> minions = new List<Zombie>();
         private BossZombie boss = new BossZombie("", 0, 0, 0,0, minions);
+        private int bossId = -1;
         public InMemoryGameDataService()
         {
             // Generate obstacles when the service is created
             obstacles = GameFunctions.GenerateObstacles();
+            obstacleChecker = new ObstacleChecker(obstacles);
+            spawner = new Spawner(objectFactory, zombieFactory, obstacleChecker);
         }
         Random random = new Random();
         int minId = 1;
@@ -92,16 +97,26 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
-                int enemyId = 0;
-                do
-                {
-                    enemyId = new Random().Next(minId, maxId);
-                } while (usedIdsEnemies.Contains(enemyId));
-                usedIdsEnemies.Add(enemyId);
-                Enemy newEnemy = GameFunctions.GenerateEnemy(enemyId, obstacles);
-                // TODO - nzn kokios maxX ir maxY reiksmes
-                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80-newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
+                Enemy newEnemy = spawner.SpawnEnemy();
+                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - newEnemy.GetSize(), 1080 - 80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
+                return newEnemy;
+            }
+        }
+
+        public Enemy AddZombieBoss()
+        {
+            lock (enemyListLock)
+            {
+                ZombieBoss newEnemy = spawner.SpawnZombieBoss();
+                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - newEnemy.GetSize(), 1080 - 80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
+                enemies.Add(newEnemy);
+                List<ZombieMinion> minions = newEnemy.GetMinions();
+                foreach (ZombieMinion minion in minions)
+                {
+                    enemies.Add(minion);
+                }
+                bossId = newEnemy.GetId();
                 return newEnemy;
             }
         }
@@ -113,7 +128,8 @@ namespace Server.GameData
                 if (enemyToUpdate != null)
                 {
                     enemyToUpdate.SetHealth(health);
-                    if (enemyToUpdate.GetCurrentMovementStrategy() is PatrollingStrategy)
+                    IMoveStrategy currentStrategy = enemyToUpdate.GetCurrentMovementStrategy();
+                    if (currentStrategy is PatrollingStrategy || currentStrategy is CircleStrategy)
                     {
                         enemyToUpdate.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
                     }
@@ -124,7 +140,11 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
-                usedIdsEnemies.Remove(id);
+                spawner.RemoveId(id);
+                if(id == bossId)
+                {
+                    bossId = -1;
+                }
                 Enemy enemyToRemove = enemies.FirstOrDefault(enemy => enemy.MatchesId(id));
                 if (enemyToRemove != null)
                 {
@@ -152,146 +172,152 @@ namespace Server.GameData
                 return enemies.Select(enemy => enemy.ToString()).ToList();
             }
         }
-        //TODO: kodel du kartus prideda sefa???? ir tada 15 minions gaunasi
-        public BossZombie AddBossZombie(string name, int health)
+
+        public bool isBossAlive()
         {
-            List<Zombie> miniZombies = new List<Zombie>();
-            BossZombie bossZombie = new BossZombie(name, health, 0, 0, 70, miniZombies);
-            if (boss.minions.Count<1)
-            {
-                Random random = new Random();
+            return bossId >= 0;
+        }
+        ////TODO: kodel du kartus prideda sefa???? ir tada 15 minions gaunasi
+        //public BossZombie AddBossZombie(string name, int health)
+        //{
+
+        //    List<Zombie> miniZombies = new List<Zombie>();
+        //    BossZombie bossZombie = new BossZombie(name, health, 0, 0, 70, miniZombies);
+        //    if (boss.minions.Count<1)
+        //    {
+        //        Random random = new Random();
                 
-                int maxAttempts = 100;
-                for (int attempt = 0; attempt < maxAttempts; attempt++)
-                {
-                    double spawnX = random.Next(bossZombie.Size, 1920 - 60 - bossZombie.Size);
-                    double spawnY = random.Next(bossZombie.Size, 1080 - 80 - bossZombie.Size);
+        //        int maxAttempts = 100;
+        //        for (int attempt = 0; attempt < maxAttempts; attempt++)
+        //        {
+        //            double spawnX = random.Next(bossZombie.Size, 1920 - 60 - bossZombie.Size);
+        //            double spawnY = random.Next(bossZombie.Size, 1080 - 80 - bossZombie.Size);
 
-                    bool positionClear = GameFunctions.IsPositionClear(spawnX, spawnY, obstacles, bossZombie.Size);
+        //            bool positionClear = GameFunctions.IsPositionClear(spawnX, spawnY, obstacles, bossZombie.Size);
 
-                    if (positionClear)
-                    {
-                        bossZombie.SetCurrentPosition(spawnX, spawnY);
-                        break;
-                    }
-                }
-                // Add 8 mini zombies around the boss zombie in a circular pattern
-                MiniZombie originalMiniZombie = new MiniZombie("mini", 80, 0.0, 0.0, 20);
-                Console.WriteLine("originalminizombiename: " + originalMiniZombie.Name);
+        //            if (positionClear)
+        //            {
+        //                bossZombie.SetCurrentPosition(spawnX, spawnY);
+        //                break;
+        //            }
+        //        }
+        //        // Add 8 mini zombies around the boss zombie in a circular pattern
+        //        MiniZombie originalMiniZombie = new MiniZombie("mini", 80, 0.0, 0.0, 20);
+        //        Console.WriteLine("originalminizombiename: " + originalMiniZombie.Name);
 
-                MiniZombie previousMiniZombie = originalMiniZombie;
+        //        MiniZombie previousMiniZombie = originalMiniZombie;
 
-                //for (int i = 0; i < 8; i++)
-                //{
-                //    double angle = 2 * Math.PI * i / 8; // Divide the circle into 8 equal parts
-                //    if (i == 0)
-                //    {
-                //        bossZombie.AddMinion(originalMiniZombie, angle, 3, originalMiniZombie.X, originalMiniZombie.Y);
-                //    }
+        //        //for (int i = 0; i < 8; i++)
+        //        //{
+        //        //    double angle = 2 * Math.PI * i / 8; // Divide the circle into 8 equal parts
+        //        //    if (i == 0)
+        //        //    {
+        //        //        bossZombie.AddMinion(originalMiniZombie, angle, 3, originalMiniZombie.X, originalMiniZombie.Y);
+        //        //    }
 
 
-                //    // Shallow copy the previous mini zombie
-                //    MiniZombie currentMiniZombie = previousMiniZombie.Clone() as MiniZombie;
+        //        //    // Shallow copy the previous mini zombie
+        //        //    MiniZombie currentMiniZombie = previousMiniZombie.Clone() as MiniZombie;
 
-                //    // Modify the coordinates of the current mini zombie
-                //    int x = (int)(previousMiniZombie.X + 3 * Math.Cos(angle));
-                //    int y = (int)(previousMiniZombie.Y + 3 * Math.Sin(angle));
+        //        //    // Modify the coordinates of the current mini zombie
+        //        //    int x = (int)(previousMiniZombie.X + 3 * Math.Cos(angle));
+        //        //    int y = (int)(previousMiniZombie.Y + 3 * Math.Sin(angle));
 
-                //    // Set the modified coordinates for the current mini zombie
-                //    currentMiniZombie.SetCurrentPosition(x, y);
+        //        //    // Set the modified coordinates for the current mini zombie
+        //        //    currentMiniZombie.SetCurrentPosition(x, y);
 
-                //    // Pass the current mini zombie with modified coordinates for the next iteration
-                //    previousMiniZombie = currentMiniZombie;
+        //        //    // Pass the current mini zombie with modified coordinates for the next iteration
+        //        //    previousMiniZombie = currentMiniZombie;
 
-                //    // Now you can use the currentMiniZombie as needed, such as adding it to a list or using it in other logic.
-                //    miniZombies.Add(currentMiniZombie);
-                //    bossZombie.AddMinionX(currentMiniZombie);
+        //        //    // Now you can use the currentMiniZombie as needed, such as adding it to a list or using it in other logic.
+        //        //    miniZombies.Add(currentMiniZombie);
+        //        //    bossZombie.AddMinionX(currentMiniZombie);
 
-                //  Console.WriteLine("copyminizombie" + i + ": " + currentMiniZombie.Name);
-                //}
-                for (int i = 0; i < 8; i++)
-                {
-                    double angle = 2 * Math.PI * i / 8; // Divide the circle into 8 equal parts
-                    if (i == 0)
-                    {
-                        bossZombie.AddMinion(originalMiniZombie, angle, 3, originalMiniZombie.X, originalMiniZombie.Y);
-                    }
-                    else
-                    {
+        //        //  Console.WriteLine("copyminizombie" + i + ": " + currentMiniZombie.Name);
+        //        //}
+        //        for (int i = 0; i < 8; i++)
+        //        {
+        //            double angle = 2 * Math.PI * i / 8; // Divide the circle into 8 equal parts
+        //            if (i == 0)
+        //            {
+        //                bossZombie.AddMinion(originalMiniZombie, angle, 3, originalMiniZombie.X, originalMiniZombie.Y);
+        //            }
+        //            else
+        //            {
 
-                        MiniZombie shallowCopyMiniZombie = originalMiniZombie.Clone() as MiniZombie;
-                        bossZombie.AddMinion(shallowCopyMiniZombie, angle, 3, shallowCopyMiniZombie.X, shallowCopyMiniZombie.Y); // Radius set to 3 for example
-                        miniZombies.Add(shallowCopyMiniZombie);
-                        Console.WriteLine("copyminizombie" + i + ": " + shallowCopyMiniZombie.Name);
-                    }
+        //                MiniZombie shallowCopyMiniZombie = originalMiniZombie.Clone() as MiniZombie;
+        //                bossZombie.AddMinion(shallowCopyMiniZombie, angle, 3, shallowCopyMiniZombie.X, shallowCopyMiniZombie.Y); // Radius set to 3 for example
+        //                miniZombies.Add(shallowCopyMiniZombie);
+        //                Console.WriteLine("copyminizombie" + i + ": " + shallowCopyMiniZombie.Name);
+        //            }
                    
 
                     
 
-                }
+        //        }
 
-                bossZombie.minions = miniZombies;
+        //        bossZombie.minions = miniZombies;
 
-                bossZombie.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - bossZombie.Size, 1080 - 80 - bossZombie.Size, 3, obstacles));
+        //        bossZombie.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - bossZombie.Size, 1080 - 80 - bossZombie.Size, 3, obstacles));
 
-                boss = bossZombie;
+        //        boss = bossZombie;
 
-                minions = miniZombies;
-                Console.WriteLine("minions count: " + minions.Count);
-                Console.WriteLine("bossminions count: " + boss.minions.Count);
-                return bossZombie;
-            }
-            return boss;
+        //        minions = miniZombies;
+        //        Console.WriteLine("minions count: " + minions.Count);
+        //        Console.WriteLine("bossminions count: " + boss.minions.Count);
+        //        return bossZombie;
+        //    }
+        //    return boss;
 
-        }
+        //}
 
-        public void UpdateBossZombie(int health, bool mini)
-        { 
-            boss.Health = health;
-           // if (!mini) minions.Clear();
-        }
+        //public void UpdateBossZombie(int health, bool mini)
+        //{ 
+        //    boss.Health = health;
+        //   // if (!mini) minions.Clear();
+        //}
 
-        public void RemoveBossZombie()
-        {
-            boss = null;
-        }
-        public void RemoveMiniZombie()
-        {
-            minions.Clear();
-        }
-        public List<string> GetBossZombie()
-        {
-            List<string> zombies = new List<string>();
-            if(boss.Name != "")
-            {
-                zombies.Add(boss.ToString());
-                zombies.AddRange(minions.Select(minion => minion.ToString())); // Add minions to the list
-            }
+        //public void RemoveBossZombie()
+        //{
+        //    boss = null;
+        //}
+        //public void RemoveMiniZombie()
+        //{
+        //    minions.Clear();
+        //}
+        //public List<string> GetBossZombie()
+        //{
+        //    List<string> zombies = new List<string>();
+        //    if(boss.Name != "")
+        //    {
+        //        zombies.Add(boss.ToString());
+        //        zombies.AddRange(minions.Select(minion => minion.ToString())); // Add minions to the list
+        //    }
 
-            return zombies;
-        }
-        public bool GetBossNull()
-        {
-            return boss.Name == "" && minions.Count==0;
-        }
-        // strategy pattern
-        // strategy for movement changes after xxx amount of time has passed
-        public List<string> UpdateBossZombiePosition() //List<string>
-        {
-            boss.Move(players);
-                foreach (var minion in minions)
-                {
-                    minion.Move(players);
-                }
+        //    return zombies;
+        //}
+        //public bool GetBossNull()
+        //{
+        //    return boss.Name == "" && minions.Count==0;
+        //}
+        //// strategy pattern
+        //// strategy for movement changes after xxx amount of time has passed
+        //public List<string> UpdateBossZombiePosition() //List<string>
+        //{
+        //    boss.Move(players);
+        //        foreach (var minion in minions)
+        //        {
+        //            minion.Move(players);
+        //        }
 
-            List<string> zombies = new List<string>();
-            zombies.Add(boss.ToString()); 
-            zombies.AddRange(minions.Select(minion => minion.ToString())); // Add minions to the list
+        //    List<string> zombies = new List<string>();
+        //    zombies.Add(boss.ToString()); 
+        //    zombies.AddRange(minions.Select(minion => minion.ToString())); // Add minions to the list
 
-            return zombies;
+        //    return zombies;
 
-            //return boss.ToString();
-        }
+        //    //return boss.ToString();
+        //}
         public DateTime GetCurrentGameTime()
         {
             return gametime;

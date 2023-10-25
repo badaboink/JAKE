@@ -13,6 +13,6 @@ namespace JAKE.classlibrary.Patterns.AbstractFactory
         {
         }
 
-        public abstract void SpawnMinion();
+        public abstract void SpawnMinion(int id);
     }
 }

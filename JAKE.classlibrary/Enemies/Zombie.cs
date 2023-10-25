@@ -47,13 +47,13 @@ namespace JAKE.classlibrary.Enemies
             this.Y = y;
         }
 
-        public void Move(List<Player> players)
-        {
-            if (movementStrategy != null)
-            {
-                movementStrategy.MoveZombie(this, players);
-            }
-        }
+        //public void Move(List<Player> players)
+        //{
+        //    if (movementStrategy != null)
+        //    {
+        //        movementStrategy.MoveZombie(this, players);
+        //    }
+        //}
 
         public override string ToString()
         {

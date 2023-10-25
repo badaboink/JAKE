@@ -15,9 +15,5 @@ namespace JAKE.classlibrary.Patterns.Strategies
         {
 
         }
-        public void MoveZombie(Zombie zombie, List<Player> players)
-        {
-
-        }
     }
 }

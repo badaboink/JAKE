@@ -108,12 +108,16 @@ namespace Server.Hubs
                     _gameDataService.AddSpeedBoost(5);
                     Console.WriteLine("pridejo speed5");
                 }
-                if (_gameDataService.GetBossNull())
+                if (!_gameDataService.isBossAlive() && _gameDataService.GetEnemies().Count <= 20)
                 {
-                    _gameDataService.AddBossZombie("Sefas", 200);
-                    
-                    Console.WriteLine("pridejo sefa");
+                    _gameDataService.AddZombieBoss();
                 }
+                //if (_gameDataService.GetBossNull())
+                //{
+                //    _gameDataService.AddBossZombie("Sefas", 200);
+
+                //    Console.WriteLine("pridejo sefa");
+                //}
             }
             List<string> enemies = _gameDataService.GetEnemies();
             if (enemies.Count > 0)
@@ -141,11 +145,11 @@ namespace Server.Hubs
             {
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleSpeedBoosts(speedBoosts);
             }
-            List<string> boss = _gameDataService.GetBossZombie();
-            if (boss.Count > 0)
-            {
-                await _gameDataService.GetObservers()[Context.ConnectionId].HandleBossZombie(boss);
-            }
+            //List<string> boss = _gameDataService.GetBossZombie();
+            //if (boss.Count > 0)
+            //{
+            //    await _gameDataService.GetObservers()[Context.ConnectionId].HandleBossZombie(boss);
+            //}
 
 
         }
@@ -307,44 +311,44 @@ namespace Server.Hubs
             }
         }
 
-        public async Task SendDeadBossZombie(string boss)
-        {
-            string[] parts = boss.Split(':');
-            if (parts.Length == 5)
-            {
-                string name = parts[0];
-                _gameDataService.RemoveBossZombie();
-                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
-                foreach (var observerEntry in observers)
-                {
-                    var connectionId = observerEntry.Key;
-                    var observer = observerEntry.Value;
-                    if (connectionId != Context.ConnectionId)
-                    {
-                        await observer.HandleDeadBossZombie(name);
-                    }
-                }
-            }
-        }
+        //public async Task SendDeadBossZombie(string boss)
+        //{
+        //    string[] parts = boss.Split(':');
+        //    if (parts.Length == 5)
+        //    {
+        //        string name = parts[0];
+        //        _gameDataService.RemoveBossZombie();
+        //        Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+        //        foreach (var observerEntry in observers)
+        //        {
+        //            var connectionId = observerEntry.Key;
+        //            var observer = observerEntry.Value;
+        //            if (connectionId != Context.ConnectionId)
+        //            {
+        //                await observer.HandleDeadBossZombie(name);
+        //            }
+        //        }
+        //    }
+        //}
 
-        public async Task SendDeadMiniZombie(string boss)
-        {
-            string[] parts = boss.Split(':');
-            if (parts.Length == 5)
-            {
-                string name = parts[0];
-                _gameDataService.RemoveMiniZombie();
-                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
-                foreach (var observerEntry in observers)
-                {
-                    var connectionId = observerEntry.Key;
-                    var observer = observerEntry.Value;
-                    if (connectionId != Context.ConnectionId)
-                    {
-                        await observer.HandleDeadMiniZombie(name);
-                    }
-                }
-            }
-        }
+        //public async Task SendDeadMiniZombie(string boss)
+        //{
+        //    string[] parts = boss.Split(':');
+        //    if (parts.Length == 5)
+        //    {
+        //        string name = parts[0];
+        //        _gameDataService.RemoveMiniZombie();
+        //        Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+        //        foreach (var observerEntry in observers)
+        //        {
+        //            var connectionId = observerEntry.Key;
+        //            var observer = observerEntry.Value;
+        //            if (connectionId != Context.ConnectionId)
+        //            {
+        //                await observer.HandleDeadMiniZombie(name);
+        //            }
+        //        }
+        //    }
+        //}
     }
 }

@@ -30,31 +30,31 @@ namespace Server.GameData
             }
             return obstacles;
         }
-        public static Enemy GenerateEnemy(int id, List<Obstacle> obstacles)
-        {
-            Random random = new Random();
-            Enemy enemy = new Enemy(id, "Blue", 10);
-            int maxAttempts = 100;
-            for (int attempt = 0; attempt < maxAttempts; attempt++)
-            {
-                double spawnX = random.Next(enemy.GetSize(), 1920-60-enemy.GetSize());
-                double spawnY = random.Next(enemy.GetSize(), 1080-80-enemy.GetSize());
+        //public static Enemy GenerateEnemy(int id, List<Obstacle> obstacles)
+        //{
+        //    Random random = new Random();
+        //    Enemy enemy = new Enemy(id, "Blue", 10);
+        //    int maxAttempts = 100;
+        //    for (int attempt = 0; attempt < maxAttempts; attempt++)
+        //    {
+        //        double spawnX = random.Next(enemy.GetSize(), 1920-60-enemy.GetSize());
+        //        double spawnY = random.Next(enemy.GetSize(), 1080-80-enemy.GetSize());
 
-                // Check if the generated position overlaps with any obstacle
-                bool positionClear = IsPositionClear(spawnX, spawnY, obstacles, enemy.GetSize());
+        //        // Check if the generated position overlaps with any obstacle
+        //        bool positionClear = IsPositionClear(spawnX, spawnY, obstacles, enemy.GetSize());
 
-                if (positionClear)
-                {
-                    // Set the position and break out of the loop
-                    enemy.SetCurrentPosition(spawnX, spawnY);
-                    break;
-                }
-            }
-            //double spawnX = random.Next(0, 1936);
-            //double spawnY = random.Next(0, 1056);
-            //enemy.SetCurrentPosition(spawnX, spawnY);
-            return enemy;
-        }
+        //        if (positionClear)
+        //        {
+        //            // Set the position and break out of the loop
+        //            enemy.SetCurrentPosition(spawnX, spawnY);
+        //            break;
+        //        }
+        //    }
+        //    //double spawnX = random.Next(0, 1936);
+        //    //double spawnY = random.Next(0, 1056);
+        //    //enemy.SetCurrentPosition(spawnX, spawnY);
+        //    return enemy;
+        //}
 
         public static bool IsPositionClear(double x, double y, List<Obstacle> obstacles, int enemySize)
         {

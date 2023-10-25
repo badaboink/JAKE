@@ -13,10 +13,5 @@ namespace JAKE.classlibrary.Patterns.AbstractFactory
         protected Minion(int id, string color, double speed = 2, int health = 20, int size = 20, int points = 5) : base(id, color, speed, health, size, points)
         {
         }
-
-        public virtual Minion? Clone()
-        {
-            return null;
-        }
     }
 }

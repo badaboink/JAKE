@@ -19,7 +19,7 @@ namespace JAKE.classlibrary.Enemies
         private int _health;
         private int _size;
         private int _points;
-        private IMoveStrategy? movementStrategy;
+        protected IMoveStrategy? movementStrategy;
 
         public Enemy(int id, string color, double speed = 2, int health = 20, int size=20, int points = 10)
         {
@@ -30,6 +30,11 @@ namespace JAKE.classlibrary.Enemies
             _size = size;
             _points = points;
             SetCurrentPosition(0, 0);
+        }
+
+        public void SetId(int id)
+        {
+            this._id = id;
         }
 
         public int GetId()
@@ -106,6 +111,10 @@ namespace JAKE.classlibrary.Enemies
                 return this.GetId() == otherPlayer.GetId();
             }
             return false;
+        }
+        public virtual void Hit()
+        {
+
         }
         public bool MatchesId(int id)
         {

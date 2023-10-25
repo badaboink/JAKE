@@ -12,21 +12,18 @@ namespace JAKE.classlibrary.Enemies
 
     public class ZombieMinion : Minion
     {
-        private ZombieBoss? parent = null;
         
         public ZombieMinion(int id, string color, double speed = 2, int health = 20, int size = 20) : base(id, color, speed, health, size)
         {
         }
 
-        public override Minion? Clone()
+        public Minion? Clone()
         {
-            return MemberwiseClone() as ZombieMinion;
-        }
-
-        public void SetBoss(ZombieBoss boss)
-        {
-            parent = boss;
-            SetMovementStrategy(new CircleStrategy(3, 0));
+            ZombieMinion clone = new ZombieMinion(this.GetId(), this.GetColor(), this.GetSpeed(), this.GetHealth(), this.GetSize());
+            clone.SetCurrentPosition(this.GetCurrentX(), this.GetCurrentY());
+            clone.SetMovementStrategy(this.GetCurrentMovementStrategy());
+            return clone;
+            //return MemberwiseClone() as ZombieMinion;
         }
     }
 }

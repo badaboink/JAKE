@@ -34,33 +34,33 @@ namespace Server_tests
             }
         }
 
-        [Fact]
-        public void GenerateEnemPositionIsWithinBounds()
-        {
+        //[Fact]
+        //public void GenerateEnemPositionIsWithinBounds()
+        //{
 
-            int enemyId = 1;
-            List<Obstacle> obstacles = new List<Obstacle>
-        {
-            new Obstacle(100, 100, 500, 500), 
-            new Obstacle(150, 150, 800, 800)
-        };
+        //    int enemyId = 1;
+        //    List<Obstacle> obstacles = new List<Obstacle>
+        //{
+        //    new Obstacle(100, 100, 500, 500), 
+        //    new Obstacle(150, 150, 800, 800)
+        //};
    
-            Enemy enemy = GameFunctions.GenerateEnemy(enemyId, obstacles);
+        //    Enemy enemy = GameFunctions.GenerateEnemy(enemyId, obstacles);
       
-            Assert.NotNull(enemy);
-            Assert.Equal(enemyId, enemy.GetId());
-            Assert.Equal("Blue", enemy.GetColor());
-            Assert.Equal(20, enemy.GetSize());
+        //    Assert.NotNull(enemy);
+        //    Assert.Equal(enemyId, enemy.GetId());
+        //    Assert.Equal("Blue", enemy.GetColor());
+        //    Assert.Equal(20, enemy.GetSize());
 
-            double spawnX = enemy.GetCurrentX();
-            double spawnY = enemy.GetCurrentY();
+        //    double spawnX = enemy.GetCurrentX();
+        //    double spawnY = enemy.GetCurrentY();
 
-            const double epsilon = 1e-9;
+        //    const double epsilon = 1e-9;
 
-            Assert.True(spawnX >= 0 - epsilon && spawnX <= 1936 + epsilon);
-            Assert.True(spawnY >= 0 - epsilon && spawnY <= 1936 + epsilon);
+        //    Assert.True(spawnX >= 0 - epsilon && spawnX <= 1936 + epsilon);
+        //    Assert.True(spawnY >= 0 - epsilon && spawnY <= 1936 + epsilon);
 
-        }
+        //}
 
         [Fact]
         public void IsPositionClearPositionIsClearReturnsTrue()

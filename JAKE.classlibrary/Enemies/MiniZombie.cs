@@ -34,13 +34,6 @@ namespace JAKE.classlibrary.Enemies
         {
             this.movementStrategy = movementStrategy;
         }
-        public void Move(List<Player> players)
-        {
-            if (movementStrategy != null)
-            {
-                movementStrategy.MoveZombie(this, players);
-            }
-        }
 
         public override string ToString()
         {
