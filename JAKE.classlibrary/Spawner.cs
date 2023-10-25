@@ -90,7 +90,7 @@ namespace JAKE.classlibrary
                 enemyId = new Random().Next(minId, maxId);
             } while (_usedIdsEnemies.Contains(enemyId));
             _usedIdsEnemies.Add(enemyId);
-            ZombieBoss zombieBoss = _zombieFactory.CreateBoss(enemyId, "green", 10);
+            ZombieBoss zombieBoss = _zombieFactory.CreateBoss(enemyId, "green", 10, 100, 40);
             Random random = new Random();
             int attempt;
             for (attempt = 0; attempt < maxAttempts; attempt++)

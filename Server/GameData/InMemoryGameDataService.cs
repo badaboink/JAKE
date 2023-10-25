@@ -103,7 +103,7 @@ namespace Server.GameData
                 return newEnemy;
             }
         }
-
+        List<ZombieMinion> tempminions;
         public Enemy AddZombieBoss()
         {
             lock (enemyListLock)
@@ -112,9 +112,12 @@ namespace Server.GameData
                 newEnemy.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - newEnemy.GetSize(), 1080 - 80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
                 List<ZombieMinion> minions = newEnemy.GetMinions();
+                tempminions = newEnemy.GetMinions();
                 foreach (ZombieMinion minion in minions)
                 {
-                    enemies.Add(minion);
+                    enemies.Add(minion.ShallowClone());
+
+                    minion.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
                 }
                 bossId = newEnemy.GetId();
                 return newEnemy;
@@ -133,6 +136,7 @@ namespace Server.GameData
                     {
                         enemyToUpdate.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
                     }
+                    enemyToUpdate.Hit();
                 }
             }
         }
@@ -166,8 +170,9 @@ namespace Server.GameData
             lock (enemyListLock)
             {
                 foreach (var enemy in enemies)
-                {
+                { 
                     enemy.Move(players);
+                    Debug.WriteLine("{0} {1}", enemy.GetCurrentMovementStrategy().GetType().ToString(), enemy.ToString());
                 }
                 return enemies.Select(enemy => enemy.ToString()).ToList();
             }

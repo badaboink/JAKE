@@ -562,96 +562,96 @@ namespace JAKE.client
                 });
             });
             //TODO: sukuria du bosszmobie, bet ne minions, grazina tik boss info
-            connection.On<List<string>>("SendingBossZombie", (bossdata) =>
-            {
-                Debug.WriteLine("bossdata: " + bossdata[0]);
-                Debug.WriteLine("vbossdatacount: " + bossdata.Count);
-                string image = "boss.png";
-                    List<Zombie> miniZombieListLocal = new List<Zombie>();
-                    BossZombie bossLocal = new BossZombie("", 0, 0, 0, 0, miniZombieListLocal);
-                    for (int i = 0; i < bossdata.Count; i++)
-                    {
-                        string data = bossdata[i];
-                    Debug.WriteLine("vienas zombie info: " + bossdata[i]);
-                    string[] parts = data.Split(':');
-                        if (parts.Length == 5)
-                        {
-                            string name = parts[0];
-                            double zombieX = double.Parse(parts[1]);
-                            double zombieY = double.Parse(parts[2]);
-                            int zombieSize = int.Parse(parts[3]);
-                            int zombieHealth = int.Parse(parts[4]);
-                            Zombie zombie = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
-                            if (i == 0) //bosas
-                            {
-                                if (boss.Name == "") //naujas
-                                {
-                                    boss = new BossZombie(name, zombieHealth, zombieX, zombieY, zombieSize, miniZombieListLocal);
-                                    Dispatcher.Invoke(() =>
-                                    {
+            //connection.On<List<string>>("SendingBossZombie", (bossdata) =>
+            //{
+            //    Debug.WriteLine("bossdata: " + bossdata[0]);
+            //    Debug.WriteLine("vbossdatacount: " + bossdata.Count);
+            //    string image = "boss.png";
+            //        List<Zombie> miniZombieListLocal = new List<Zombie>();
+            //        BossZombie bossLocal = new BossZombie("", 0, 0, 0, 0, miniZombieListLocal);
+            //        for (int i = 0; i < bossdata.Count; i++)
+            //        {
+            //            string data = bossdata[i];
+            //        Debug.WriteLine("vienas zombie info: " + bossdata[i]);
+            //        string[] parts = data.Split(':');
+            //            if (parts.Length == 5)
+            //            {
+            //                string name = parts[0];
+            //                double zombieX = double.Parse(parts[1]);
+            //                double zombieY = double.Parse(parts[2]);
+            //                int zombieSize = int.Parse(parts[3]);
+            //                int zombieHealth = int.Parse(parts[4]);
+            //                Zombie zombie = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
+            //                if (i == 0) //bosas
+            //                {
+            //                    if (boss.Name == "") //naujas
+            //                    {
+            //                        boss = new BossZombie(name, zombieHealth, zombieX, zombieY, zombieSize, miniZombieListLocal);
+            //                        Dispatcher.Invoke(() =>
+            //                        {
 
-                                        ZombiesVisual zombieVisual = new ZombiesVisual();
-                                        zombieVisual.ZombieSize = zombieSize;
-                                        zombieVisual.ZombieName = name;
-                                        Debug.WriteLine("zombiesize : " + zombieVisual.ZombieSize);
-                                        Canvas.SetLeft(zombieVisual, zombieX);
-                                        Canvas.SetTop(zombieVisual, zombieY);
-                                        bossVisual = zombieVisual;
-                                        ZombieContainer.Children.Add(zombieVisual);
-                                        Debug.WriteLine("isvisiblezombie : " + zombieVisual.IsVisible);
-                                        HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
-                                else //atnaujint bosa
-                                {
-                                    Dispatcher.Invoke(() =>
-                                    {
-                                        boss.Health = zombieHealth;
-                                        boss.SetCurrentPosition(zombieX, zombieY);
-                                        Canvas.SetLeft(bossVisual, zombieX);
-                                        Canvas.SetTop(bossVisual, zombieY);
+            //                            ZombiesVisual zombieVisual = new ZombiesVisual();
+            //                            zombieVisual.ZombieSize = zombieSize;
+            //                            zombieVisual.ZombieName = name;
+            //                            Debug.WriteLine("zombiesize : " + zombieVisual.ZombieSize);
+            //                            Canvas.SetLeft(zombieVisual, zombieX);
+            //                            Canvas.SetTop(zombieVisual, zombieY);
+            //                            bossVisual = zombieVisual;
+            //                            ZombieContainer.Children.Add(zombieVisual);
+            //                            Debug.WriteLine("isvisiblezombie : " + zombieVisual.IsVisible);
+            //                            HandleZombieCollisions(playerVisuals[currentPlayer]);
+            //                        });
+            //                    }
+            //                    else //atnaujint bosa
+            //                    {
+            //                        Dispatcher.Invoke(() =>
+            //                        {
+            //                            boss.Health = zombieHealth;
+            //                            boss.SetCurrentPosition(zombieX, zombieY);
+            //                            Canvas.SetLeft(bossVisual, zombieX);
+            //                            Canvas.SetTop(bossVisual, zombieY);
 
-                                        HandleEnemyCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
+            //                            HandleEnemyCollisions(playerVisuals[currentPlayer]);
+            //                        });
+            //                    }
 
-                            }
-                            else //minions
-                            {
-                            Debug.WriteLine("vienas minion");
-                                if (!miniZombieList.Contains(zombie)) //naujas minion
-                                {
-                                    Zombie mini = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
-                                    miniZombieListLocal.Add(mini);
-                                    Dispatcher.Invoke(() =>
-                                    {
+            //                }
+            //                else //minions
+            //                {
+            //                Debug.WriteLine("vienas minion");
+            //                    if (!miniZombieList.Contains(zombie)) //naujas minion
+            //                    {
+            //                        Zombie mini = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
+            //                        miniZombieListLocal.Add(mini);
+            //                        Dispatcher.Invoke(() =>
+            //                        {
 
-                                        MiniZombieVisual zombieVisual = new MiniZombieVisual();
-                                        Canvas.SetLeft(zombieVisual, zombieX);
-                                        Canvas.SetTop(zombieVisual, zombieY);
-                                        zombieVisuals[mini] = zombieVisual;
-                                        MiniZombieContainer.Children.Add(zombieVisual);
-                                        HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
-                                else //atnaujint minion
-                                {
-                                    MiniZombieVisual zombieVisual = zombieVisuals[zombie];
-                                    zombie.Health = zombieHealth;
-                                    zombie.SetCurrentPosition(zombieX, zombieY);
-                                    Canvas.SetLeft(zombieVisual, zombieX);
-                                    Canvas.SetTop(zombieVisual, zombieY);
+            //                            MiniZombieVisual zombieVisual = new MiniZombieVisual();
+            //                            Canvas.SetLeft(zombieVisual, zombieX);
+            //                            Canvas.SetTop(zombieVisual, zombieY);
+            //                            zombieVisuals[mini] = zombieVisual;
+            //                            MiniZombieContainer.Children.Add(zombieVisual);
+            //                            HandleZombieCollisions(playerVisuals[currentPlayer]);
+            //                        });
+            //                    }
+            //                    else //atnaujint minion
+            //                    {
+            //                        MiniZombieVisual zombieVisual = zombieVisuals[zombie];
+            //                        zombie.Health = zombieHealth;
+            //                        zombie.SetCurrentPosition(zombieX, zombieY);
+            //                        Canvas.SetLeft(zombieVisual, zombieX);
+            //                        Canvas.SetTop(zombieVisual, zombieY);
 
-                                    HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                }
-                            }
+            //                        HandleZombieCollisions(playerVisuals[currentPlayer]);
+            //                    }
+            //                }
 
-                        }
-                    }
-                    miniZombieList = miniZombieListLocal;
-                    boss.minions = miniZombieList;
+            //            }
+            //        }
+            //        miniZombieList = miniZombieListLocal;
+            //        boss.minions = miniZombieList;
  
-            });
+            //});
         }
 
         private async void CheckElapsedTimeMove(object state)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,11 +38,20 @@ namespace JAKE.classlibrary.Enemies
             }
             else
             {
-                ZombieMinion copyZombieMinion = minions[0].Clone() as ZombieMinion;
+                ZombieMinion copyZombieMinion = minions[0].DeepClone() as ZombieMinion;
                 copyZombieMinion.SetId(id);
                 copyZombieMinion.SetCurrentPosition(xx, yy);
                 copyZombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this));
                 minions.Add(copyZombieMinion);
+            }
+        }
+
+        public override void Hit()
+        {
+            IMoveStrategy moveStrategy = new DontMoveStrategy();
+            foreach(var minion in minions)
+            {
+                minion.SetMovementStrategy(moveStrategy);
             }
         }
 

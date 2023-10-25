@@ -25,23 +25,7 @@ namespace JAKE.classlibrary
         private bool _isShooting = false;
         private double _attackSpeed;
         public string? Ability { get; set; }
-        private class Coordinates
-        {
-            public double x;
-            public double y;
-
-            public Coordinates()
-            {
-            }
-
-            public Coordinates(double x, double y)
-            {
-                this.x = x;
-                this.y = y;
-            }
-
-
-        }
+        
 
         public Player(int id, string name, string color, string shotColor, string shotShape)
         {

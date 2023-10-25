@@ -83,12 +83,11 @@ namespace Server.Hubs
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
                 //Console.WriteLine($"Sending enemy update {DateTime.Now}");
-                
+
                 _gameDataService.UpdateEnemyPositions();
                 if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
                 {
                     _gameDataService.AddEnemies();
-                    //Console.WriteLine($"Spawning enemy {startTime} - {DateTime.Now}. {_gameDataService.GetEnemies().Count}");
                     _gameDataService.SetGameTime(DateTime.Now);
                 }
                 if (_gameDataService.GetCoins().Count <= 10)

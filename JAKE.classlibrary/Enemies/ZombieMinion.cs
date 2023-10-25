@@ -17,13 +17,18 @@ namespace JAKE.classlibrary.Enemies
         {
         }
 
-        public Minion? Clone()
+        public Minion? DeepClone()
         {
             ZombieMinion clone = new ZombieMinion(this.GetId(), this.GetColor(), this.GetSpeed(), this.GetHealth(), this.GetSize());
             clone.SetCurrentPosition(this.GetCurrentX(), this.GetCurrentY());
             clone.SetMovementStrategy(this.GetCurrentMovementStrategy());
             return clone;
-            //return MemberwiseClone() as ZombieMinion;
         }
+
+        public override Enemy ShallowClone()
+        {
+            return MemberwiseClone() as Enemy;
+        }
+        
     }
 }
