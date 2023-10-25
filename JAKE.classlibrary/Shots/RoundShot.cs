@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,11 +8,11 @@ using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary.Shots
 {
-    public class RoundShot : IShape
+    public class RoundShot : Shot
     {
-        public string GetShape()
+       public RoundShot(Shot shot) : base(shot)
         {
-            return "round";
+            base.setShape("round");
         }
     }
 }

@@ -37,7 +37,7 @@ namespace JAKE.client
     public partial class MainWindow : Window
     {
         private Player currentPlayer;
-        private bool gamestarted = false;
+        public bool gamestarted = false;
         private List<Player> playerInfoList = new List<Player>();
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
@@ -62,7 +62,8 @@ namespace JAKE.client
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         private static List<Zombie> miniZombieList = new List<Zombie>();
         private Dictionary<Zombie, MiniZombieVisual> zombieVisuals = new Dictionary<Zombie, MiniZombieVisual>();
-        private BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
+        private static BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
+        private BossZombie nextBoss = (BossZombie)boss.Clone();
         ZombiesVisual bossVisual = new ZombiesVisual();
 
 
@@ -86,6 +87,7 @@ namespace JAKE.client
             {
                 collisionCheckedEnemies[enemy] = false;
             }
+            Debug.WriteLine("naujas instance " + gameStat);
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -141,7 +143,13 @@ namespace JAKE.client
             });
             connection.On<List<string>, DateTime>("GameUpdate", (userData, gametime) =>
             {
+                bool areHashCodesEqual = boss.GetHashCode() == nextBoss.GetHashCode();
+
+                // Print the result (for testing purposes)
+                Debug.WriteLine($"BOSS IR NEXTBOSS Hash Codes Are Equal: {areHashCodesEqual}");
                 Debug.WriteLine("gameupdate userdata count: " + userData.Count);
+                Debug.WriteLine("boss hashcode: " + boss.GetHashCode());
+                Debug.WriteLine("nextboss hashcode: " + nextBoss.GetHashCode());
                 foreach (string playerEntry in userData)
                 {
                     string[] parts = playerEntry.Split(':');
@@ -382,23 +390,26 @@ namespace JAKE.client
 
             });
 
-            connection.On<int>("SendingPickedCoin", (coinid) =>
+            connection.On<string>("SendingPickedCoin", (coinObj) =>
             {
+                string coinString = new ServerString(coinObj).ConvertedString;
+                string[] parts = coinString.Split(':');
+                int id = int.Parse(parts[1]);
                 Dispatcher.Invoke(() =>
                 {
-                        foreach (var pair in coinVisuals)
-                        {
-                            Coin coin = pair.Key;
-                            CoinVisual coinVisual = pair.Value;
+                    foreach (var pair in coinVisuals)
+                    {
+                        Coin coin = pair.Key;
+                        CoinVisual coinVisual = pair.Value;
 
-                            if (coin.id == coinid)
-                            {
-                                coins.Remove(coin);
-                                coinVisuals.Remove(coin);
-                                CoinContainer.Children.Remove(coinVisual);
-                                break;
-                            }
+                        if (coin.id == id)
+                        {
+                            coins.Remove(coin);
+                            coinVisuals.Remove(coin);
+                            CoinContainer.Children.Remove(coinVisual);
+                            break;
                         }
+                    }
                        
                 });
             });
@@ -587,7 +598,8 @@ namespace JAKE.client
                                 if (boss.Name == "") //naujas
                                 {
                                     boss = new BossZombie(name, zombieHealth, zombieX, zombieY, zombieSize, miniZombieListLocal);
-                                    Dispatcher.Invoke(() =>
+                                    nextBoss = (BossZombie)boss.Clone();
+                                Dispatcher.Invoke(() =>
                                     {
 
                                         ZombiesVisual zombieVisual = new ZombiesVisual();
@@ -807,12 +819,25 @@ namespace JAKE.client
         {
             // tekstas dingsta po puse sekundes
             var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(8);
+            timer.Interval = TimeSpan.FromSeconds(0.5);
             timer.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
                 //heartLabel.Visibility = Visibility.Hidden;
                 //shieldBorder.Visibility = Visibility.Hidden;
+                timer.Stop();
+            };
+
+            timer.Start();
+        }
+        private void StopSpeed()
+        {
+            // tekstas dingsta po puse sekundes
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Tick += (sender, args) =>
+            {
+                gameStat.PlayerSpeed = 10;
                 timer.Stop();
             };
 
@@ -896,7 +921,7 @@ namespace JAKE.client
                 }
             }
         }
-        private async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
+        public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             if (!gameStat.ShieldOn)
             {
@@ -982,24 +1007,11 @@ namespace JAKE.client
                         testLabel.Text = text.DisplayObject("coin").text;
                         HideDisplay();
 
-                        //------------- JSONAdapter
-                        Dictionary<string, object> jsonObject = new Dictionary<string, object>();
-
-                        // Add key-value pairs to the dictionary
-                        jsonObject["id"] = coin.id;
-                        jsonObject["x"] = coin.X;
-                        jsonObject["y"] = coin.Y;
-                        jsonObject["width"] = coin.Width;
-                        jsonObject["height"] = coin.Height;
-                        jsonObject["points"] = coin.Points;
-
-
-                        // Convert the dictionary to a JSON string
-                        string jsonString = JsonConvert.SerializeObject(jsonObject);
-                        ServerString server = new ServerString(jsonString);
-                        
+                        // Convert coin to a JSON string
+                        string json = JsonConvert.SerializeObject(coin);
+ 
                         //-----------
-                        await connection.SendAsync("SendPickedCoin", server.ConvertedString);  //coin.ToString()
+                        await connection.SendAsync("SendPickedCoin", json);
                     }
                 }
             }
@@ -1036,7 +1048,7 @@ namespace JAKE.client
                         if (shieldVisible)
                         {
                             shieldBorder.Visibility = Visibility.Visible;
-                            gameStat.ShieldOn = true; //i gamestat perkelt
+                            gameStat.ShieldOn = true; 
                             shield.Interact(gameStat);
                         }
                         HideDisplay();
@@ -1072,7 +1084,7 @@ namespace JAKE.client
                             Base text = new Base(currentPlayer);
                             testLabel.Text = text.DisplayObject("speed").text;
                             HideDisplay();
-
+                            StopSpeed();
                             await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
                         }
 
@@ -1151,8 +1163,9 @@ namespace JAKE.client
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
-
+                    Debug.WriteLine("SHEIPAS create shot" + shape);
                     SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
+                    Debug.WriteLine("SHEIPAS po single shot" + shape);
                     ShotVisual shotVisual = shotVisualBuilder.New()
                                 .SetColor($"{color},{shape}")
                                 .SetSize(shot.getSize())
@@ -1379,8 +1392,8 @@ namespace JAKE.client
             //                await connection.SendAsync("SendZombieUpdate", boss.ToString()); //nusiuncia pasikeitusi minions sarasa TODO
             //                if (boss.Health <= 0)
             //                {
-
-            //                    boss = new BossZombie("", 0, 0, 0, 0, miniZombieList);
+            //                    
+            //                    boss = nextBoss; //new BossZombie("", 0, 0, 0, 0, miniZombieList);
             //                    bossVisual = new ZombiesVisual();
             //                    //EnemyContainer.Children.Remove(enemyRect);
             //                    ZombieContainer.Children.Clear();
@@ -1433,23 +1446,26 @@ namespace JAKE.client
             {
                 shotColor = new BlueColor();
             }
-            IShape shotShape;
+
+            Shot localShot = new Shot(shotColor, 5, 10, 5);
+
             if (shape == "triangle")
             {
-                shotShape = new TriangleShot();
+                localShot = new TriangleShot(localShot);
             }
             else
             {
-                shotShape = new RoundShot();
-            }
-
-            Shot localShot = new Shot(shotColor, shotShape, 5, 10, 5);
+                localShot = new RoundShot(localShot);
+            }     
 
             double playerCenterX = playerX + playerWidth / 2;
             double playerCenterY = playerY + playerHeight / 2;
 
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;
+            Debug.WriteLine("SHOTAS " + localShot.getY());
+
+
         }
     }
 }

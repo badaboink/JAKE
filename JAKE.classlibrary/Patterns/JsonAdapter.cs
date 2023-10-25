@@ -17,6 +17,11 @@ namespace JAKE.classlibrary.Patterns
         {
             return _jsonConverter.ConvertFromJson(inputString);
         }
+
+        public int CountCharacters(string inputString)
+        {
+            return inputString.Length;
+        }
     }
 
        

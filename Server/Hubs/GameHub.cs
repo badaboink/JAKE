@@ -4,6 +4,7 @@ using JAKE.classlibrary.Enemies;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Protocol;
+using Newtonsoft.Json;
 using Server.GameData;
 using System;
 using System.Drawing;
@@ -151,17 +152,26 @@ namespace Server.Hubs
         }
         public async Task SendPickedCoin(string coin)
         {
-            string[] parts = coin.Split(':');
-            if (parts.Length == 6)
+            string coinString = new ServerString(coin).ConvertedString;
+            string[] parts = coinString.Split(':');
+            if (parts.Length == 7)
             {
-                int id = int.Parse(parts[0]);
-                _gameDataService.RemoveCoin(id);
-                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
-                foreach (var observerEntry in observers)
+                int id = int.Parse(parts[1]);
+                Coin coinToRemove = _gameDataService.returnCoin(id);
+                if(coinToRemove != null)
                 {
-                    var observer = observerEntry.Value;     
-                    await observer.HandlePickedCoin(id);
+                    _gameDataService.RemoveCoin(id);
+
+                    string json = JsonConvert.SerializeObject(coinToRemove);
+
+                    Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                    foreach (var observerEntry in observers)
+                    {
+                        var observer = observerEntry.Value;
+                        await observer.HandlePickedCoin(json);
+                    }
                 }
+            
             }
         }
 

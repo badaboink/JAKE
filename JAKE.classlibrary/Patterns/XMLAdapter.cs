@@ -15,5 +15,10 @@ namespace JAKE.classlibrary.Patterns
         {
             return _xmlConverter.ConvertFromXML(inputString);
         }
+
+        public int CountCharacters(string inputString)
+        {
+            return inputString.Length;
+        }
     }
 }

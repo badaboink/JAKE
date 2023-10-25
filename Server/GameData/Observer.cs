@@ -54,7 +54,7 @@ namespace Server.GameData
         {
             await clientProxy.SendAsync("SendingCoins", coins);
         }
-        public async Task HandlePickedCoin(int id)
+        public async Task HandlePickedCoin(string id)
         {
             await clientProxy.SendAsync("SendingPickedCoin", id);
         }
