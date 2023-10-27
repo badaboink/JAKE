@@ -59,7 +59,6 @@ namespace Server.Hubs
             try
             {
                 Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId, shotcolor, shotshape);
-                Console.WriteLine($"Player {newPlayer.ToString()}");
 
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
 

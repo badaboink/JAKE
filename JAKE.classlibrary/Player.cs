@@ -24,7 +24,6 @@ namespace JAKE.classlibrary
         private string? _shotShape;
         private bool _isShooting = false;
         private double _attackSpeed;
-        public string? Ability { get; set; }
         private class Coordinates
         {
             public double x;
@@ -53,14 +52,6 @@ namespace JAKE.classlibrary
             _shotColor = shotColor;
             _shotShape = shotShape;
             SetCurrentPosition(0, 0);
-            if (ColorToAbilityMap.TryGetValue(color, out var ability))
-            {
-                Ability = ability;
-            }
-            else
-            {
-                Ability = "unknown";
-            }
              
         }
            

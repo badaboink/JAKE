@@ -696,16 +696,6 @@ namespace JAKE.client
                 playersContainer.Items.Add(gameMapCanvas);
             });
         }
-        public string getFirstInstanceUsingSubString(string input, string something)
-        {
-            int index = input.Contains(something) ? input.IndexOf(something)+something.Length-1 : 0;
-            return input.Substring(0, index);
-        }
-        public string GetStringAfterFirstSpace(string input, string something)
-        {
-            int index = input.Contains(something) ? input.IndexOf(something) + something.Length : 0;
-            return input.Substring(index);
-        }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
