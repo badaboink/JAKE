@@ -60,14 +60,7 @@ namespace JAKE.client
         private readonly object enemyListLock = new object();
         private bool shieldOn = false;
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
-        private static List<Zombie> miniZombieList = new List<Zombie>();
-        private Dictionary<Zombie, MiniZombieVisual> zombieVisuals = new Dictionary<Zombie, MiniZombieVisual>();
-        private static BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
-        private BossZombie nextBoss = (BossZombie)boss.Clone();
-        ZombiesVisual bossVisual = new ZombiesVisual();
 
-
-        //TODO: zombie visual, main iskvietimai, gavimai responses, judejimas, logika ar veikia
         private bool isCollidingWithHealthBoost = false;
 
 
@@ -143,13 +136,6 @@ namespace JAKE.client
             });
             connection.On<List<string>, DateTime>("GameUpdate", (userData, gametime) =>
             {
-                bool areHashCodesEqual = boss.GetHashCode() == nextBoss.GetHashCode();
-
-                // Print the result (for testing purposes)
-                Debug.WriteLine($"BOSS IR NEXTBOSS Hash Codes Are Equal: {areHashCodesEqual}");
-                Debug.WriteLine("gameupdate userdata count: " + userData.Count);
-                Debug.WriteLine("boss hashcode: " + boss.GetHashCode());
-                Debug.WriteLine("nextboss hashcode: " + nextBoss.GetHashCode());
                 foreach (string playerEntry in userData)
                 {
                     string[] parts = playerEntry.Split(':');
@@ -572,98 +558,7 @@ namespace JAKE.client
                     }      
                 });
             });
-            //TODO: sukuria du bosszmobie, bet ne minions, grazina tik boss info
-            connection.On<List<string>>("SendingBossZombie", (bossdata) =>
-            {
-                Debug.WriteLine("bossdata: " + bossdata[0]);
-                Debug.WriteLine("vbossdatacount: " + bossdata.Count);
-                string image = "boss.png";
-                    List<Zombie> miniZombieListLocal = new List<Zombie>();
-                    BossZombie bossLocal = new BossZombie("", 0, 0, 0, 0, miniZombieListLocal);
-                    for (int i = 0; i < bossdata.Count; i++)
-                    {
-                        string data = bossdata[i];
-                    Debug.WriteLine("vienas zombie info: " + bossdata[i]);
-                    string[] parts = data.Split(':');
-                        if (parts.Length == 5)
-                        {
-                            string name = parts[0];
-                            double zombieX = double.Parse(parts[1]);
-                            double zombieY = double.Parse(parts[2]);
-                            int zombieSize = int.Parse(parts[3]);
-                            int zombieHealth = int.Parse(parts[4]);
-                            Zombie zombie = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
-                            if (i == 0) //bosas
-                            {
-                                if (boss.Name == "") //naujas
-                                {
-                                    boss = new BossZombie(name, zombieHealth, zombieX, zombieY, zombieSize, miniZombieListLocal);
-                                    nextBoss = (BossZombie)boss.Clone();
-                                Dispatcher.Invoke(() =>
-                                    {
 
-                                        ZombiesVisual zombieVisual = new ZombiesVisual();
-                                        zombieVisual.ZombieSize = zombieSize;
-                                        zombieVisual.ZombieName = name;
-                                        Debug.WriteLine("zombiesize : " + zombieVisual.ZombieSize);
-                                        Canvas.SetLeft(zombieVisual, zombieX);
-                                        Canvas.SetTop(zombieVisual, zombieY);
-                                        bossVisual = zombieVisual;
-                                        ZombieContainer.Children.Add(zombieVisual);
-                                        Debug.WriteLine("isvisiblezombie : " + zombieVisual.IsVisible);
-                                        HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
-                                else //atnaujint bosa
-                                {
-                                    Dispatcher.Invoke(() =>
-                                    {
-                                        boss.Health = zombieHealth;
-                                        boss.SetCurrentPosition(zombieX, zombieY);
-                                        Canvas.SetLeft(bossVisual, zombieX);
-                                        Canvas.SetTop(bossVisual, zombieY);
-
-                                        HandleEnemyCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
-
-                            }
-                            else //minions
-                            {
-                            Debug.WriteLine("vienas minion");
-                                if (!miniZombieList.Contains(zombie)) //naujas minion
-                                {
-                                    Zombie mini = new Zombie(name, zombieHealth, zombieX, zombieY, zombieSize);
-                                    miniZombieListLocal.Add(mini);
-                                    Dispatcher.Invoke(() =>
-                                    {
-
-                                        MiniZombieVisual zombieVisual = new MiniZombieVisual();
-                                        Canvas.SetLeft(zombieVisual, zombieX);
-                                        Canvas.SetTop(zombieVisual, zombieY);
-                                        zombieVisuals[mini] = zombieVisual;
-                                        MiniZombieContainer.Children.Add(zombieVisual);
-                                        HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                    });
-                                }
-                                else //atnaujint minion
-                                {
-                                    MiniZombieVisual zombieVisual = zombieVisuals[zombie];
-                                    zombie.Health = zombieHealth;
-                                    zombie.SetCurrentPosition(zombieX, zombieY);
-                                    Canvas.SetLeft(zombieVisual, zombieX);
-                                    Canvas.SetTop(zombieVisual, zombieY);
-
-                                    HandleZombieCollisions(playerVisuals[currentPlayer]);
-                                }
-                            }
-
-                        }
-                    }
-                    miniZombieList = miniZombieListLocal;
-                    boss.minions = miniZombieList;
- 
-            });
         }
 
         private async void CheckElapsedTimeMove(object state)
@@ -746,7 +641,6 @@ namespace JAKE.client
                 HandleShieldsCollisions(playerVisuals[currentPlayer]);
                 HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
                 HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
-                HandleZombieCollisions(playerVisuals[currentPlayer]);
             }
         }
 
@@ -879,38 +773,6 @@ namespace JAKE.client
                 }
             }
         }
-        private async void HandleZombieCollisions(PlayerVisual playerVisual)
-        {
-            double playerX = Canvas.GetLeft(playerVisual);
-            double playerY = Canvas.GetTop(playerVisual);
-
-            foreach (Zombie mini in miniZombieList)
-            {
-                if (zombieVisuals.ContainsKey(mini))
-                {
-                    MiniZombieVisual miniRect = zombieVisuals[mini];
-                    double miniX = Canvas.GetLeft(miniRect);
-                    double miniY = Canvas.GetTop(miniRect);
-
-                    if (CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
-                                                       miniX, miniY, miniRect.Width, miniRect.Height))
-                    {
-                        await HandleCollisionZ(10);
-                    }
-                }
-            }
-            if (bossVisual.Name != "")
-            {
-                double miniX = Canvas.GetLeft(bossVisual);
-                double miniY = Canvas.GetTop(bossVisual);
-
-                if (CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
-                                                   miniX, miniY, bossVisual.Width, bossVisual.Height))
-                {
-                    await HandleCollisionZ(30);
-                }
-            }
-        }
         public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             if (!gameStat.ShieldOn)
@@ -1025,11 +887,6 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= shieldY &&
                         playerY <= shieldY + shieldRect.Height)
                     {
-
-                        //TODO: jei paliecia priesas nenusiima gyvybe - veliavele kazkokia??? ir timeri uzdet
-                        //pakeist player visual kazkaip - borderi koki uzdet
-                        //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
-                        //shield.Interact(player, shield.Time);
                         
                         Base baseObj = new Base(currentPlayer);
                         testLabel.Text = baseObj.DisplayObject("shield").text;
@@ -1135,7 +992,7 @@ namespace JAKE.client
             }
         }
 
-        private object miniZombiesListLock = new object();
+       
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
         {
             bool CountKills = false;
@@ -1240,8 +1097,7 @@ namespace JAKE.client
                             }
 
                         }
-                        //Debug.WriteLine("po break"); //lygiai du praeina tarp shots
-                        // Remove the enemies that need to be removed
+
                         foreach (Enemy enemyToRemove in enemiesToRemove)
                         {
                             enemies.Remove(enemyToRemove);
@@ -1267,152 +1123,6 @@ namespace JAKE.client
 
                 });
             }
-
-            //TODO : KAD VEIKTU, simplify JORIUI ACIU
-            //lock (miniZombiesListLock)
-            //{
-            //    Dispatcher.Invoke(() =>
-            //    {
-            //        Shot shot;
-            //        double playerX = Canvas.GetLeft(playerVisual);
-            //        double playerY = Canvas.GetTop(playerVisual);
-            //        double playerWidth = playerVisual.Width;
-            //        double playerHeight = playerVisual.Height;
-
-            //        SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
-            //        ShotVisual shotVisual = shotVisualBuilder.New()
-            //                    .SetColor($"{color},{shape}")
-            //                    .SetSize(shot.getSize())
-            //                    .SetPosition(shot.getX(), shot.getY())
-            //                    .Build();
-
-            //        // Add the shot to the ShotContainer (Canvas)
-            //        ShotContainer.Children.Add(shotVisual);
-
-            //        // Update the shot's position based on the direction and speed
-            //        bool shouldRender = true;
-
-
-            //        CompositionTarget.Rendering += async (sender, e) =>
-            //        {
-            //            if (!shouldRender) return;
-            //            double currentX = Canvas.GetLeft(shotVisual);
-            //            double currentY = Canvas.GetTop(shotVisual);
-
-            //            double newX = currentX + directionX * shot.getSpeed();
-            //            double newY = currentY + directionY * shot.getSpeed();
-
-            //            // Check for collisions with obstacles
-            //            // TO-DO: shotvisual does not set width and height for some reason... will fix in future maybe
-            //            foreach (Obstacle obstacle in obstacles)
-            //            {
-            //                double elipse = shotVisual.EllipseSize;
-            //                shot = RemoveShot(shot, newX, newY, obstacle, elipse);
-            //                if (shot == null) //obstacle.WouldOverlap(newX, newY, shotVisual.EllipseSize, shotVisual.EllipseSize)
-            //                {
-            //                    // Remove the shot and break out of the loop
-            //                    ShotContainer.Children.Remove(shotVisual);
-            //                    shouldRender = false;
-            //                    return;
-            //                }
-            //            }
-
-
-            //            bool shotHitEnemy = false;
-            //            bool overlapWithEnemy = false;
-
-            //            for (int i = 0; i < miniZombieList.Count; i++)
-            //            {
-            //                Zombie zombie = miniZombieList[i];
-            //                if (zombieVisuals.ContainsKey(zombie))
-            //                {
-            //                    MiniZombieVisual enemyRect = zombieVisuals[zombie];
-            //                    double enemyXx = Canvas.GetLeft(enemyRect);
-            //                    double enemyYy = Canvas.GetTop(enemyRect);
-
-            //                    if (newX + shotVisual.EllipseSize >= enemyXx &&
-            //                        newX <= enemyXx + enemyRect.Width &&
-            //                        newY + shotVisual.EllipseSize >= enemyYy &&
-            //                        newY <= enemyYy + enemyRect.Height)
-            //                    {
-
-            //                        zombie.Health -= (int)shot.getPoints();  // Reduce the enemy's health
-            //                        miniZombieList[i] = zombie;
-            //                        boss.minions = miniZombieList;
-            //                        gameStat.PlayerScore += 8;
-            //                        Debug.WriteLine("score: " + gameStat.PlayerScore);
-            //                        scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-            //                        Debug.WriteLine("pataike i minizombie");
-            //                        await connection.SendAsync("SendZombieUpdate", boss.ToString()); //nusiuncia pasikeitusi minions sarasa TODO
-            //                        if (zombie.Health <= 0)
-            //                        {
-
-            //                            miniZombieList = new List<Zombie>();
-            //                            zombieVisuals = new Dictionary<Zombie, MiniZombieVisual>();
-            //                            //EnemyContainer.Children.Remove(enemyRect);
-            //                            MiniZombieContainer.Children.Clear();
-
-            //                            Debug.WriteLine("mire zombie list");
-            //                            await connection.SendAsync("SendDeadMini"); //TODO: servery pasalint
-            //                        }
-            //                    }
-            //                    shotHitEnemy = true;
-            //                    shouldRender = false;
-            //                    break;
-            //                }
-            //            }
-
-            //            //TODO: padaryt tikrinima su boss zombie
-
-            //            double enemyX = Canvas.GetLeft(bossVisual);
-            //            double enemyY = Canvas.GetTop(bossVisual);
-
-            //            if (newX + shotVisual.EllipseSize >= enemyX &&
-            //                newX <= enemyX + bossVisual.Width &&
-            //                newY + shotVisual.EllipseSize >= enemyY &&
-            //                newY <= enemyY + bossVisual.Height)
-            //            {
-
-            //                boss.Health -= (int)shot.getPoints();  // Reduce the enemy's health
-
-            //                gameStat.PlayerScore += 10;
-            //                Debug.WriteLine("score: " + gameStat.PlayerScore);
-            //                scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-            //                Debug.WriteLine("pataike i bosszombie");
-            //                await connection.SendAsync("SendZombieUpdate", boss.ToString()); //nusiuncia pasikeitusi minions sarasa TODO
-            //                if (boss.Health <= 0)
-            //                {
-            //                    
-            //                    boss = nextBoss; //new BossZombie("", 0, 0, 0, 0, miniZombieList);
-            //                    bossVisual = new ZombiesVisual();
-            //                    //EnemyContainer.Children.Remove(enemyRect);
-            //                    ZombieContainer.Children.Clear();
-
-            //                    Debug.WriteLine("mire zombieBOSS");
-            //                    await connection.SendAsync("SendDeadBoss"); //TODO: servery pasalint
-            //                }
-            //                shotHitEnemy = true;
-            //                shouldRender = false;
-            //            }
-
-
-
-            //            if (!shotHitEnemy)
-            //            {
-            //                //Debug.WriteLine("paskutinis if");
-            //                Canvas.SetLeft(shotVisual, newX);
-            //                Canvas.SetTop(shotVisual, newY);
-
-            //                // Remove the shot if it goes out of bounds
-            //                if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
-            //                {
-            //                    ShotContainer.Children.Remove(shotVisual);
-            //                }
-            //            }
-            //        };
-
-            //    });
-            //}
         }
 
         public static Shot RemoveShot(Shot shot, double newX, double newY, Obstacle obstacle, double elipse)
