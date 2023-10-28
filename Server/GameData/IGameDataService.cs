@@ -47,14 +47,6 @@ namespace Server.GameData
         void RemoveSpeedBoost(int id);
         List<string> GetSpeedBoosts();
 
-        BossZombie AddBossZombie(string name, int health);
-        void RemoveBossZombie();
-        void RemoveMiniZombie();
-        void UpdateBossZombie(int health, bool mini);
-        List<string> GetBossZombie();
-        bool GetBossNull();
-        List<string> UpdateBossZombiePosition();
-
         Coin returnCoin(int id);
 
     }
