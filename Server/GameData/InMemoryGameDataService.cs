@@ -115,7 +115,10 @@ namespace Server.GameData
                 tempminions = newEnemy.GetMinions();
                 foreach (ZombieMinion minion in minions)
                 {
-                    enemies.Add(minion.ShallowClone());
+                    Console.WriteLine("original minion in zombieBoss list hash: " + minion.GetHashCode());
+                    Enemy copy = minion.ShallowClone();
+                    Console.WriteLine("shallow copy minion in enemies list hash: " + copy.GetHashCode());
+                    enemies.Add(copy); //minion.ShallowClone()
 
                     minion.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
                 }
