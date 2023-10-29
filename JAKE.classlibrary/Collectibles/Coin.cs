@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary.Collectibles
@@ -41,6 +42,11 @@ namespace JAKE.classlibrary.Collectibles
         {
             this.Points = points;
         }
+        public Coin()
+        {
+            // Parameterless constructor required for XML  serialization
+        }
+
 
         public void Interact(GameStats gameStats)
         {
@@ -71,6 +77,15 @@ namespace JAKE.classlibrary.Collectibles
         public override string ToString()
         {
             return $"{id}:{X}:{Y}:{Width}:{Height}:{Points}";
+        }
+        public string ToXML()
+        {
+            using (var stringwriter = new System.IO.StringWriter())
+            {
+                var serializer = new XmlSerializer(this.GetType());
+                serializer.Serialize(stringwriter, this);
+                return stringwriter.ToString();
+            }
         }
     }
 }

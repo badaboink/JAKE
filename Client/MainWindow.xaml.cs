@@ -836,8 +836,6 @@ namespace JAKE.client
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-
-            // Create a copy of the coins collection
             List<Coin> coinsCopy = new List<Coin>(coins);
 
             foreach (Coin coin in coinsCopy)
@@ -847,11 +845,7 @@ namespace JAKE.client
                     CoinVisual coinRect = coinVisuals[coin];
                     double coinX = Canvas.GetLeft(coinRect);
                     double coinY = Canvas.GetTop(coinRect);
-
-                    if (playerX + playerVisual.Width >= coinX &&
-                        playerX <= coinX + coinRect.Width &&
-                        playerY + playerVisual.Height >= coinY &&
-                        playerY <= coinY + coinRect.Height)
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height)) 
                     {
                         coin.Interact(gameStat);
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
@@ -861,7 +855,6 @@ namespace JAKE.client
 
                         // Convert coin to a JSON string
                         string json = JsonConvert.SerializeObject(coin);
- 
                         //-----------
                         await connection.SendAsync("SendPickedCoin", json);
                     }
@@ -882,10 +875,7 @@ namespace JAKE.client
                     double shieldX = Canvas.GetLeft(shieldRect);
                     double shieldY = Canvas.GetTop(shieldRect);
 
-                    if (playerX + playerVisual.Width >= shieldX &&
-                        playerX <= shieldX + shieldRect.Width &&
-                        playerY + playerVisual.Height >= shieldY &&
-                        playerY <= shieldY + shieldRect.Height)
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, shieldX, shieldY, shieldRect.Height))
                     {
                         
                         Base baseObj = new Base(currentPlayer);
@@ -919,10 +909,7 @@ namespace JAKE.client
                     double speedBoostX = Canvas.GetLeft(speedBoostRect);
                     double speedBoostY = Canvas.GetTop(speedBoostRect);
 
-                    if (playerX + playerVisual.Width >= speedBoostX &&
-                        playerX <= speedBoostX + speedBoostRect.Width &&
-                        playerY + playerVisual.Height >= speedBoostY &&
-                        playerY <= speedBoostY + speedBoostRect.Height)
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, speedBoostX, speedBoostY, speedBoostRect.Height))
                     {
 
                         if (gameStat.PlayerSpeed < 50)
@@ -957,16 +944,9 @@ namespace JAKE.client
                     double healthBoostX = Canvas.GetLeft(healthBoostRect);
                     double healthBoostY = Canvas.GetTop(healthBoostRect);
 
-                    if (playerX + playerVisual.Width >= healthBoostX &&
-                        playerX <= healthBoostX + healthBoostRect.Width &&
-                        playerY + playerVisual.Height >= healthBoostY &&
-                        playerY <= healthBoostY + healthBoostRect.Height)
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, healthBoostX, healthBoostY, healthBoostRect.Height))
                     {
                         isCollidingWithHealthBoost = true;
-                        //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
-                        //healthBoost.Interact(player, healthBoost.Health);
-                        Debug.WriteLine("health pries: " + gameStat.PlayerHealth);
-                        Debug.WriteLine("health reiksme: " + healthBoost.Health);
                         healthBoost.Interact(gameStat);
                         if (gameStat.PlayerHealth > 100)
                         {
@@ -984,7 +964,6 @@ namespace JAKE.client
                         HideDisplay();
                         HealthAdd healthObj = new HealthAdd(currentPlayer);
                         healthBar.Width = healthObj.DisplayHealth(gameStat.PlayerHealth/2).health;
-                        //await connection.SendAsync("UpdatePlayerHealth", currentPlayer.GetId(), gameStat.PlayerHealth);
                         await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
                         isCollidingWithHealthBoost = false;
                     }
@@ -1166,6 +1145,12 @@ namespace JAKE.client
             Debug.WriteLine("SHOTAS " + localShot.getY());
 
 
+        }
+
+        public static bool playerTouchesMapObject(double playerX, double playerY, double playerSize, double objectX, double objectY, double objectSize)
+        {           
+            if (playerX + playerSize >= objectX &&  playerX <= objectX + objectSize &&  playerY + playerSize >= objectY && playerY <= objectY + objectSize) return true;
+            else return false;
         }
     }
 }
