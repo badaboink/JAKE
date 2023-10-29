@@ -9,7 +9,7 @@ using System.Windows.Media;
 
 namespace Client_tests
 {
-    public class Player_tests
+    public class PlayerTests
     {
         [Fact]
         public void CheckCollision_ShouldReturnTrue_ForCollidingRectangles()
