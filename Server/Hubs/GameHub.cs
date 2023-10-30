@@ -75,13 +75,11 @@ namespace Server.Hubs
                 DateTime startTime = _gameDataService.GetCurrentGameTime();
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
-                //Console.WriteLine($"Sending enemy update {DateTime.Now}");
 
                 _gameDataService.UpdateEnemyPositions();
                 if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
                 {
                     _gameDataService.AddEnemies();
-                    //Console.WriteLine($"Spawning enemy {startTime} - {DateTime.Now}. {_gameDataService.GetEnemies().Count}");
                     _gameDataService.SetGameTime(DateTime.Now);
                 }
                 if (_gameDataService.GetCoins().Count <= 10)
@@ -99,14 +97,12 @@ namespace Server.Hubs
                 if (_gameDataService.GetSpeedBoosts().Count <= 2)
                 {
                     _gameDataService.AddSpeedBoost(5);
-                    Console.WriteLine("pridejo speed5");
                 }
 
             }
             List<string> enemies = _gameDataService.GetEnemies();
             if (enemies.Count > 0)
             {
-                //Console.WriteLine($"Sending Enemies {Context.ConnectionId}");
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleEnemies(enemies);
             }
             List<string> coins = _gameDataService.GetCoins();
@@ -129,9 +125,6 @@ namespace Server.Hubs
             {
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleSpeedBoosts(speedBoosts);
             }
-
-
-
         }
         public async Task SendPickedCoin(string coin)
         {
