@@ -80,7 +80,6 @@ namespace JAKE.client
             {
                 collisionCheckedEnemies[enemy] = false;
             }
-            //Debug.WriteLine("naujas instance " + gameStat);
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -102,7 +101,7 @@ namespace JAKE.client
         IBuilderVisual<PlayerVisual> playerVisualBuilder = new PlayerVisualBuilder();
         IBuilderVisual<EnemyVisual> enemyVisualBuilder = new EnemyVisualBuilder();
         IBuilderVisual<ShotVisual> shotVisualBuilder = new ShotVisualBuilder();
-        private async Task GameStart()
+        public async Task GameStart()
         {            
             // Create and show the ColorChoiceForm as a pop-up
             ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
@@ -115,7 +114,8 @@ namespace JAKE.client
             await connection.SendAsync("SendColor", selectedColor, name, shotColor, shotShape);
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
-                currentPlayer = new Player(id, name, color, shotColor, shotShape);
+                SetCurrentPlayer(id, name, color, shotColor, shotShape);
+
                 gamestarted = true;
                 string[] obstaclemessages = obstacleData.Split(',');
                 foreach (string obs in obstaclemessages)
@@ -155,9 +155,7 @@ namespace JAKE.client
 
                         if (!playerInfoList.Contains(playerInfo))
                         {
-                            //playerInfo.SetCurrentPosition(x, y);
                             playerInfoList.Add(playerInfo);
-                            Debug.WriteLine("PRIDEJO " + playerInfo.GetId() + " LIST COUNT DABAR " +  playerInfoList.Count);
                             Dispatcher.Invoke(() =>
                             {
                                 PlayerVisual playerVisual = playerVisualBuilder.New()
@@ -175,7 +173,6 @@ namespace JAKE.client
                             Dispatcher.Invoke(() =>
                             {
                                 PlayerVisual playerVisual = playerVisuals[playerInfo];
-                                //playerInfo.SetCurrentPosition(x, y);
                                 Canvas.SetLeft(playerVisual, x);
                                 Canvas.SetTop(playerVisual, y);
                             });
@@ -185,6 +182,22 @@ namespace JAKE.client
                 GameStats gameStat = GameStats.Instance;
                 gameStat.PlayersCount = playerInfoList.Count;  //singleton
                 lastGameTime = gametime;
+            });
+        }
+        public void SetCurrentPlayer(int id, string name, string color, string shotColor, string shotShape)
+        {
+            currentPlayer = new Player(id, name, color, shotColor, shotShape);
+            playerInfoList.Add(currentPlayer);
+            Dispatcher.Invoke(() =>
+            {
+                PlayerVisual playerVisual = playerVisualBuilder.New()
+                .SetName(currentPlayer.GetName())
+                .SetColor(currentPlayer.GetColor())
+                .SetPosition(0, 0)
+                .Build();
+                playerVisuals[currentPlayer] = playerVisual;
+
+                playersContainer.Items.Add(playerVisual);
             });
         }
         private Timer? timer;
@@ -958,8 +971,6 @@ namespace JAKE.client
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //healthBoost.Interact(player, healthBoost.Health);
                         GameStats gameStat = GameStats.Instance;
-                        Debug.WriteLine("health pries: " + gameStat.PlayerHealth);
-                        Debug.WriteLine("health reiksme: " + healthBoost.Health);
                         healthBoost.Interact(gameStat);
                         if (gameStat.PlayerHealth > 100)
                         {
@@ -967,8 +978,6 @@ namespace JAKE.client
                         }
                         
                         healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-                        Debug.WriteLine("health po: " + gameStat.PlayerHealth);
-                        Debug.WriteLine("CIA IEINA");
                         healthBoosts.Remove(healthBoost);
                         healthBoostsVisuals.Remove(healthBoost);
                         HealthBoostContainer.Children.Remove(healthBoostRect);
@@ -1156,9 +1165,6 @@ namespace JAKE.client
 
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;
-            Debug.WriteLine("SHOTAS " + localShot.getY());
-
-
         }
 
         public static bool playerTouchesMapObject(double playerX, double playerY, double playerSize, double objectX, double objectY, double objectSize)
