@@ -48,6 +48,7 @@ namespace Server.GameData
         List<string> GetSpeedBoosts();
 
         Coin returnCoin(int id);
-
+        Enemy AddZombieBoss();
+        bool IsBossAlive();
     }
 }

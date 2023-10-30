@@ -8,7 +8,13 @@ namespace JAKE.classlibrary.Patterns.AbstractFactory
 {
     public abstract class EnemyFactory
     {
-        public abstract Minion CreateMinion(int id, string color);
-        public abstract Boss CreateBoss(int id, string color);
+
+        protected EnemyFactory()
+        {
+        }
+
+        public abstract Minion CreateMinion(int id, string color, double speed, int health, int size);
+        public abstract Boss CreateBoss(int id, string color, double speed, int health, int size);
+        
     }
 }

@@ -37,6 +37,5 @@ namespace JAKE.classlibrary.Patterns.Strategies
                 enemy.SetCurrentPosition(newX, newY);
             }
         }
-       
     }
 }

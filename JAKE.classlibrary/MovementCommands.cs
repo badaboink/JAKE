@@ -7,129 +7,115 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary
 {
-    
-    public class MoveUp : Command
+
+    public abstract class MovementCommand : Command
     {
-        List<Obstacle> obstacles;
-        double windowWidth;
-        double windowHeight;
-        public MoveUp(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
+        protected ObstacleChecker obstacleChecker;
+        protected double windowWidth;
+        protected double windowHeight;
+
+        public MovementCommand(Player player, List<Obstacle> obstacles) : base(player)
         {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
+            this.obstacleChecker = new ObstacleChecker(obstacles);
         }
 
-        public override void Execute()
+        public override bool Execute()
+        {
+            return Move();
+        }
+
+        public override void Undo()
+        {
+            Move();
+        }
+
+        public bool Move()
+        {
+            GameStats gameStat = GameStats.Instance;
+            Coordinates playerCurrent = player.GetCurrentCoords();
+            Coordinates playerDirection = player.GetDirectionCoords();
+            double stepSize = gameStat.PlayerSpeed;
+            Coordinates nextCoords = player.GetNextCoords(stepSize);
+            obstacleChecker.PositionNextToObstacle(playerCurrent, playerDirection, ref nextCoords);
+            player.SetCurrentPosition(nextCoords);
+            return !(Math.Abs(playerCurrent.x - nextCoords.x) < 0.001 && Math.Abs(playerCurrent.y - nextCoords.y) < 0.001);
+        }
+    }
+    
+    public class MoveUp : MovementCommand
+    {
+        public MoveUp(Player player, List<Obstacle> obstacles) : base(player, obstacles)
+        {
+        }
+
+        public override bool Execute()
         {
             player.SetCurrentDirection(0, -1);
-            GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
-            double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
+            return base.Execute();
         }
 
-    }
-
-    public class MoveDown : Command
-    {
-        List<Obstacle> obstacles;
-        double windowWidth;
-        double windowHeight;
-        public MoveDown(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
-        {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
-        }
-
-        public override void Execute()
+        public override void Undo()
         {
             player.SetCurrentDirection(0, 1);
-            GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
-            double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
+            base.Undo();
+        }
+
+    }
+
+    public class MoveDown : MovementCommand
+    {
+        public MoveDown(Player player, List<Obstacle> obstacles) : base(player, obstacles)
+        {
+        }
+
+        public override bool Execute()
+        {
+            player.SetCurrentDirection(0, 1);
+            return base.Execute();
+        }
+
+        public override void Undo()
+        {
+            player.SetCurrentDirection(0, -1);
+            base.Execute();
         }
     }
 
-    public class MoveLeft : Command
+    public class MoveLeft : MovementCommand
     {
-        List<Obstacle> obstacles;
-        double windowWidth;
-        double windowHeight;
-        public MoveLeft(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
+        public MoveLeft(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
         }
 
-        public override void Execute()
+        public override bool Execute()
         {
             player.SetCurrentDirection(-1, 0);
-            GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
-            double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
-        }
-    }
-
-    public class MoveRight : Command
-    {
-        List<Obstacle> obstacles;
-        double windowWidth;
-        double windowHeight;
-        public MoveRight(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
-        {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
+            return base.Execute();
         }
 
-        public override void Execute()
+        public override void Undo()
         {
             player.SetCurrentDirection(1, 0);
-            GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
-            double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
+            base.Execute();
         }
     }
 
-    public class Undo : Command
+    public class MoveRight : MovementCommand
     {
-        public Undo(Player player) : base(player)
+        public MoveRight(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
         }
 
-        public override void Execute()
+        public override bool Execute()
         {
-            player.Undo();
+            player.SetCurrentDirection(1, 0);
+            return base.Execute();
+        }
+
+        public override void Undo()
+        {
+            player.SetCurrentDirection(-1, 0);
+            base.Undo();
         }
     }
 
