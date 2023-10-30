@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JAKE.classlibrary.Patterns;
 using JAKE.classlibrary.Patterns.AbstractFactory;
 using JAKE.classlibrary.Patterns.Strategies;
 
 
 namespace JAKE.classlibrary.Enemies
 {
-
-    public class ZombieMinion : Minion
+    //IPrototype
+    public class ZombieMinion : Minion  
     {
         
         public ZombieMinion(int id, string color, double speed = 2, int health = 20, int size = 20) : base(id, color, speed, health, size)

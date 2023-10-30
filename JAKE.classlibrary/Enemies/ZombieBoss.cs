@@ -31,7 +31,9 @@ namespace JAKE.classlibrary.Enemies
             double yy = (GetCurrentY() + radius * Math.Sin(angle));
             if (minions.Count < 1)
             {
+              
                 ZombieMinion zombieMinion = new ZombieMinion(id, "green", 10);
+                Console.WriteLine("Original minion hash: " + zombieMinion.GetHashCode());
                 zombieMinion.SetCurrentPosition(xx, yy);
                 zombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
                 //zombieMinion.SetMovementStrategy(new DontMoveStrategy());
@@ -42,8 +44,8 @@ namespace JAKE.classlibrary.Enemies
                 ZombieMinion copyZombieMinion = minions[0].DeepClone() as ZombieMinion;
                 copyZombieMinion.SetId(id);
                 copyZombieMinion.SetCurrentPosition(xx, yy);
-                copyZombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
-                //copyZombieMinion.SetMovementStrategy(new DontMoveStrategy());
+                copyZombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this));
+                Console.WriteLine("Deep copy minion hash: " + copyZombieMinion.GetHashCode());
                 minions.Add(copyZombieMinion);
             }
         }

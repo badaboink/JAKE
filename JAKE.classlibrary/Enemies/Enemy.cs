@@ -9,7 +9,7 @@ using JAKE.classlibrary.Patterns.Strategies;
 
 namespace JAKE.classlibrary.Enemies
 {
-    public class Enemy
+    public class Enemy //: IPrototype
     {
         private int _id;
         private double _speed;
@@ -163,5 +163,10 @@ namespace JAKE.classlibrary.Enemies
         {
             return $"{GetId()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetHealth()}:{GetSize()}";
         }
+
+        //public Enemy DeepClone()
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }

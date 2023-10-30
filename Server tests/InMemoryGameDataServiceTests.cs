@@ -18,9 +18,11 @@ namespace Server_tests
             string playerName = "name";
             string playerColor = "color";
             string connectionID = "connectionID";
-            Player player1 = new Player(1, playerName, playerColor);
+            string shotColor = "red";
+            string shotShape = "circle";
+            Player player1 = new Player(1, playerName, playerColor, shotColor, shotShape);
             player1.SetConnectionId(connectionID);
-            Player player2 = gameDataService.AddPlayer(playerName, playerColor, connectionID);
+            Player player2 = gameDataService.AddPlayer(playerName, playerColor, connectionID, shotColor, shotShape);
             Assert.Equal(player1.GetId(), player2.GetId());
             Assert.Equal(player1.GetName(), player2.GetName());
             Assert.Equal(player1.GetColor(), player2.GetColor());
@@ -33,7 +35,9 @@ namespace Server_tests
             string playerName = "name";
             string playerColor = "color";
             string connectionID = "connectionID";
-            Player player1 = gameDataService.AddPlayer(playerName, playerColor, connectionID);
+            string shotColor = "red";
+            string shotShape = "circle";
+            Player player1 = gameDataService.AddPlayer(playerName, playerColor, connectionID, shotColor, shotShape);
             Player player2 = gameDataService.RemovePlayer(player1.GetConnectionId());
             Assert.Equal(player1.GetId(), player2.GetId());
             Assert.Equal(player1.GetName(), player2.GetName());
@@ -47,10 +51,12 @@ namespace Server_tests
             string playerName = "name";
             string playerColor = "color";
             string connectionID = "connectionID";
+            string shotColor = "red";
+            string shotShape = "circle";
             Player player1 = new Player(1, playerName, playerColor);
             player1.SetConnectionId(connectionID);
             player1.SetCurrentPosition(42, 69);
-            Player player2 = gameDataService.AddPlayer(playerName, playerColor, connectionID);
+            Player player2 = gameDataService.AddPlayer(playerName, playerColor, connectionID, shotColor, shotShape);
             gameDataService.EditPlayerPosition(0, 42, 69);
             Assert.Equal(player1.GetCurrentX(), player2.GetCurrentX());
             Assert.Equal(player1.GetCurrentY(), player2.GetCurrentY());
@@ -62,9 +68,11 @@ namespace Server_tests
             string playerName = "name";
             string playerColor = "color";
             string connectionID = "connectionID";
-            Player player1 = new Player(1, playerName, playerColor);
+            string shotColor = "red";
+            string shotShape = "circle";
+            Player player1 = new Player(1, playerName, playerColor, shotColor, shotShape);
             player1.SetConnectionId(connectionID);
-            gameDataService.AddPlayer(playerName, playerColor, connectionID);
+            gameDataService.AddPlayer(playerName, playerColor, connectionID, shotColor, shotShape);
             Assert.Equal(player1.ToString(), gameDataService.GetPlayerData(0));
         }
 
@@ -89,7 +97,9 @@ namespace Server_tests
              string connectionID1 = "connectionID1";
              string connectionID2 = "connectionID2";
              string connectionID3 = "connectionID3";
-             Player player1 = new Player(1, playerName1, playerColor1);
+            string shotColor = "red";
+            string shotShape = "circle";
+            Player player1 = new Player(1, playerName1, playerColor1);
              Player player2 = new Player(2, playerName2, playerColor2);
              Player player3 = new Player(3, playerName3, playerColor3);
              player1.SetConnectionId(connectionID1);
