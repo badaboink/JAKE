@@ -11,6 +11,5 @@ namespace JAKE.classlibrary.Patterns.Strategies
     public interface IMoveStrategy
     {
         void Move(Enemy enemy, List<Player> players);
-      
     }
 }

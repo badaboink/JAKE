@@ -16,6 +16,19 @@ namespace JAKE.classlibrary.Patterns
         private int playerScore;
         private int playerSpeed;
         private bool shieldOn;
+        private double windowHeight;
+        private double windowWidth;
+
+        public double WindowWidth
+        {
+            get { return windowWidth; }
+            set { windowWidth = value; }
+        }
+        public double WindowHeight
+        {
+            get { return windowHeight; }
+            set { windowHeight = value; }
+        }
 
         public int PlayersCount
         {

@@ -69,6 +69,5 @@ namespace JAKE.classlibrary.Patterns.Strategies
                 }
             }
         }
-      
     }
 }
