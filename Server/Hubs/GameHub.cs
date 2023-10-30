@@ -101,7 +101,7 @@ namespace Server.Hubs
                     _gameDataService.AddSpeedBoost(5);
                     Console.WriteLine("pridejo speed5");
                 }
-                if (!_gameDataService.isBossAlive() && _gameDataService.GetEnemies().Count <= 20)
+                if (!_gameDataService.IsBossAlive() && _gameDataService.GetEnemies().Count <= 20)
                 {
                     _gameDataService.AddZombieBoss();
                 }

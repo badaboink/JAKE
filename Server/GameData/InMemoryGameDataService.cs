@@ -28,8 +28,6 @@ namespace Server.GameData
         public ZombieFactory zombieFactory = new ZombieFactory();
         public ObstacleChecker obstacleChecker;
         public Spawner spawner;
-        private static List<Zombie> minions = new List<Zombie>();
-        private BossZombie boss = new BossZombie("", 0, 0, 0,0, minions);
         private int bossId = -1;
         public InMemoryGameDataService()
         {
@@ -126,6 +124,11 @@ namespace Server.GameData
                 return newEnemy;
             }
         }
+        public bool IsBossAlive()
+        {
+            return bossId >= 0;
+        }
+
         public void UpdateEnemy(int id, int health)
         {
             lock (enemyListLock)

@@ -58,10 +58,6 @@ namespace JAKE.client
         private List<Weapon> weapons = new List<Weapon>();
         private readonly object enemyListLock = new object();
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
-        private static List<Zombie> miniZombieList = new List<Zombie>();
-        private Dictionary<Zombie, MiniZombieVisual> zombieVisuals = new Dictionary<Zombie, MiniZombieVisual>();
-        private BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
-        ZombiesVisual bossVisual = new ZombiesVisual();
         Controller controller = new Controller();
 
 
@@ -114,6 +110,7 @@ namespace JAKE.client
             string name = colorChoiceForm.Name;
             string shotColor = colorChoiceForm.ShotColor;
             string shotShape = colorChoiceForm.ShotShape;
+            GameStats gameStat = GameStats.Instance;
             gameStat.WindowWidth = this.ActualWidth;
             gameStat.WindowHeight = this.ActualHeight;
 
