@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary
 {
-    public class Decorator
+    public abstract class Decorator 
     {
         protected Player wrapper;
         public Decorator(Player player)

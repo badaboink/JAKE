@@ -210,6 +210,11 @@ namespace JAKE.classlibrary
         {
             return (text, health, shieldOn);
         }
+
+        public (string text, float health, bool shieldOn) Display2(string text, float health, bool shieldOn)
+        {
+            return (text, health, shieldOn);
+        }
         public override bool Equals(object obj)
         {
             if (obj is Player otherPlayer)

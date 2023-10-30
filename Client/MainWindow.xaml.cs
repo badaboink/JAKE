@@ -43,7 +43,7 @@ namespace JAKE.client
         private List<Shot> shots = new List<Shot>();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
         private DateTime lastGameTime = DateTime.MinValue;
-        private GameStats gameStat = GameStats.Instance;
+        //private GameStats gameStat = GameStats.Instance;
         private Dictionary<Enemy, bool> collisionCheckedEnemies = new Dictionary<Enemy, bool>();
         private List<Coin> coins = new List<Coin>();
         private Dictionary<Coin, CoinVisual> coinVisuals = new Dictionary<Coin, CoinVisual>();
@@ -84,7 +84,7 @@ namespace JAKE.client
             {
                 collisionCheckedEnemies[enemy] = false;
             }
-            Debug.WriteLine("naujas instance " + gameStat);
+            //Debug.WriteLine("naujas instance " + gameStat);
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -193,6 +193,7 @@ namespace JAKE.client
                         }
                     }
                 }
+                GameStats gameStat = GameStats.Instance;
                 gameStat.PlayersCount = playerInfoList.Count;  //singleton
                 lastGameTime = gametime;
             });
@@ -832,6 +833,7 @@ namespace JAKE.client
             timer.Interval = TimeSpan.FromSeconds(10);
             timer.Tick += (sender, args) =>
             {
+                GameStats gameStat = GameStats.Instance;
                 gameStat.PlayerSpeed = 10;
                 timer.Stop();
             };
@@ -849,6 +851,7 @@ namespace JAKE.client
                 bool shieldVisible = shieldObj.HideShield().shieldOn;
                 if (!shieldVisible)
                 {
+                    GameStats gameStat = GameStats.Instance;
                     shieldBorder.Visibility = Visibility.Hidden;
                     gameStat.ShieldOn = false;
                     timer.Stop();
@@ -918,6 +921,7 @@ namespace JAKE.client
         }
         public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
+            GameStats gameStat = GameStats.Instance;
             if (!gameStat.ShieldOn)
             {
                 gameStat.PlayerHealth -= 5;
@@ -940,6 +944,7 @@ namespace JAKE.client
    
         private async Task HandleCollisionZ(int damage)
         {
+            GameStats gameStat = GameStats.Instance;
             if (!gameStat.ShieldOn)
             {
                 gameStat.PlayerHealth -= damage;
@@ -996,6 +1001,7 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= coinY &&
                         playerY <= coinY + coinRect.Height)
                     {
+                        GameStats gameStat = GameStats.Instance;
                         coin.Interact(gameStat);
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
                         Base text = new Base(currentPlayer);
@@ -1042,6 +1048,7 @@ namespace JAKE.client
                         bool shieldVisible = shieldObj.DisplayShield().shieldOn;
                         if (shieldVisible)
                         {
+                            GameStats gameStat = GameStats.Instance;
                             shieldBorder.Visibility = Visibility.Visible;
                             gameStat.ShieldOn = true; 
                             shield.Interact(gameStat);
@@ -1072,6 +1079,7 @@ namespace JAKE.client
                         playerY + playerVisual.Height >= speedBoostY &&
                         playerY <= speedBoostY + speedBoostRect.Height)
                     {
+                        GameStats gameStat = GameStats.Instance;
 
                         if (gameStat.PlayerSpeed < 50)
                         {
@@ -1113,6 +1121,7 @@ namespace JAKE.client
                         isCollidingWithHealthBoost = true;
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //healthBoost.Interact(player, healthBoost.Health);
+                        GameStats gameStat = GameStats.Instance;
                         Debug.WriteLine("health pries: " + gameStat.PlayerHealth);
                         Debug.WriteLine("health reiksme: " + healthBoost.Health);
                         healthBoost.Interact(gameStat);
@@ -1132,6 +1141,7 @@ namespace JAKE.client
                         HideDisplay();
                         HealthAdd healthObj = new HealthAdd(currentPlayer);
                         healthBar.Width = healthObj.DisplayHealth(gameStat.PlayerHealth/2).health;
+
                         //await connection.SendAsync("UpdatePlayerHealth", currentPlayer.GetId(), gameStat.PlayerHealth);
                         await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
                         isCollidingWithHealthBoost = false;
@@ -1221,6 +1231,7 @@ namespace JAKE.client
 
                                     if (CountKills)
                                     {
+                                        GameStats gameStat = GameStats.Instance;
                                         enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
                                         gameStat.PlayerScore += 5;
                                         Debug.WriteLine("score: " + gameStat.PlayerScore);
@@ -1458,9 +1469,6 @@ namespace JAKE.client
 
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;
-            Debug.WriteLine("SHOTAS " + localShot.getY());
-
-
         }
     }
 }
