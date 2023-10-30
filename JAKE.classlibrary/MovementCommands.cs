@@ -10,15 +10,13 @@ namespace JAKE.classlibrary
 
     public abstract class MovementCommand : Command
     {
-        protected List<Obstacle> obstacles;
+        protected ObstacleChecker obstacleChecker;
         protected double windowWidth;
         protected double windowHeight;
 
-        public MovementCommand(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
+        public MovementCommand(Player player, List<Obstacle> obstacles) : base(player)
         {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
+            this.obstacleChecker = new ObstacleChecker(obstacles);
         }
 
         public override bool Execute()
@@ -34,26 +32,20 @@ namespace JAKE.classlibrary
         public bool Move()
         {
             GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
+            Coordinates playerCurrent = player.GetCurrentCoords();
+            Coordinates playerDirection = player.GetDirectionCoords();
             double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
-            return !(Math.Abs(playerCurrentX - newX) < 0.001 && Math.Abs(playerCurrentY - newY) < 0.001);
+            Coordinates nextCoords = player.GetNextCoords(stepSize);
+            obstacleChecker.PositionNextToObstacle(playerCurrent, playerDirection, ref nextCoords);
+            player.SetCurrentPosition(nextCoords);
+            return !(Math.Abs(playerCurrent.x - nextCoords.x) < 0.001 && Math.Abs(playerCurrent.y - nextCoords.y) < 0.001);
         }
     }
     
     public class MoveUp : MovementCommand
     {
-        public MoveUp(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player, obstacles, windowWidth, windowHeight)
+        public MoveUp(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
         }
 
         public override bool Execute()
@@ -72,11 +64,8 @@ namespace JAKE.classlibrary
 
     public class MoveDown : MovementCommand
     {
-        public MoveDown(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player, obstacles, windowWidth, windowHeight)
+        public MoveDown(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
         }
 
         public override bool Execute()
@@ -94,11 +83,8 @@ namespace JAKE.classlibrary
 
     public class MoveLeft : MovementCommand
     {
-        public MoveLeft(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player, obstacles, windowWidth, windowHeight)
+        public MoveLeft(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
         }
 
         public override bool Execute()
@@ -116,11 +102,8 @@ namespace JAKE.classlibrary
 
     public class MoveRight : MovementCommand
     {
-        public MoveRight(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player, obstacles, windowWidth, windowHeight)
+        public MoveRight(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
         }
 
         public override bool Execute()

@@ -88,13 +88,13 @@ namespace JAKE.classlibrary
             {
                 // Player is moving right
                 double distanceToObstacle = obstacleLeft - playerRight;
-                return distanceToObstacle < gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle < playerDirectionX*gameStat.PlayerSpeed ? distanceToObstacle : 0;
             }
             else if (playerDirectionX < 0)
             {
                 // Player is moving left
                 double distanceToObstacle = playerLeft - obstacleRight;
-                return distanceToObstacle > -gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle > playerDirectionX*gameStat.PlayerSpeed ? distanceToObstacle : 0;
             }
             else
             {
@@ -115,13 +115,13 @@ namespace JAKE.classlibrary
             {
                 // Player is moving down
                 double distanceToObstacle = obstacleTop - playerBottom;
-                return distanceToObstacle < gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle < playerDirectionY * gameStat.PlayerSpeed ? distanceToObstacle : 0;
             }
             else if (playerDirectionY < 0)
             {
                 // Player is moving up
                 double distanceToObstacle = playerTop - obstacleBottom;
-                return distanceToObstacle > -gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle > playerDirectionY * gameStat.PlayerSpeed ? distanceToObstacle : 0;
             }
             else
             {

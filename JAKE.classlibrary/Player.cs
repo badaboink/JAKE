@@ -18,7 +18,6 @@ namespace JAKE.classlibrary
         private string _color;
         private Coordinates _currentDirection = new(0, 1);
         private Coordinates _currentCoords = new(0, 0);
-        private Stack<Coordinates> _history = new Stack<Coordinates>();
         private int _speed;
         private string? _shotColor;
         private string? _shotShape;
@@ -90,12 +89,30 @@ namespace JAKE.classlibrary
             return _currentCoords.y;
         }
 
+        public Coordinates GetCurrentCoords()
+        {
+            return _currentCoords;
+        }
+
+        public Coordinates GetNextCoords(double stepSize)
+        {
+
+            double newX = _currentCoords.x + _currentDirection.x * stepSize;
+            double newY = _currentCoords.y + _currentDirection.y * stepSize;
+            return new Coordinates(newX, newY);
+        }
+
         public void SetCurrentPosition(double x, double y)
         {
-            _history.Push(new Coordinates(_currentCoords.x, _currentCoords.y));
             _currentCoords.x = x;
             _currentCoords.y = y;
         }
+
+        public void SetCurrentPosition(Coordinates coords)
+        {
+            this.SetCurrentPosition(coords.x, coords.y);
+        }
+
 
         public double GetDirectionX()
         {
@@ -105,6 +122,11 @@ namespace JAKE.classlibrary
         public double GetDirectionY()
         {
             return _currentDirection.y;
+        }
+
+        public Coordinates GetDirectionCoords()
+        {
+            return _currentDirection;
         }
 
         public string? GetShotColor()
@@ -132,13 +154,6 @@ namespace JAKE.classlibrary
             return _connectionid;
         }
 
-        public void Undo()
-        {
-            if (_history.Count > 0)
-            {
-                _currentCoords = _history.Pop();
-            }
-        }
         public void SetConnectionId(string id)
         {
             _connectionid = id;

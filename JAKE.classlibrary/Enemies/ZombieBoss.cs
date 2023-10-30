@@ -44,7 +44,7 @@ namespace JAKE.classlibrary.Enemies
                 ZombieMinion copyZombieMinion = minions[0].DeepClone() as ZombieMinion;
                 copyZombieMinion.SetId(id);
                 copyZombieMinion.SetCurrentPosition(xx, yy);
-                copyZombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this));
+                copyZombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
                 Console.WriteLine("Deep copy minion hash: " + copyZombieMinion.GetHashCode());
                 minions.Add(copyZombieMinion);
             }

@@ -11,9 +11,12 @@ namespace JAKE.classlibrary.Patterns.Strategies
     public class ChasePlayerStrategy : IMoveStrategy
     {
         private List<Obstacle> obstacles;
+        private ObstacleChecker checker;
         public ChasePlayerStrategy(List<Obstacle> obstacles)
         {
             this.obstacles = obstacles;
+            this.checker = new ObstacleChecker(obstacles);
+
         }
         public void Move(Enemy enemy, List<Player> players)
         {
@@ -21,10 +24,10 @@ namespace JAKE.classlibrary.Patterns.Strategies
 
             if (closestPlayer != null)
             {
+                Coordinates enemyCurrent = new Coordinates(enemy.GetCurrentX(), enemy.GetCurrentY());
                 // Calculate direction vector from enemy to closest player
-                double directionX = closestPlayer.GetCurrentX() - enemy.GetCurrentX();
-                double directionY = closestPlayer.GetCurrentY() - enemy.GetCurrentY();
-
+                double directionX = closestPlayer.GetCurrentX() - enemyCurrent.x;
+                double directionY = closestPlayer.GetCurrentY() - enemyCurrent.y;
                 // Normalize the direction vector
                 double length = Math.Sqrt(directionX * directionX + directionY * directionY);
                 if (length > 0)
@@ -32,13 +35,16 @@ namespace JAKE.classlibrary.Patterns.Strategies
                     directionX /= length;
                     directionY /= length;
                 }
+                Coordinates direction = new Coordinates(directionX, directionY);
 
                 // Define enemy movement speed
                 double enemySpeed = enemy.GetSpeed();
 
-                double newX = enemy.GetCurrentX() + directionX * enemySpeed;
-                double newY = enemy.GetCurrentY() + directionY * enemySpeed;
-
+                double newX = enemyCurrent.x + directionX * enemySpeed;
+                double newY = enemyCurrent.y + directionY * enemySpeed;
+                Coordinates nextCoords = new Coordinates(newX, newY);
+                //checker.PositionNextToObstacle(enemyCurrent, direction, ref nextCoords);
+                //enemy.SetCurrentPosition(nextCoords.x, nextCoords.y);
                 bool CantMove = false;
                 foreach (Obstacle obstacle in obstacles)
                 {

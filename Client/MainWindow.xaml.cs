@@ -115,6 +115,8 @@ namespace JAKE.client
             string name = colorChoiceForm.Name;
             string shotColor = colorChoiceForm.ShotColor;
             string shotShape = colorChoiceForm.ShotShape;
+            gameStat.WindowWidth = this.ActualWidth;
+            gameStat.WindowHeight = this.ActualHeight;
 
             await connection.SendAsync("SendColor", selectedColor, name, shotColor, shotShape);
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
@@ -608,20 +610,16 @@ namespace JAKE.client
                 switch (e.Key)
                 {
                     case Key.Left:
-                        controller.SetCommand(new MoveLeft(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
-                        //move = true;
+                        controller.SetCommand(new MoveLeft(currentPlayer, obstacles));
                         break;
                     case Key.Right:
-                        controller.SetCommand(new MoveRight(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
-                        //move = true;
+                        controller.SetCommand(new MoveRight(currentPlayer, obstacles));
                         break;
                     case Key.Up:
-                        controller.SetCommand(new MoveUp(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
-                        //move = true;
+                        controller.SetCommand(new MoveUp(currentPlayer, obstacles));
                         break;
                     case Key.Down:
-                        controller.SetCommand(new MoveDown(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
-                        //move = true;
+                        controller.SetCommand(new MoveDown(currentPlayer, obstacles));
                         break;
                     case Key.Z:
                         controller.Undo();
