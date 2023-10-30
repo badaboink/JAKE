@@ -64,6 +64,8 @@ namespace JAKE.client
         private Dictionary<Zombie, MiniZombieVisual> zombieVisuals = new Dictionary<Zombie, MiniZombieVisual>();
         private BossZombie boss = new BossZombie("",0,0,0,0, miniZombieList);
         ZombiesVisual bossVisual = new ZombiesVisual();
+        Controller controller = new Controller();
+
 
 
         //TODO: zombie visual, main iskvietimai, gavimai responses, judejimas, logika ar veikia
@@ -699,7 +701,6 @@ namespace JAKE.client
         {
             if (gamestarted)
             {
-                Controller controller = new Controller();
                 // Handle arrow key presses here and update the player's position
                 // based on the arrow key input.
                 bool execute = true;
@@ -722,7 +723,8 @@ namespace JAKE.client
                         //move = true;
                         break;
                     case Key.Z:
-                        controller.SetCommand(new Undo(currentPlayer));
+                        controller.Undo();
+                        execute = false;
                         break;
                     case Key.Space:
                         controller.SetCommand(new ShootCommand(currentPlayer, this));
@@ -768,9 +770,15 @@ namespace JAKE.client
                 this.window = mainWindow;
             }
 
-            public override void Execute()
+            public override bool Execute()
             {
                 window.Shoot();
+                return false;
+            }
+
+            public override void Undo()
+            {
+                
             }
         }
 

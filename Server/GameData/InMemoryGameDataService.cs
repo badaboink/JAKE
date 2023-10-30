@@ -116,8 +116,6 @@ namespace Server.GameData
                 foreach (ZombieMinion minion in minions)
                 {
                     enemies.Add(minion.ShallowClone());
-
-                    minion.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
                 }
                 bossId = newEnemy.GetId();
                 return newEnemy;

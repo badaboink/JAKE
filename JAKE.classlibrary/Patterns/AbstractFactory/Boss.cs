@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using JAKE.classlibrary.Enemies;
+using JAKE.classlibrary;
 
 namespace JAKE.classlibrary.Patterns.AbstractFactory
 {
@@ -13,6 +14,6 @@ namespace JAKE.classlibrary.Patterns.AbstractFactory
         {
         }
 
-        public abstract void SpawnMinion(int id);
+        public abstract void SpawnMinion(int id, List<Obstacle> obstacles);
     }
 }

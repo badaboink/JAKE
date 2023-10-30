@@ -111,7 +111,7 @@ namespace JAKE.classlibrary
                     enemyId = new Random().Next(minId, maxId);
                 } while (_usedIdsEnemies.Contains(enemyId));
                 _usedIdsEnemies.Add(enemyId);
-                zombieBoss.SpawnMinion(enemyId);
+                zombieBoss.SpawnMinion(enemyId, _obstacleChecker.GetObstacles);
             }
             return zombieBoss;
         }

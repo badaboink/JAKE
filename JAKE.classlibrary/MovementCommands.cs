@@ -7,129 +7,132 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary
 {
-    
-    public class MoveUp : Command
+
+    public abstract class MovementCommand : Command
     {
-        List<Obstacle> obstacles;
-        double windowWidth;
-        double windowHeight;
-        public MoveUp(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
+        protected List<Obstacle> obstacles;
+        protected double windowWidth;
+        protected double windowHeight;
+
+        public MovementCommand(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
         {
             this.obstacles = obstacles;
             this.windowWidth = windowWidth;
             this.windowHeight = windowHeight;
         }
 
-        public override void Execute()
+        public override bool Execute()
+        {
+            return Move();
+        }
+
+        public override void Undo()
+        {
+            Move();
+        }
+
+        public bool Move()
+        {
+            GameStats gameStat = GameStats.Instance;
+            double playerCurrentX = player.GetCurrentX();
+            double playerCurrentY = player.GetCurrentY();
+            double playerDirectionX = player.GetDirectionX();
+            double playerDirectionY = player.GetDirectionY();
+            double stepSize = gameStat.PlayerSpeed;
+            double newX = playerCurrentX + playerDirectionX * stepSize;
+            double newY = playerCurrentY + playerDirectionY * stepSize;
+            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
+            player.SetCurrentPosition(newX, newY);
+            return !(Math.Abs(playerCurrentX - newX) < 0.001 && Math.Abs(playerCurrentY - newY) < 0.001);
+        }
+    }
+    
+    public class MoveUp : MovementCommand
+    {
+        public MoveUp(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player, obstacles, windowWidth, windowHeight)
+        {
+            this.obstacles = obstacles;
+            this.windowWidth = windowWidth;
+            this.windowHeight = windowHeight;
+        }
+
+        public override bool Execute()
         {
             player.SetCurrentDirection(0, -1);
-            GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
-            double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
+            return base.Execute();
         }
 
-    }
-
-    public class MoveDown : Command
-    {
-        List<Obstacle> obstacles;
-        double windowWidth;
-        double windowHeight;
-        public MoveDown(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
-        {
-            this.obstacles = obstacles;
-            this.windowWidth = windowWidth;
-            this.windowHeight = windowHeight;
-        }
-
-        public override void Execute()
+        public override void Undo()
         {
             player.SetCurrentDirection(0, 1);
-            GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
-            double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
+            base.Undo();
         }
+
     }
 
-    public class MoveLeft : Command
+    public class MoveDown : MovementCommand
     {
-        List<Obstacle> obstacles;
-        double windowWidth;
-        double windowHeight;
-        public MoveLeft(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
+        public MoveDown(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player, obstacles, windowWidth, windowHeight)
         {
             this.obstacles = obstacles;
             this.windowWidth = windowWidth;
             this.windowHeight = windowHeight;
         }
 
-        public override void Execute()
+        public override bool Execute()
+        {
+            player.SetCurrentDirection(0, 1);
+            return base.Execute();
+        }
+
+        public override void Undo()
+        {
+            player.SetCurrentDirection(0, -1);
+            base.Execute();
+        }
+    }
+
+    public class MoveLeft : MovementCommand
+    {
+        public MoveLeft(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player, obstacles, windowWidth, windowHeight)
+        {
+            this.obstacles = obstacles;
+            this.windowWidth = windowWidth;
+            this.windowHeight = windowHeight;
+        }
+
+        public override bool Execute()
         {
             player.SetCurrentDirection(-1, 0);
-            GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
-            double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
+            return base.Execute();
+        }
+
+        public override void Undo()
+        {
+            player.SetCurrentDirection(1, 0);
+            base.Execute();
         }
     }
 
-    public class MoveRight : Command
+    public class MoveRight : MovementCommand
     {
-        List<Obstacle> obstacles;
-        double windowWidth;
-        double windowHeight;
-        public MoveRight(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player)
+        public MoveRight(Player player, List<Obstacle> obstacles, double windowWidth, double windowHeight) : base(player, obstacles, windowWidth, windowHeight)
         {
             this.obstacles = obstacles;
             this.windowWidth = windowWidth;
             this.windowHeight = windowHeight;
         }
 
-        public override void Execute()
+        public override bool Execute()
         {
             player.SetCurrentDirection(1, 0);
-            GameStats gameStat = GameStats.Instance;
-            double playerCurrentX = player.GetCurrentX();
-            double playerCurrentY = player.GetCurrentY();
-            double playerDirectionX = player.GetDirectionX();
-            double playerDirectionY = player.GetDirectionY();
-            double stepSize = gameStat.PlayerSpeed;
-            double newX = playerCurrentX + playerDirectionX * stepSize;
-            double newY = playerCurrentY + playerDirectionY * stepSize;
-            Check(obstacles, ref newX, ref newY, windowWidth, windowHeight);
-            player.SetCurrentPosition(newX, newY);
-        }
-    }
-
-    public class Undo : Command
-    {
-        public Undo(Player player) : base(player)
-        {
+            return base.Execute();
         }
 
-        public override void Execute()
+        public override void Undo()
         {
-            player.Undo();
+            player.SetCurrentDirection(-1, 0);
+            base.Undo();
         }
     }
 

@@ -15,6 +15,14 @@ namespace JAKE.classlibrary
             this.obstacles = obstacles;
         }
 
+
+        public List<Obstacle> GetObstacles
+        {
+            get
+            {
+                return obstacles;
+            }
+        }
         public bool IsPointOverlapping(double x, double y)
         {
             foreach (Obstacle obstacle in obstacles)

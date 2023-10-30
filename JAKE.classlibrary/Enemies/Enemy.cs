@@ -15,6 +15,7 @@ namespace JAKE.classlibrary.Enemies
         private double _speed;
         private string _color;
         private Coordinates coordinates;
+        private Trigger trigger = new Trigger();
         private double _currentX;
         private double _currentY;
         private int _health;
@@ -37,6 +38,11 @@ namespace JAKE.classlibrary.Enemies
             _points = points;
             coordinates = new Coordinates(0, 0);
             SetCurrentPosition(0, 0);
+        }
+
+        public bool Trigerred
+        {
+            get { return trigger.trigger; }
         }
 
         public void SetId(int id)
@@ -122,7 +128,7 @@ namespace JAKE.classlibrary.Enemies
 
         public virtual void Hit()
         {
-
+            trigger.Flip();
         }
         public bool MatchesId(int id)
         {

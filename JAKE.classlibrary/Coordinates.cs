@@ -21,4 +21,18 @@ namespace JAKE.classlibrary
             this.y = y;
         }
     }
+
+    public class Trigger
+    {
+        public bool trigger;
+        public Trigger()
+        {
+            trigger = false;
+        }
+
+        public void Flip()
+        {
+            trigger = true;
+        }
+    }
 }

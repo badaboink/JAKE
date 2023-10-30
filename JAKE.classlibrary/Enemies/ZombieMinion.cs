@@ -27,7 +27,7 @@ namespace JAKE.classlibrary.Enemies
 
         public override Enemy ShallowClone()
         {
-            return MemberwiseClone() as Enemy;
+            return base.ShallowClone();
         }
         
     }

@@ -18,7 +18,7 @@ namespace JAKE.classlibrary.Enemies
             maxMinions = 8;
         }
 
-        public override void SpawnMinion(int id)
+        public override void SpawnMinion(int id, List<Obstacle> obstacles)
         {
             if(minions.Count >= maxMinions)
             {
@@ -33,7 +33,8 @@ namespace JAKE.classlibrary.Enemies
             {
                 ZombieMinion zombieMinion = new ZombieMinion(id, "green", 10);
                 zombieMinion.SetCurrentPosition(xx, yy);
-                zombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this));
+                zombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
+                //zombieMinion.SetMovementStrategy(new DontMoveStrategy());
                 minions.Add(zombieMinion);
             }
             else
@@ -41,17 +42,18 @@ namespace JAKE.classlibrary.Enemies
                 ZombieMinion copyZombieMinion = minions[0].DeepClone() as ZombieMinion;
                 copyZombieMinion.SetId(id);
                 copyZombieMinion.SetCurrentPosition(xx, yy);
-                copyZombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this));
+                copyZombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
+                //copyZombieMinion.SetMovementStrategy(new DontMoveStrategy());
                 minions.Add(copyZombieMinion);
             }
         }
 
         public override void Hit()
         {
-            IMoveStrategy moveStrategy = new DontMoveStrategy();
+            base.Hit();
             foreach(var minion in minions)
             {
-                minion.SetMovementStrategy(moveStrategy);
+                minion.Hit();
             }
         }
 
