@@ -16,6 +16,10 @@ namespace JAKE.classlibrary.Patterns
 
             // Extract values from XML
             List<string> values = new List<string>();
+            if(xmlDoc.DocumentElement == null)
+            {
+                return "";
+            }
             foreach (XmlNode node in xmlDoc.DocumentElement.ChildNodes)
             {
                 values.Add(node.InnerText);

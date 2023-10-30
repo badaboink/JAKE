@@ -5,8 +5,9 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Patterns.Strategies;
 
-namespace JAKE.classlibrary
+namespace JAKE.classlibrary.Enemies
 {
     public class Enemy
     {
@@ -17,15 +18,17 @@ namespace JAKE.classlibrary
         private double _currentY;
         private int _health;
         private int _size;
-        private IMoveStrategy movementStrategy;
+        private int _points;
+        private IMoveStrategy? movementStrategy;
 
-        public Enemy(int id, string color, double speed = 2, int health = 20, int size=20)
+        public Enemy(int id, string color, double speed = 2, int health = 20, int size=20, int points = 10)
         {
             _id = id;
             _color = color;
             _speed = speed;
             _health = health;
             _size = size;
+            _points = points;
             SetCurrentPosition(0, 0);
         }
 
@@ -53,6 +56,14 @@ namespace JAKE.classlibrary
         {
             return _speed;
         }
+        public int GetHealth()
+        {
+            return _health;
+        }
+        public int GetSize()
+        {
+            return _size;
+        }
 
         public void SetCurrentPosition(double x, double y)
         {
@@ -60,18 +71,9 @@ namespace JAKE.classlibrary
             _currentY = y;
         }
 
-        public int GetHealth()
-        {
-            return _health;
-        }
-
         public void SetHealth(int health)
         {
             _health = health;
-        }
-        public int GetSize()
-        {
-            return _size;
         }
 
         public void SetSize(int size)
@@ -82,7 +84,7 @@ namespace JAKE.classlibrary
         {
             _speed = speed;
         }
-        public IMoveStrategy GetCurrentMovementStrategy()
+        public IMoveStrategy? GetCurrentMovementStrategy()
         {
             return movementStrategy;
         }
@@ -90,20 +92,14 @@ namespace JAKE.classlibrary
         {
             this.movementStrategy = movementStrategy;
         }
-        public void Move(List<Player> players)
+        public virtual void Move(List<Player> players)
         {
             if (movementStrategy != null)
             {
                 movementStrategy.Move(this, players);
             }
         }
-        //private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
-        //{
-        //    { "Green", "heal" },
-        //    { "Blue", "wall" },
-        //    { "Red", "strength" },
-        //};
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is Enemy otherPlayer)
             {
@@ -115,9 +111,9 @@ namespace JAKE.classlibrary
         {
             return _id == id;
         }
-        public Player FindClosestPlayer(List<Player> players)
+        public Player? FindClosestPlayer(List<Player> players)
         {
-            Player closestPlayer = null;
+            Player? closestPlayer = null;
             double closestDistance = double.MaxValue;
 
             foreach (var player in players)

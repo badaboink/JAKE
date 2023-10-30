@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JAKE.classlibrary.Enemies;
 
-namespace JAKE.classlibrary.Patterns
+
+namespace JAKE.classlibrary.Patterns.Strategies
 {
     public class GroupToOneStrategy : IMoveStrategy
     {
@@ -17,7 +19,7 @@ namespace JAKE.classlibrary.Patterns
         }
         public void Move(Enemy enemy, List<Player> players)
         {
-            Player closestPlayer = enemy.FindClosestPlayer(players);
+            Player? closestPlayer = enemy.FindClosestPlayer(players);
 
             if (closestPlayer != null)
             {
@@ -67,11 +69,6 @@ namespace JAKE.classlibrary.Patterns
                     enemy.SetCurrentPosition(newX, newY);
                 }
             }
-        }
-
-        public void MoveZombie(Zombie zombie, List<Player> players)
-        {
-
         }
     }
 }

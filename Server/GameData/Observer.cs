@@ -1,6 +1,7 @@
 ﻿using JAKE.classlibrary;
 using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
@@ -85,17 +86,5 @@ namespace Server.GameData
             await clientProxy.SendAsync("SendingPickedSpeedBoost", id);
         }
 
-        public async Task HandleBossZombie(List<string> boss)
-        {
-            await clientProxy.SendAsync("SendingBossZombie", boss);
-        }
-        public async Task HandleDeadBossZombie(string name)
-        {
-            await clientProxy.SendAsync("SendingDeadBossZombie", name);
-        }
-        public async Task HandleDeadMiniZombie(string name)
-        {
-            await clientProxy.SendAsync("SendingDeadMiniZombie", name);
-        }
     }
 }

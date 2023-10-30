@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JAKE.classlibrary.Enemies;
 
-namespace JAKE.classlibrary.Patterns
+
+namespace JAKE.classlibrary.Patterns.Strategies
 {
     public class PatrollingStrategy : IMoveStrategy
     {
@@ -26,6 +29,8 @@ namespace JAKE.classlibrary.Patterns
             directionY = 2;
             GenerateRandomDirection();
         }
+        // is tested when testing move function
+        [ExcludeFromCodeCoverage]
         private void GenerateRandomDirection()
         {
             if (directionX == 2 && directionY == 2)
@@ -93,40 +98,5 @@ namespace JAKE.classlibrary.Patterns
             return directionY;
         }
 
-        public void MoveZombie(Zombie zombie, List<Player> players)
-        {
-            double newX = zombie.X + directionX * 3;
-            double newY = zombie.Y + directionY * 3;
-
-            // Check if the new position is out of bounds
-            if (newX < 0 || newX > maxX || newY < 0 || newY > maxY)
-            {
-                // Change direction and continue patrolling
-                GenerateRandomDirection();
-            }
-            else
-            {
-                foreach (Obstacle obstacle in obstacles)
-                {
-                    if (obstacle.WouldOverlap(newX, newY, zombie.Size, zombie.Size))
-                    {
-
-                        double distance = obstacle.DistanceFromObstacle(directionX, directionY, zombie.X, zombie.Y, zombie.Size, zombie.Size);
-                        if (distance != 0)
-                        {
-                            newX = directionX == 0 ? zombie.X : zombie.X + distance;
-                            newY = directionY == 0 ? zombie.X : zombie.X + distance;
-
-                            zombie.SetCurrentPosition(newX, newY);
-                        }
-                        GenerateRandomDirection();
-                        break;
-                    }
-                }
-
-                zombie.SetCurrentPosition(newX, newY);
-            }
-
-        }
     }
 }

@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JAKE.classlibrary.Enemies;
 
-namespace JAKE.classlibrary.Patterns
+
+namespace JAKE.classlibrary.Patterns.Strategies
 {
+    // nothing to test
+    [ExcludeFromCodeCoverage]
     public class DontMoveStrategy : IMoveStrategy
     {
         public DontMoveStrategy() { }
@@ -13,9 +18,6 @@ namespace JAKE.classlibrary.Patterns
         {
 
         }
-        public void MoveZombie(Zombie zombie, List<Player> players)
-        {
-
-        }
+     
     }
 }

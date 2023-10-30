@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Xunit;
 using System.Windows.Media;
 using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Shots;
+using JAKE.classlibrary.Colors;
 
 namespace Class_library_tests
 {
@@ -29,7 +31,7 @@ namespace Class_library_tests
             // Assert
             Assert.NotNull(shot);
             Assert.Equal(10, shot.getSize());     // toks dydis #FF0000FF spalvos suvio
-            Assert.Equal("red", shot.getColor());
+            Assert.Equal("red", shot.getColor().GetColor());
             Assert.Equal("triangle", shot.getShape());
             Assert.Equal(10, shot.getX());
             Assert.Equal(10, shot.getY());

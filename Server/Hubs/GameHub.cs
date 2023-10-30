@@ -1,5 +1,6 @@
 ﻿using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Enemies;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Protocol;
@@ -12,6 +13,7 @@ using System.Net.Sockets;
 using System.Numerics;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using JAKE.classlibrary.Collectibles;
 
 namespace Server.Hubs
 {
@@ -24,7 +26,6 @@ namespace Server.Hubs
             string connectionId = Context.ConnectionId;
             Observer observer = new Observer(Clients.Client(connectionId));
             _gameDataService.AddObserver(connectionId, observer);
-            Console.WriteLine(connectionId);
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
@@ -51,13 +52,12 @@ namespace Server.Hubs
 
         }
         private object syncLock = new object();
-        
+
         public async Task SendColor(string color, string name, string shotcolor, string shotshape)
         {
             try
             {
                 Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId, shotcolor, shotshape);
-                Console.WriteLine($"Player {newPlayer.ToString()}");
 
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
 
@@ -83,7 +83,7 @@ namespace Server.Hubs
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
                 //Console.WriteLine($"Sending enemy update {DateTime.Now}");
-                
+
                 _gameDataService.UpdateEnemyPositions();
                 if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
                 {
@@ -108,12 +108,7 @@ namespace Server.Hubs
                     _gameDataService.AddSpeedBoost(5);
                     Console.WriteLine("pridejo speed5");
                 }
-                if (_gameDataService.GetBossNull())
-                {
-                    _gameDataService.AddBossZombie("Sefas", 200);
-                    
-                    Console.WriteLine("pridejo sefa");
-                }
+
             }
             List<string> enemies = _gameDataService.GetEnemies();
             if (enemies.Count > 0)
@@ -141,11 +136,7 @@ namespace Server.Hubs
             {
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleSpeedBoosts(speedBoosts);
             }
-            List<string> boss = _gameDataService.GetBossZombie();
-            if (boss.Count > 0)
-            {
-                await _gameDataService.GetObservers()[Context.ConnectionId].HandleBossZombie(boss);
-            }
+
 
 
         }
@@ -157,7 +148,7 @@ namespace Server.Hubs
             {
                 int id = int.Parse(parts[1]);
                 Coin coinToRemove = _gameDataService.returnCoin(id);
-                if(coinToRemove != null)
+                if (coinToRemove != null)
                 {
                     _gameDataService.RemoveCoin(id);
 
@@ -170,7 +161,7 @@ namespace Server.Hubs
                         await observer.HandlePickedCoin(json);
                     }
                 }
-            
+
             }
         }
 
@@ -183,7 +174,7 @@ namespace Server.Hubs
                 _gameDataService.RemoveShield(id);
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
                 foreach (var observerEntry in observers)
-                {  
+                {
                     var observer = observerEntry.Value;
                     await observer.HandlePickedShield(id);
                 }
@@ -222,7 +213,7 @@ namespace Server.Hubs
                 foreach (var observerEntry in observers)
                 {
                     var observer = observerEntry.Value;
-                    await observer.HandlePickedSpeedBoost(id);  
+                    await observer.HandlePickedSpeedBoost(id);
                 }
             }
         }
@@ -316,44 +307,5 @@ namespace Server.Hubs
             }
         }
 
-        public async Task SendDeadBossZombie(string boss)
-        {
-            string[] parts = boss.Split(':');
-            if (parts.Length == 5)
-            {
-                string name = parts[0];
-                _gameDataService.RemoveBossZombie();
-                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
-                foreach (var observerEntry in observers)
-                {
-                    var connectionId = observerEntry.Key;
-                    var observer = observerEntry.Value;
-                    if (connectionId != Context.ConnectionId)
-                    {
-                        await observer.HandleDeadBossZombie(name);
-                    }
-                }
-            }
-        }
-
-        public async Task SendDeadMiniZombie(string boss)
-        {
-            string[] parts = boss.Split(':');
-            if (parts.Length == 5)
-            {
-                string name = parts[0];
-                _gameDataService.RemoveMiniZombie();
-                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
-                foreach (var observerEntry in observers)
-                {
-                    var connectionId = observerEntry.Key;
-                    var observer = observerEntry.Value;
-                    if (connectionId != Context.ConnectionId)
-                    {
-                        await observer.HandleDeadMiniZombie(name);
-                    }
-                }
-            }
-        }
     }
 }

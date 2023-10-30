@@ -1,4 +1,5 @@
 ﻿using JAKE.classlibrary;
+using JAKE.classlibrary.Enemies;
 
 namespace Server.GameData
 {
