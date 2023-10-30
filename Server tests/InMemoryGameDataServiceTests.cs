@@ -1,4 +1,6 @@
 ﻿using JAKE.classlibrary;
+using JAKE.classlibrary.Collectibles;
+using JAKE.classlibrary.Enemies;
 using JAKE.classlibrary.Patterns;
 using Server.GameData;
 using System.Diagnostics;
@@ -8,6 +10,8 @@ namespace Server_tests
     public class InMemoryGameDataServiceTests
     {
         private readonly InMemoryGameDataService gameDataService;
+        private List<Enemy> enemies = new List<Enemy>();
+        
         public InMemoryGameDataServiceTests()
         {
             gameDataService = new InMemoryGameDataService();
@@ -129,6 +133,218 @@ namespace Server_tests
             Assert.Equal(list[1].Substring(2), second.Substring(index2));
             Assert.Equal(list[2].Substring(2), third.Substring(index3));
         }
-       
+
+        [Fact]
+        public void Test_Update_Enemy()
+        { 
+            Enemy enemy = gameDataService.AddEnemies();
+            int id = enemy.GetId();
+            gameDataService.UpdateEnemy(id, 50);
+            int expected = 50;
+            int actual = enemy.GetHealth();
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Test_Remove_Enemy()
+        {
+            Enemy enemy = gameDataService.AddEnemies();
+            int listCountBefore = gameDataService.GetEnemies().Count;
+            int id = enemy.GetId();
+            gameDataService.RemoveEnemy(id);
+            int listCountAfter = gameDataService.GetEnemies().Count;
+            int difference = listCountBefore - listCountAfter;
+
+            Assert.Equal(1, difference);
+        }
+        
+        [Fact]
+        public void Test_Get_Enemies()
+        {
+            Enemy enemy = gameDataService.AddEnemies();
+            int actual = gameDataService.GetEnemies().Count;
+            int expected = 1;
+
+            Assert.Equal(expected, actual);
+        }
+
+        //TODO: updateEnemyPosition, observers
+
+        [Fact]
+        public void Test_Add_Coin()
+        {
+            Coin coin = gameDataService.AddCoin(10);
+            int expected = 10;
+            int actual = coin.Points;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Test_Return_Coin()
+        {
+            Coin coin = gameDataService.AddCoin(10);
+            int id = coin.id;
+
+            Coin returned = gameDataService.returnCoin(id);
+
+            Assert.Equal(coin, returned);
+        }
+
+        [Fact]
+        public void Test_Remove_Coin()
+        {
+            Coin coin = gameDataService.AddCoin(10);
+            int listCountBefore = gameDataService.GetCoins().Count;
+            int id = coin.id;
+            gameDataService.RemoveCoin(id);
+            int listCountAfter = gameDataService.GetCoins().Count;
+            int difference = listCountBefore - listCountAfter;
+
+            Assert.Equal(1, difference);
+        }
+
+        [Fact]
+        public void Test_Get_Coins()
+        {
+            Coin coin = gameDataService.AddCoin(10);
+            int actual = gameDataService.GetCoins().Count;
+            int expected = 1;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Test_Add_HealthBoost()
+        {
+            HealthBoost healthBoost = gameDataService.AddHealthBoost(10);
+            int expected = 10;
+            int actual = healthBoost.Health;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Test_Remove_HealthBoost()
+        {
+            HealthBoost healthBoost = gameDataService.AddHealthBoost(10);
+            int listCountBefore = gameDataService.GetHealthBoosts().Count;
+            int id = healthBoost.id;
+            gameDataService.RemoveHealthBoost(id);
+            int listCountAfter = gameDataService.GetHealthBoosts().Count;
+            int difference = listCountBefore - listCountAfter;
+
+            Assert.Equal(1, difference);
+        }
+
+        [Fact]
+        public void Test_Get_HealthBoost()
+        {
+            HealthBoost healthBoost = gameDataService.AddHealthBoost(10);
+            int actual = gameDataService.GetHealthBoosts().Count;
+            int expected = 1;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Test_Add_SpeedBoost()
+        {
+            SpeedBoost speedBoost = gameDataService.AddSpeedBoost(10);
+            int expected = 10;
+            int actual = speedBoost.Speed;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Test_Remove_SpeedBoost()
+        {
+            SpeedBoost speedBoost = gameDataService.AddSpeedBoost(10);
+            int listCountBefore = gameDataService.GetSpeedBoosts().Count;
+            int id = speedBoost.id;
+            gameDataService.RemoveSpeedBoost(id);
+            int listCountAfter = gameDataService.GetSpeedBoosts().Count;
+            int difference = listCountBefore - listCountAfter;
+
+            Assert.Equal(1, difference);
+        }
+
+        [Fact]
+        public void Test_Get_SpeedBoost()
+        {
+            SpeedBoost speedBoost = gameDataService.AddSpeedBoost(10);
+            int actual = gameDataService.GetSpeedBoosts().Count;
+            int expected = 1;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Test_Add_Shield()
+        {
+            Shield shield = gameDataService.AddShield(10);
+            int expected = 10;
+            int actual = shield.Time;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void Test_Remove_Shield()
+        {
+            Shield shield = gameDataService.AddShield(10);
+            int listCountBefore = gameDataService.GetShields().Count;
+            int id = shield.id;
+            gameDataService.RemoveShield(id);
+            int listCountAfter = gameDataService.GetShields().Count;
+            int difference = listCountBefore - listCountAfter;
+
+            Assert.Equal(1, difference);
+        }
+
+        [Fact]
+        public void Test_Get_Shield()
+        {
+            Shield shield = gameDataService.AddShield(10);
+            int actual = gameDataService.GetShields().Count;
+            int expected = 1;
+
+            Assert.Equal(expected, actual);
+        }
+
+
+        /*
+         public DateTime GetCurrentGameTime()
+        {
+            return gametime;
+        }
+        public void SetGameTime(DateTime gametime)
+        {
+            this.gametime = gametime;
+        }
+        public void AddObserver(string connectionID, Observer observer)
+        {
+            observers[connectionID] = observer;
+        }
+        public void RemoveObserver(string connectionId)
+        {
+            if (observers.ContainsKey(connectionId))
+            {
+                observers.Remove(connectionId);
+            }
+        }
+        public Dictionary<string, Observer> GetObservers()
+        {
+            return observers;
+        }
+        public void UpdateDeadPlayer(int id)
+        {
+            Player playerToUpdate = players.FirstOrDefault(p => p.GetId() == id);
+
+            playerToUpdate.SetName("DEAD");
+            playerToUpdate.SetColor("Black");
+        }*/
     }
 }
