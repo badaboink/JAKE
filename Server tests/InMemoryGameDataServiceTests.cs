@@ -314,37 +314,31 @@ namespace Server_tests
             Assert.Equal(expected, actual);
         }
 
+        [Fact]
+        public void Test_Update_Dead_Player()
+        {
 
-        /*
-         public DateTime GetCurrentGameTime()
-        {
-            return gametime;
-        }
-        public void SetGameTime(DateTime gametime)
-        {
-            this.gametime = gametime;
-        }
-        public void AddObserver(string connectionID, Observer observer)
-        {
-            observers[connectionID] = observer;
-        }
-        public void RemoveObserver(string connectionId)
-        {
-            if (observers.ContainsKey(connectionId))
-            {
-                observers.Remove(connectionId);
-            }
-        }
-        public Dictionary<string, Observer> GetObservers()
-        {
-            return observers;
-        }
-        public void UpdateDeadPlayer(int id)
-        {
-            Player playerToUpdate = players.FirstOrDefault(p => p.GetId() == id);
+            Player player = gameDataService.AddPlayer("vardenis", "red", "conn123","red", "round");
+            int id = player.GetId();
+            gameDataService.UpdateDeadPlayer(id);
+            string updated = gameDataService.GetPlayerData(id);
+            string[] parts = updated.Split(':');
+            string actualName = parts[1];
+            string expected = "DEAD";
 
-            playerToUpdate.SetName("DEAD");
-            playerToUpdate.SetColor("Black");
-        }*/
+            Assert.Equal(expected, actualName);
+
+        }
+
+        [Fact]
+        public void Test_SetGetGameTime()
+        {
+            DateTime datetime = DateTime.Now;
+            gameDataService.SetGameTime(datetime);
+            DateTime settedDatetime = gameDataService.GetCurrentGameTime();
+
+            Assert.Equal(datetime, settedDatetime);
+        }
+       
     }
 }
