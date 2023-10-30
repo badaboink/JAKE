@@ -43,6 +43,21 @@ namespace JAKE.classlibrary
             return overlapX && overlapY;
         }
 
+        public bool WouldOverlap(double newX, double newY)
+        {
+            // Calculate the boundaries of the obstacle
+            double obstacleLeft = PositionX;
+            double obstacleRight = PositionX + Width;
+            double obstacleTop = PositionY;
+            double obstacleBottom = PositionY + Height;
+
+            // Check for overlap
+            bool overlapX = newX < obstacleRight && newX > obstacleLeft;
+            bool overlapY = newY < obstacleBottom && newY > obstacleTop;
+
+            return overlapX && overlapY;
+        }
+
         public double DistanceFromObstacle(int x, int y, double playerX, double playerY, double playerWidth, double playerHeight)
         {
             double distance = 0;
@@ -73,13 +88,13 @@ namespace JAKE.classlibrary
             {
                 // Player is moving right
                 double distanceToObstacle = obstacleLeft - playerRight;
-                return distanceToObstacle < gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle < playerDirectionX*gameStat.PlayerSpeed ? distanceToObstacle : 0;
             }
             else if (playerDirectionX < 0)
             {
                 // Player is moving left
                 double distanceToObstacle = playerLeft - obstacleRight;
-                return distanceToObstacle > -gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle > playerDirectionX*gameStat.PlayerSpeed ? distanceToObstacle : 0;
             }
             else
             {
@@ -100,13 +115,13 @@ namespace JAKE.classlibrary
             {
                 // Player is moving down
                 double distanceToObstacle = obstacleTop - playerBottom;
-                return distanceToObstacle < gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle < playerDirectionY * gameStat.PlayerSpeed ? distanceToObstacle : 0;
             }
             else if (playerDirectionY < 0)
             {
                 // Player is moving up
                 double distanceToObstacle = playerTop - obstacleBottom;
-                return distanceToObstacle > -gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle > playerDirectionY * gameStat.PlayerSpeed ? distanceToObstacle : 0;
             }
             else
             {

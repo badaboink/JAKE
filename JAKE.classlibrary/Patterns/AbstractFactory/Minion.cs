@@ -14,9 +14,10 @@ namespace JAKE.classlibrary.Patterns.AbstractFactory
         {
         }
 
-        public virtual Minion? Clone()
+        public override Enemy ShallowClone()
         {
-            return null;
+            return base.ShallowClone();
         }
+
     }
 }

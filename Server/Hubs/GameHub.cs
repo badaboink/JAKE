@@ -77,11 +77,11 @@ namespace Server.Hubs
                 TimeSpan elapsedTime = currentTime - startTime;
                 //Console.WriteLine($"Sending enemy update {DateTime.Now}");
 
+
                 _gameDataService.UpdateEnemyPositions();
                 if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
                 {
                     _gameDataService.AddEnemies();
-                    //Console.WriteLine($"Spawning enemy {startTime} - {DateTime.Now}. {_gameDataService.GetEnemies().Count}");
                     _gameDataService.SetGameTime(DateTime.Now);
                 }
                 if (_gameDataService.GetCoins().Count <= 10)
@@ -101,7 +101,10 @@ namespace Server.Hubs
                     _gameDataService.AddSpeedBoost(5);
                     Console.WriteLine("pridejo speed5");
                 }
-
+                if (!_gameDataService.IsBossAlive() && _gameDataService.GetEnemies().Count <= 20)
+                {
+                    _gameDataService.AddZombieBoss();
+                }
             }
             List<string> enemies = _gameDataService.GetEnemies();
             if (enemies.Count > 0)
