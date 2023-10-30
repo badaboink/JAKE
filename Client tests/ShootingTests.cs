@@ -59,6 +59,7 @@ namespace Class_library_tests
             IColor color = new RedColor();
             //IShape shape = new RoundShot();
             Shot shot = new Shot(color, 5, 10, 5);
+            shot = new RoundShot(shot);
 
             // Act
             Shot result = MainWindow.RemoveShot(shot, playerX, playerY, obstacle, playerSize);
@@ -83,13 +84,12 @@ namespace Class_library_tests
             IColor color = new RedColor();
             //IShape shape = new RoundShot();
             Shot shot = new Shot(color, 5, 10, 5);
-
+            shot = new TriangleShot(shot);
             // Act
             Shot result = MainWindow.RemoveShot(shot, playerX, playerY, obstacle, playerSize);
 
             // Assert
             Assert.NotNull(result);
         }
-       
     }
 }
