@@ -1,6 +1,7 @@
 ﻿using JAKE.classlibrary;
 using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 

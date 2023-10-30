@@ -195,7 +195,7 @@ namespace Class_library_tests
             double initialDistance = CalculateDistance(enemy.GetCurrentX(), enemy.GetCurrentY(), king.GetCurrentX(), king.GetCurrentY());
 
             king.Move(players);
-            enemy.Move(players);
+            groupToOneStrategy.Move(enemy, players);
 
             double newX = enemy.GetCurrentX();
             double newY = enemy.GetCurrentY();

@@ -26,7 +26,6 @@ namespace Server.Hubs
             string connectionId = Context.ConnectionId;
             Observer observer = new Observer(Clients.Client(connectionId));
             _gameDataService.AddObserver(connectionId, observer);
-            Console.WriteLine(connectionId);
         }
         public override async Task OnDisconnectedAsync(Exception exception)
         {
