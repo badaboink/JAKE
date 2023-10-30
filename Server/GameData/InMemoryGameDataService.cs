@@ -6,6 +6,7 @@ using JAKE.classlibrary.Collectibles;
 using Microsoft.AspNetCore.SignalR;
 using Server.Hubs;
 using System.Reflection.Emit;
+using System.Diagnostics;
 
 namespace Server.GameData
 {
@@ -24,11 +25,16 @@ namespace Server.GameData
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
         private List<Weapon> weapons = new List<Weapon>();
         public MapObjectFactory objectFactory = new MapObjectFactory();
-
+        public ZombieFactory zombieFactory = new ZombieFactory();
+        public ObstacleChecker obstacleChecker;
+        public Spawner spawner;
+        private int bossId = -1;
         public InMemoryGameDataService()
         {
             // Generate obstacles when the service is created
             obstacles = GameFunctions.GenerateObstacles();
+            obstacleChecker = new ObstacleChecker(obstacles);
+            spawner = new Spawner(objectFactory, zombieFactory, obstacleChecker);
         }
         Random random = new Random();
         int minId = 1;
@@ -89,19 +95,40 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
-                int enemyId = 0;
-                do
-                {
-                    enemyId = new Random().Next(minId, maxId);
-                } while (usedIdsEnemies.Contains(enemyId));
-                usedIdsEnemies.Add(enemyId);
-                Enemy newEnemy = GameFunctions.GenerateEnemy(enemyId, obstacles);
-                // TODO - nzn kokios maxX ir maxY reiksmes
-                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920-60-newEnemy.GetSize(), 1080-80-newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
+                Enemy newEnemy = spawner.SpawnEnemy();
+                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - newEnemy.GetSize(), 1080 - 80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
                 return newEnemy;
             }
         }
+        List<ZombieMinion> tempminions;
+        public Enemy AddZombieBoss()
+        {
+            lock (enemyListLock)
+            {
+                ZombieBoss newEnemy = spawner.SpawnZombieBoss();
+                newEnemy.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - newEnemy.GetSize(), 1080 - 80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
+                enemies.Add(newEnemy);
+                List<ZombieMinion> minions = newEnemy.GetMinions();
+                tempminions = newEnemy.GetMinions();
+                foreach (ZombieMinion minion in minions)
+                {
+                    Console.WriteLine("original minion in zombieBoss list hash: " + minion.GetHashCode());
+                    Enemy copy = minion.ShallowClone();
+                    Console.WriteLine("shallow copy minion in enemies list hash: " + copy.GetHashCode());
+                    enemies.Add(copy); //minion.ShallowClone()
+
+                    minion.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
+                }
+                bossId = newEnemy.GetId();
+                return newEnemy;
+            }
+        }
+        public bool IsBossAlive()
+        {
+            return bossId >= 0;
+        }
+
         public void UpdateEnemy(int id, int health)
         {
             lock (enemyListLock)
@@ -110,10 +137,12 @@ namespace Server.GameData
                 if (enemyToUpdate != null)
                 {
                     enemyToUpdate.SetHealth(health);
-                    if (enemyToUpdate.GetCurrentMovementStrategy() is PatrollingStrategy)
+                    IMoveStrategy currentStrategy = enemyToUpdate.GetCurrentMovementStrategy();
+                    if (currentStrategy is PatrollingStrategy || currentStrategy is CircleStrategy)
                     {
                         enemyToUpdate.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
                     }
+                    enemyToUpdate.Hit();
                 }
             }
         }
@@ -121,7 +150,11 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
-                usedIdsEnemies.Remove(id);
+                spawner.RemoveId(id);
+                if(id == bossId)
+                {
+                    bossId = -1;
+                }
                 Enemy enemyToRemove = enemies.FirstOrDefault(enemy => enemy.MatchesId(id));
                 if (enemyToRemove != null)
                 {
@@ -143,8 +176,9 @@ namespace Server.GameData
             lock (enemyListLock)
             {
                 foreach (var enemy in enemies)
-                {
+                { 
                     enemy.Move(players);
+                    Debug.WriteLine("{0} {1}", enemy.GetCurrentMovementStrategy().GetType().ToString(), enemy.ToString());
                 }
                 return enemies.Select(enemy => enemy.ToString()).ToList();
             }

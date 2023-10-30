@@ -76,6 +76,7 @@ namespace Server.Hubs
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
 
+
                 _gameDataService.UpdateEnemyPositions();
                 if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
                 {
@@ -98,7 +99,10 @@ namespace Server.Hubs
                 {
                     _gameDataService.AddSpeedBoost(5);
                 }
-
+                if (!_gameDataService.IsBossAlive() && _gameDataService.GetEnemies().Count <= 20)
+                {
+                    _gameDataService.AddZombieBoss();
+                }
             }
             List<string> enemies = _gameDataService.GetEnemies();
             if (enemies.Count > 0)

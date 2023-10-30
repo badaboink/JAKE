@@ -57,8 +57,9 @@ namespace JAKE.client
         private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
         private List<Weapon> weapons = new List<Weapon>();
         private readonly object enemyListLock = new object();
-        private bool shieldOn = false;
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
+        Controller controller = new Controller();
+
 
         private bool isCollidingWithHealthBoost = false;
 
@@ -109,6 +110,9 @@ namespace JAKE.client
             string name = colorChoiceForm.Name;
             string shotColor = colorChoiceForm.ShotColor;
             string shotShape = colorChoiceForm.ShotShape;
+            GameStats gameStat = GameStats.Instance;
+            gameStat.WindowWidth = this.ActualWidth;
+            gameStat.WindowHeight = this.ActualHeight;
 
             await connection.SendAsync("SendColor", selectedColor, name, shotColor, shotShape);
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
@@ -262,6 +266,7 @@ namespace JAKE.client
                             {
                                 Dispatcher.Invoke(() =>
                                 {
+                                    
                                     EnemyVisual enemyVisual = enemyVisualBuilder.New()
                                     .SetColor(enemyColor)
                                     .SetSize(size)
@@ -270,8 +275,8 @@ namespace JAKE.client
 
                                     enemyVisuals[enemy] = enemyVisual;
                                     EnemyContainer.Children.Add(enemyVisual);
-
                                     HandleEnemyCollisions(playerVisuals[currentPlayer]);
+                        
                                 });
                             }
                         }
@@ -370,12 +375,6 @@ namespace JAKE.client
                             {
                               
                                 CoinVisual coinVisual = new CoinVisual();
-
-                                //CoinVisual coinVisual = new CoinVisual("coin.png", coinWidth, coinHeight);
-                                //coinVisual.CoinImageHeight = coinHeight;
-                                //coinVisual.CoinImageWidth = coinWidth;
-                                //coinVisual.CoinImageSource = image;
-
                                 Canvas.SetLeft(coinVisual, coinX);
                                 Canvas.SetTop(coinVisual, coinY);
                                 coinVisuals[coin] = coinVisual;
@@ -571,7 +570,6 @@ namespace JAKE.client
                     }      
                 });
             });
-
         }
 
         private async void CheckElapsedTimeMove(object state)
@@ -609,30 +607,26 @@ namespace JAKE.client
         {
             if (gamestarted)
             {
-                Controller controller = new Controller();
                 // Handle arrow key presses here and update the player's position
                 // based on the arrow key input.
                 bool execute = true;
                 switch (e.Key)
                 {
                     case Key.Left:
-                        controller.SetCommand(new MoveLeft(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
-                        //move = true;
+                        controller.SetCommand(new MoveLeft(currentPlayer, obstacles));
                         break;
                     case Key.Right:
-                        controller.SetCommand(new MoveRight(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
-                        //move = true;
+                        controller.SetCommand(new MoveRight(currentPlayer, obstacles));
                         break;
                     case Key.Up:
-                        controller.SetCommand(new MoveUp(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
-                        //move = true;
+                        controller.SetCommand(new MoveUp(currentPlayer, obstacles));
                         break;
                     case Key.Down:
-                        controller.SetCommand(new MoveDown(currentPlayer, obstacles, this.ActualWidth, this.ActualHeight));
-                        //move = true;
+                        controller.SetCommand(new MoveDown(currentPlayer, obstacles));
                         break;
                     case Key.Z:
-                        controller.SetCommand(new Undo(currentPlayer));
+                        controller.Undo();
+                        execute = false;
                         break;
                     case Key.Space:
                         controller.SetCommand(new ShootCommand(currentPlayer, this));
@@ -677,9 +671,15 @@ namespace JAKE.client
                 this.window = mainWindow;
             }
 
-            public override void Execute()
+            public override bool Execute()
             {
                 window.Shoot();
+                return false;
+            }
+
+            public override void Undo()
+            {
+                
             }
         }
 
@@ -895,6 +895,8 @@ namespace JAKE.client
 
                     if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, shieldX, shieldY, shieldRect.Height))
                     {
+
+                        //TODO: dingsta kitas shield ne ta kuri paliecia
                         
                         Base baseObj = new Base(currentPlayer);
                         testLabel.Text = baseObj.DisplayObject("shield").text;
@@ -904,7 +906,7 @@ namespace JAKE.client
                         {
                             GameStats gameStat = GameStats.Instance;
                             shieldBorder.Visibility = Visibility.Visible;
-                            gameStat.ShieldOn = true; 
+                            gameStat.ShieldOn = true;
                             shield.Interact(gameStat);
                         }
                         HideDisplay();

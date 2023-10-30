@@ -10,14 +10,14 @@ namespace JAKE.classlibrary.Enemies
 {
     public class ZombieFactory : EnemyFactory
     {
-        public override Boss CreateBoss(int id, string color)
+        public override ZombieBoss CreateBoss(int id, string color, double speed = 2, int health = 20, int size = 20)
         {
-            return new ZombieBoss(id, color);
+            return new ZombieBoss(id, color, speed, health, size);
         }
 
-        public override Minion CreateMinion(int id, string color)
+        public override ZombieMinion CreateMinion(int id, string color, double speed = 2, int health = 20, int size = 20)
         {
-            return new ZombieMinion(id, color);
+            return new ZombieMinion(id, color, speed, health, size);
         }
     }
 }

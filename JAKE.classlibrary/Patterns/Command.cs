@@ -14,7 +14,8 @@ namespace JAKE.classlibrary.Patterns
         {
             this.player = player;
         }
-        public abstract void Execute();
+        public abstract bool Execute();
+        public abstract void Undo();
         public bool Check(List<Obstacle> obstacles, ref double newX, ref double newY, double windowWidth, double windowHeight)
         {
             bool overlap = false;

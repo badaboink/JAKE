@@ -29,17 +29,6 @@ namespace JAKE.classlibrary.Collectibles
             X = x;
             Y = y;
         }
-        public SpeedBoost(int id, double x, double y, int speed)
-        {
-            Speed = speed;
-            Width = 20;
-            Height = 20;
-            Time = 15;
-            Speed = speed;
-            this.id = id;
-            X = x;
-            Y = y;
-        }
         public SpeedBoost(int speed)
         {
             Speed = speed;
@@ -63,10 +52,6 @@ namespace JAKE.classlibrary.Collectibles
         {
             return $"{id}:{X}:{Y}:{Width}:{Height}:{Speed}:{Time}";
         }
-        public void SetSpeedTime(int speed, int time)
-        {
-            this.Speed = speed;
-            this.Time = time;
-        }
+      
     }
 }

@@ -11,10 +11,11 @@ namespace JAKE.classlibrary
     public class Controller
     {
         Command? slot;
+        LinkedList<Command> commands;
 
         public Controller()
         {
-
+            commands = new LinkedList<Command>();
         }
 
         public void SetCommand(Command command)
@@ -28,7 +29,19 @@ namespace JAKE.classlibrary
             {
                 return;
             }
-            slot.Execute();
+            if (slot.Execute())
+            {
+                commands.AddFirst(slot);
+            }
+        }
+
+        public void Undo()
+        {
+            if (commands.First != null)
+            {
+                commands.First.Value.Undo();
+                commands.RemoveFirst();
+            }
         }
     }
 }

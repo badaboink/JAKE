@@ -28,15 +28,6 @@ namespace JAKE.classlibrary.Collectibles
             this.id = id;
         }
 
-        public HealthBoost(int id, double x, double y, int health)
-        { 
-            Health = health;
-            Width = 20;
-            Height = 20;
-            X = x;
-            Y = y;
-            this.id = id;
-        }
         public HealthBoost(int health)
         {
             this.Health = health;
@@ -58,11 +49,6 @@ namespace JAKE.classlibrary.Collectibles
         public override string ToString()
         {
             return $"{id}:{X}:{Y}:{Width}:{Height}:{Health}";
-        }
-
-        public void SetHealth(int health)
-        {
-            this.Health=health;
         }
     }
 }

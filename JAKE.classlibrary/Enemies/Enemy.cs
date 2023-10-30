@@ -9,17 +9,24 @@ using JAKE.classlibrary.Patterns.Strategies;
 
 namespace JAKE.classlibrary.Enemies
 {
-    public class Enemy
+    public class Enemy //: IPrototype
     {
         private int _id;
         private double _speed;
         private string _color;
+        private Coordinates coordinates;
+        private Trigger trigger = new Trigger();
         private double _currentX;
         private double _currentY;
         private int _health;
         private int _size;
         private int _points;
-        private IMoveStrategy? movementStrategy;
+        protected IMoveStrategy? movementStrategy;
+
+        public virtual Enemy ShallowClone()
+        {
+            return MemberwiseClone() as Enemy;
+        }
 
         public Enemy(int id, string color, double speed = 2, int health = 20, int size=20, int points = 10)
         {
@@ -29,7 +36,18 @@ namespace JAKE.classlibrary.Enemies
             _health = health;
             _size = size;
             _points = points;
+            coordinates = new Coordinates(0, 0);
             SetCurrentPosition(0, 0);
+        }
+
+        public bool Trigerred
+        {
+            get { return trigger.trigger; }
+        }
+
+        public void SetId(int id)
+        {
+            this._id = id;
         }
 
         public int GetId()
@@ -44,12 +62,12 @@ namespace JAKE.classlibrary.Enemies
 
         public double GetCurrentX()
         {
-            return _currentX;
+            return coordinates.x;
         }
 
         public double GetCurrentY()
         {
-            return _currentY;
+            return coordinates.y;
         }
 
         public double GetSpeed()
@@ -67,8 +85,8 @@ namespace JAKE.classlibrary.Enemies
 
         public void SetCurrentPosition(double x, double y)
         {
-            _currentX = x;
-            _currentY = y;
+            coordinates.x = x;
+            coordinates.y = y;
         }
 
         public void SetHealth(int health)
@@ -107,6 +125,11 @@ namespace JAKE.classlibrary.Enemies
             }
             return false;
         }
+
+        public virtual void Hit()
+        {
+            trigger.Flip();
+        }
         public bool MatchesId(int id)
         {
             return _id == id;
@@ -140,5 +163,10 @@ namespace JAKE.classlibrary.Enemies
         {
             return $"{GetId()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetHealth()}:{GetSize()}";
         }
+
+        //public Enemy DeepClone()
+        //{
+        //    throw new NotImplementedException();
+        //}
     }
 }
