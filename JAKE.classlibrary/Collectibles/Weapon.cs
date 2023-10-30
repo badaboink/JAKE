@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary.Collectibles
 {
+    [ExcludeFromCodeCoverage]
     public class Weapon : IMapObject
     {
         public int Time { get;  set; }

@@ -14,6 +14,7 @@ using System.Numerics;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using JAKE.classlibrary.Collectibles;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Server.Hubs
 {
@@ -31,20 +32,13 @@ namespace Server.Hubs
         {
             string connectionId = Context.ConnectionId;
             _gameDataService.RemoveObserver(connectionId);
-            Console.WriteLine($"Disconnected: {connectionId}");
             Player playertoremove = _gameDataService.RemovePlayer(connectionId);
-            Console.WriteLine(_gameDataService.GetPlayerList().Count);
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {
                 await observerEntry.Value.HandleDisconnectedPlayer(playertoremove.ToString());
             }
             await base.OnDisconnectedAsync(exception);
-        }
-
-        public bool IsClientConnected(string userId)
-        {
-            return ConnectedClients.ContainsKey(userId);
         }
         public GameHub(IGameDataService gameDataService)
         {
@@ -63,7 +57,6 @@ namespace Server.Hubs
 
                 await observers[Context.ConnectionId].GameStart(newPlayer, _gameDataService.GetObstacleData());
                 List<string> playerlist = _gameDataService.GetPlayerList();
-                Console.WriteLine("playerlistcount gamehub: " + playerlist.Count);
                 DateTime currentgametime = _gameDataService.GetCurrentGameTime();
                 foreach (var observerEntry in observers)
                 {
