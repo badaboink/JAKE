@@ -23,19 +23,19 @@ using JAKE.classlibrary.Enemies;
 using System.Windows;
 using JAKE.classlibrary.Shots;
 using System.Windows.Shapes;
+using System.Windows.Input;
+using Microsoft.VisualBasic.Devices;
+using FlaUI.Core.WindowsAPI;
+using Moq;
+using Microsoft.AspNet.SignalR.Client;
+using System.Xml.Linq;
+using System.Diagnostics.CodeAnalysis;
 
 namespace UI_tests
 {
     public class BuilderTests
     {
-        public async Task Somethingseomthign()
-        {
-            //var msApplication = JakeClientHelper.LaunchJakeClient();
-            //var automation = new UIA3Automation();
-            //var mainWindow = msApplication.GetMainWindow(automation);
 
-            //msApplication.Close();
-        }
         [Fact]
         public async Task Build_PlayerVisualBuilder()
         {

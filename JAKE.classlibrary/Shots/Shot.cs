@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary.Shots
 {
+    [ExcludeFromCodeCoverage]
     public class Shot
     {
         private double _speed;

@@ -1,14 +1,22 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using FlaUI.Core;
+using FlaUI.UIA3;
+
 namespace UI_tests
 {
+    [ExcludeFromCodeCoverage]
     public class JakeClientHelper
     {
         public static Application LaunchJakeClient()
         {
             string jakeClientPath = GetJakeClientPath();
             var msApplication = Application.Launch(jakeClientPath);
+
+            //var msApplication = JakeClientHelper.LaunchJakeClient();
+            //var automation = new UIA3Automation();
+            //var mainWindow = msApplication.GetMainWindow(automation);
             return msApplication;
         }
         private static string GetJakeClientPath()

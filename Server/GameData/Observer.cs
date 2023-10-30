@@ -7,6 +7,7 @@ using System.Xml.Linq;
 
 namespace Server.GameData
 {
+    [ExcludeFromCodeCoverage]
     public class Observer
     {
         private readonly IClientProxy clientProxy;
@@ -17,7 +18,10 @@ namespace Server.GameData
         }
         public async Task GameUpdate(List<string> playerlist, DateTime gametime)
         {
-            await clientProxy.SendAsync("GameUpdate", playerlist, gametime);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("GameUpdate", playerlist, gametime);
+            }
         }
         public async Task HandleMoveUpdate(string player)
         {
@@ -40,7 +44,10 @@ namespace Server.GameData
         }
         public async Task GameStart(Player newPlayer, string obstacles)
         {
-            await clientProxy.SendAsync("GameStart", newPlayer.GetId(), newPlayer.GetName(), newPlayer.GetColor(), obstacles);
+            if(clientProxy!=null)
+            {
+                await clientProxy.SendAsync("GameStart", newPlayer.GetId(), newPlayer.GetName(), newPlayer.GetColor(), obstacles);
+            }
         }
         public async Task HandleEnemies(List<string> enemies)
         {
