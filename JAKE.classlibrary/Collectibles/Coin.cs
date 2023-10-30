@@ -12,7 +12,7 @@ namespace JAKE.classlibrary.Collectibles
     {
 
         public int Points { get; set; }
-        public int id { get;  set; }
+        public int id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public int Width { get; set; }
@@ -21,8 +21,8 @@ namespace JAKE.classlibrary.Collectibles
         public Coin(int id, double x, double y, int points, string image)
         {
             this.id = id;
-            X= x;
-            Y= y;
+            X = x;
+            Y = y;
             Width = 20;
             Height = 20;
             Points = points;
@@ -47,7 +47,6 @@ namespace JAKE.classlibrary.Collectibles
             // Parameterless constructor required for XML  serialization
         }
 
-
         public void Interact(GameStats gameStats)
         {
             gameStats.PlayerScore += this.Points;
@@ -56,7 +55,7 @@ namespace JAKE.classlibrary.Collectibles
         {
             return this.id == id;
         }
-        public  void SetPosition(double x, double y)
+        public void SetPosition(double x, double y)
         {
             X = x;
             Y = y;

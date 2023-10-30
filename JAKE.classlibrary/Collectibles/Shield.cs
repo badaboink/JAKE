@@ -26,16 +26,6 @@ namespace JAKE.classlibrary.Collectibles
             this.Y = y;
             Image = image;
         }
-
-        public Shield(int id, double x, double y, int time)
-        {
-            Time = time;
-            Width = 20;
-            Height = 20;
-            this.id = id;
-            this.X = x;
-            this.Y = y;
-        }
         public Shield(int time)
         {
             Time = time;
@@ -57,10 +47,6 @@ namespace JAKE.classlibrary.Collectibles
             return $"{id}:{X}:{Y}:{Width}:{Height}:{Time}";
         }
 
-        public void SetTime(int time)
-        {
-            this.Time = time;
-        }
         public void Interact(GameStats gameStats)
         {
 
