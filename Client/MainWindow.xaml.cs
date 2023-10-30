@@ -24,7 +24,6 @@ using System.Windows.Threading;
 using System.Xml.Linq;
 using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
-using JAKE.client.Visuals;
 using JAKE.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
