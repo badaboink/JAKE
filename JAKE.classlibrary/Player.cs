@@ -36,14 +36,6 @@ namespace JAKE.classlibrary
             _shotColor = shotColor;
             _shotShape = shotShape;
             SetCurrentPosition(0, 0);
-            if (ColorToAbilityMap.TryGetValue(color, out var ability))
-            {
-                Ability = ability;
-            }
-            else
-            {
-                Ability = "unknown";
-            }
              
         }
            

@@ -26,15 +26,17 @@ namespace Class_library_tests
             //MainWindow a = new MainWindow();
 
             // Act
-            MainWindow.SingleShot(10,10,10,10,"red", "triangle", out shot);  // spalvos kodas cia (melyna)
+            MainWindow.SingleShot(10,10,10,10, "red", "triangle", out shot);  // spalvos kodas cia (melyna)
 
             // Assert
             Assert.NotNull(shot);
             Assert.Equal(10, shot.getSize());     // toks dydis #FF0000FF spalvos suvio
-            Assert.Equal("red", shot.getColor());
+            Assert.Equal("red", shot.getColor().GetColor());
             Assert.Equal("triangle", shot.getShape());
             Assert.Equal(10, shot.getX());
             Assert.Equal(10, shot.getY());
+            Assert.Equal(5, shot.getPoints());
+            Assert.Equal(5, shot.getSpeed());
 
             // jeigu testas nepraeina vadinasi nustatyta kitoks shape ir color MainWindow
             // kol kas shape ir color keiciami paciam kode
@@ -55,8 +57,8 @@ namespace Class_library_tests
 
             Obstacle obstacle = new Obstacle(obstacleWidth, obstacleHeight, obstacleX, obstacleY);
             IColor color = new RedColor();
-            IShape shape = new RoundShot();
-            Shot shot = new Shot(color, shape, 5, 10, 5);
+            //IShape shape = new RoundShot();
+            Shot shot = new Shot(color, 5, 10, 5);
 
             // Act
             Shot result = MainWindow.RemoveShot(shot, playerX, playerY, obstacle, playerSize);
@@ -79,8 +81,8 @@ namespace Class_library_tests
 
             Obstacle obstacle = new Obstacle(obstacleWidth, obstacleHeight, obstacleX, obstacleY);
             IColor color = new RedColor();
-            IShape shape = new RoundShot();
-            Shot shot = new Shot(color, shape, 5, 10, 5);
+            //IShape shape = new RoundShot();
+            Shot shot = new Shot(color, 5, 10, 5);
 
             // Act
             Shot result = MainWindow.RemoveShot(shot, playerX, playerY, obstacle, playerSize);

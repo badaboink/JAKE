@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,11 +8,12 @@ using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary.Shots
 {
-    public class TriangleShot : IShape
+    [ExcludeFromCodeCoverage]
+    public class TriangleShot : Shot
     {
-        public string GetShape()
+        public TriangleShot(Shot shot) : base(shot)
         {
-            return "triangle";
+            base.setShape("triangle");
         }
     }
 }

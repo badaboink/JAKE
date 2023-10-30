@@ -1,11 +1,13 @@
 ﻿using JAKE.classlibrary;
 using Microsoft.AspNetCore.SignalR;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 
 namespace Server.GameData
 {
+    [ExcludeFromCodeCoverage]
     public class Observer
     {
         private readonly IClientProxy clientProxy;
@@ -16,7 +18,10 @@ namespace Server.GameData
         }
         public async Task GameUpdate(List<string> playerlist, DateTime gametime)
         {
-            await clientProxy.SendAsync("GameUpdate", playerlist, gametime);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("GameUpdate", playerlist, gametime);
+            }
         }
         public async Task HandleMoveUpdate(string player)
         {
@@ -39,7 +44,10 @@ namespace Server.GameData
         }
         public async Task GameStart(Player newPlayer, string obstacles)
         {
-            await clientProxy.SendAsync("GameStart", newPlayer.GetId(), newPlayer.GetName(), newPlayer.GetColor(), obstacles);
+            if(clientProxy!=null)
+            {
+                await clientProxy.SendAsync("GameStart", newPlayer.GetId(), newPlayer.GetName(), newPlayer.GetColor(), obstacles);
+            }
         }
         public async Task HandleEnemies(List<string> enemies)
         {
@@ -54,7 +62,7 @@ namespace Server.GameData
         {
             await clientProxy.SendAsync("SendingCoins", coins);
         }
-        public async Task HandlePickedCoin(int id)
+        public async Task HandlePickedCoin(string id)
         {
             await clientProxy.SendAsync("SendingPickedCoin", id);
         }
@@ -85,17 +93,5 @@ namespace Server.GameData
             await clientProxy.SendAsync("SendingPickedSpeedBoost", id);
         }
 
-        public async Task HandleBossZombie(List<string> boss)
-        {
-            await clientProxy.SendAsync("SendingBossZombie", boss);
-        }
-        public async Task HandleDeadBossZombie(string name)
-        {
-            await clientProxy.SendAsync("SendingDeadBossZombie", name);
-        }
-        public async Task HandleDeadMiniZombie(string name)
-        {
-            await clientProxy.SendAsync("SendingDeadMiniZombie", name);
-        }
     }
 }

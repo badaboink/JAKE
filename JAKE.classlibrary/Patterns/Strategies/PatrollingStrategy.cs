@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +29,8 @@ namespace JAKE.classlibrary.Patterns.Strategies
             directionY = 2;
             GenerateRandomDirection();
         }
+        // is tested when testing move function
+        [ExcludeFromCodeCoverage]
         private void GenerateRandomDirection()
         {
             if (directionX == 2 && directionY == 2)

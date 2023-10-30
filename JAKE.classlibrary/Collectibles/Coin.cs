@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary.Collectibles
@@ -11,7 +12,7 @@ namespace JAKE.classlibrary.Collectibles
     {
 
         public int Points { get; set; }
-        public int id { get;  set; }
+        public int id { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
         public int Width { get; set; }
@@ -20,8 +21,8 @@ namespace JAKE.classlibrary.Collectibles
         public Coin(int id, double x, double y, int points, string image)
         {
             this.id = id;
-            X= x;
-            Y= y;
+            X = x;
+            Y = y;
             Width = 20;
             Height = 20;
             Points = points;
@@ -41,6 +42,10 @@ namespace JAKE.classlibrary.Collectibles
         {
             this.Points = points;
         }
+        public Coin()
+        {
+            // Parameterless constructor required for XML  serialization
+        }
 
         public void Interact(GameStats gameStats)
         {
@@ -50,7 +55,7 @@ namespace JAKE.classlibrary.Collectibles
         {
             return this.id == id;
         }
-        public  void SetPosition(double x, double y)
+        public void SetPosition(double x, double y)
         {
             X = x;
             Y = y;
@@ -71,6 +76,15 @@ namespace JAKE.classlibrary.Collectibles
         public override string ToString()
         {
             return $"{id}:{X}:{Y}:{Width}:{Height}:{Points}";
+        }
+        public string ToXML()
+        {
+            using (var stringwriter = new System.IO.StringWriter())
+            {
+                var serializer = new XmlSerializer(this.GetType());
+                serializer.Serialize(stringwriter, this);
+                return stringwriter.ToString();
+            }
         }
     }
 }

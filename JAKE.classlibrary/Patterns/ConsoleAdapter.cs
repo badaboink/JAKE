@@ -14,6 +14,9 @@ namespace JAKE.classlibrary.Patterns
         {
             return _consoleConverter.ConvertFromConsole(inputString);
         }
-       
+        public int CountCharacters(string inputString)
+        {
+            return inputString.Length;
+        }
     }
 }

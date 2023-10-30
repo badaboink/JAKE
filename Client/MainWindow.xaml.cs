@@ -24,7 +24,6 @@ using System.Windows.Threading;
 using System.Xml.Linq;
 using JAKE.classlibrary;
 using JAKE.classlibrary.Patterns;
-using JAKE.client.Visuals;
 using JAKE.Client;
 using Microsoft.AspNetCore.SignalR.Client;
 using Newtonsoft.Json;
@@ -37,7 +36,7 @@ namespace JAKE.client
     public partial class MainWindow : Window
     {
         private Player currentPlayer;
-        private bool gamestarted = false;
+        public bool gamestarted = false;
         private List<Player> playerInfoList = new List<Player>();
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
@@ -46,7 +45,7 @@ namespace JAKE.client
         private List<Shot> shots = new List<Shot>();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
         private DateTime lastGameTime = DateTime.MinValue;
-        private GameStats gameStat = GameStats.Instance;
+        //private GameStats gameStat = GameStats.Instance;
         private Dictionary<Enemy, bool> collisionCheckedEnemies = new Dictionary<Enemy, bool>();
         private List<Coin> coins = new List<Coin>();
         private Dictionary<Coin, CoinVisual> coinVisuals = new Dictionary<Coin, CoinVisual>();
@@ -106,7 +105,7 @@ namespace JAKE.client
         IBuilderVisual<PlayerVisual> playerVisualBuilder = new PlayerVisualBuilder();
         IBuilderVisual<EnemyVisual> enemyVisualBuilder = new EnemyVisualBuilder();
         IBuilderVisual<ShotVisual> shotVisualBuilder = new ShotVisualBuilder();
-        private async Task GameStart()
+        public async Task GameStart()
         {            
             // Create and show the ColorChoiceForm as a pop-up
             ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
@@ -121,7 +120,8 @@ namespace JAKE.client
             await connection.SendAsync("SendColor", selectedColor, name, shotColor, shotShape);
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
-                currentPlayer = new Player(id, name, color, shotColor, shotShape);
+                SetCurrentPlayer(id, name, color, shotColor, shotShape);
+
                 gamestarted = true;
                 string[] obstaclemessages = obstacleData.Split(',');
                 foreach (string obs in obstaclemessages)
@@ -142,7 +142,6 @@ namespace JAKE.client
             });
             connection.On<List<string>, DateTime>("GameUpdate", (userData, gametime) =>
             {
-                Debug.WriteLine("gameupdate userdata count: " + userData.Count);
                 foreach (string playerEntry in userData)
                 {
                     string[] parts = playerEntry.Split(':');
@@ -162,9 +161,7 @@ namespace JAKE.client
 
                         if (!playerInfoList.Contains(playerInfo))
                         {
-                            //playerInfo.SetCurrentPosition(x, y);
                             playerInfoList.Add(playerInfo);
-                            Debug.WriteLine("PRIDEJO " + playerInfo.GetId() + " LIST COUNT DABAR " +  playerInfoList.Count);
                             Dispatcher.Invoke(() =>
                             {
                                 PlayerVisual playerVisual = playerVisualBuilder.New()
@@ -182,15 +179,31 @@ namespace JAKE.client
                             Dispatcher.Invoke(() =>
                             {
                                 PlayerVisual playerVisual = playerVisuals[playerInfo];
-                                //playerInfo.SetCurrentPosition(x, y);
                                 Canvas.SetLeft(playerVisual, x);
                                 Canvas.SetTop(playerVisual, y);
                             });
                         }
                     }
                 }
+                GameStats gameStat = GameStats.Instance;
                 gameStat.PlayersCount = playerInfoList.Count;  //singleton
                 lastGameTime = gametime;
+            });
+        }
+        public void SetCurrentPlayer(int id, string name, string color, string shotColor, string shotShape)
+        {
+            currentPlayer = new Player(id, name, color, shotColor, shotShape);
+            playerInfoList.Add(currentPlayer);
+            Dispatcher.Invoke(() =>
+            {
+                PlayerVisual playerVisual = playerVisualBuilder.New()
+                .SetName(currentPlayer.GetName())
+                .SetColor(currentPlayer.GetColor())
+                .SetPosition(0, 0)
+                .Build();
+                playerVisuals[currentPlayer] = playerVisual;
+
+                playersContainer.Items.Add(playerVisual);
             });
         }
         private Timer? timer;
@@ -378,23 +391,26 @@ namespace JAKE.client
 
             });
 
-            connection.On<int>("SendingPickedCoin", (coinid) =>
+            connection.On<string>("SendingPickedCoin", (coinObj) =>
             {
+                string coinString = new ServerString(coinObj).ConvertedString;
+                string[] parts = coinString.Split(':');
+                int id = int.Parse(parts[1]);
                 Dispatcher.Invoke(() =>
                 {
-                        foreach (var pair in coinVisuals)
-                        {
-                            Coin coin = pair.Key;
-                            CoinVisual coinVisual = pair.Value;
+                    foreach (var pair in coinVisuals)
+                    {
+                        Coin coin = pair.Key;
+                        CoinVisual coinVisual = pair.Value;
 
-                            if (coin.id == coinid)
-                            {
-                                coins.Remove(coin);
-                                coinVisuals.Remove(coin);
-                                CoinContainer.Children.Remove(coinVisual);
-                                break;
-                            }
+                        if (coin.id == id)
+                        {
+                            coins.Remove(coin);
+                            coinVisuals.Remove(coin);
+                            CoinContainer.Children.Remove(coinVisual);
+                            break;
                         }
+                    }
                        
                 });
             });
@@ -589,16 +605,6 @@ namespace JAKE.client
                 playersContainer.Items.Add(gameMapCanvas);
             });
         }
-        public string getFirstInstanceUsingSubString(string input, string something)
-        {
-            int index = input.Contains(something) ? input.IndexOf(something)+something.Length-1 : 0;
-            return input.Substring(0, index);
-        }
-        public string GetStringAfterFirstSpace(string input, string something)
-        {
-            int index = input.Contains(something) ? input.IndexOf(something) + something.Length : 0;
-            return input.Substring(index);
-        }
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
@@ -713,12 +719,26 @@ namespace JAKE.client
         {
             // tekstas dingsta po puse sekundes
             var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(8);
+            timer.Interval = TimeSpan.FromSeconds(0.5);
             timer.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
                 //heartLabel.Visibility = Visibility.Hidden;
                 //shieldBorder.Visibility = Visibility.Hidden;
+                timer.Stop();
+            };
+
+            timer.Start();
+        }
+        private void StopSpeed()
+        {
+            // tekstas dingsta po puse sekundes
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Tick += (sender, args) =>
+            {
+                GameStats gameStat = GameStats.Instance;
+                gameStat.PlayerSpeed = 10;
                 timer.Stop();
             };
 
@@ -735,6 +755,7 @@ namespace JAKE.client
                 bool shieldVisible = shieldObj.HideShield().shieldOn;
                 if (!shieldVisible)
                 {
+                    GameStats gameStat = GameStats.Instance;
                     shieldBorder.Visibility = Visibility.Hidden;
                     gameStat.ShieldOn = false;
                     timer.Stop();
@@ -770,9 +791,9 @@ namespace JAKE.client
                 }
             }
         }
-       
-        private async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
+        public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
+            GameStats gameStat = GameStats.Instance;
             if (!gameStat.ShieldOn)
             {
                 gameStat.PlayerHealth -= 5;
@@ -795,6 +816,7 @@ namespace JAKE.client
    
         private async Task HandleCollisionZ(int damage)
         {
+            GameStats gameStat = GameStats.Instance;
             if (!gameStat.ShieldOn)
             {
                 gameStat.PlayerHealth -= damage;
@@ -834,8 +856,6 @@ namespace JAKE.client
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-
-            // Create a copy of the coins collection
             List<Coin> coinsCopy = new List<Coin>(coins);
 
             foreach (Coin coin in coinsCopy)
@@ -845,36 +865,19 @@ namespace JAKE.client
                     CoinVisual coinRect = coinVisuals[coin];
                     double coinX = Canvas.GetLeft(coinRect);
                     double coinY = Canvas.GetTop(coinRect);
-
-                    if (playerX + playerVisual.Width >= coinX &&
-                        playerX <= coinX + coinRect.Width &&
-                        playerY + playerVisual.Height >= coinY &&
-                        playerY <= coinY + coinRect.Height)
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height)) 
                     {
+                        GameStats gameStat = GameStats.Instance;
                         coin.Interact(gameStat);
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
                         Base text = new Base(currentPlayer);
                         testLabel.Text = text.DisplayObject("coin").text;
                         HideDisplay();
 
-                        //------------- JSONAdapter
-                        Dictionary<string, object> jsonObject = new Dictionary<string, object>();
-
-                        // Add key-value pairs to the dictionary
-                        jsonObject["id"] = coin.id;
-                        jsonObject["x"] = coin.X;
-                        jsonObject["y"] = coin.Y;
-                        jsonObject["width"] = coin.Width;
-                        jsonObject["height"] = coin.Height;
-                        jsonObject["points"] = coin.Points;
-
-
-                        // Convert the dictionary to a JSON string
-                        string jsonString = JsonConvert.SerializeObject(jsonObject);
-                        ServerString server = new ServerString(jsonString);
-                        
+                        // Convert coin to a JSON string
+                        string json = JsonConvert.SerializeObject(coin);
                         //-----------
-                        await connection.SendAsync("SendPickedCoin", server.ConvertedString);  //coin.ToString()
+                        await connection.SendAsync("SendPickedCoin", json);
                     }
                 }
             }
@@ -893,10 +896,7 @@ namespace JAKE.client
                     double shieldX = Canvas.GetLeft(shieldRect);
                     double shieldY = Canvas.GetTop(shieldRect);
 
-                    if (playerX + playerVisual.Width >= shieldX &&
-                        playerX <= shieldX + shieldRect.Width &&
-                        playerY + playerVisual.Height >= shieldY &&
-                        playerY <= shieldY + shieldRect.Height)
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, shieldX, shieldY, shieldRect.Height))
                     {
 
                         //TODO: dingsta kitas shield ne ta kuri paliecia
@@ -907,6 +907,7 @@ namespace JAKE.client
                         bool shieldVisible = shieldObj.DisplayShield().shieldOn;
                         if (shieldVisible)
                         {
+                            GameStats gameStat = GameStats.Instance;
                             shieldBorder.Visibility = Visibility.Visible;
                             gameStat.ShieldOn = true;
                             shield.Interact(gameStat);
@@ -932,11 +933,9 @@ namespace JAKE.client
                     double speedBoostX = Canvas.GetLeft(speedBoostRect);
                     double speedBoostY = Canvas.GetTop(speedBoostRect);
 
-                    if (playerX + playerVisual.Width >= speedBoostX &&
-                        playerX <= speedBoostX + speedBoostRect.Width &&
-                        playerY + playerVisual.Height >= speedBoostY &&
-                        playerY <= speedBoostY + speedBoostRect.Height)
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, speedBoostX, speedBoostY, speedBoostRect.Height))
                     {
+                        GameStats gameStat = GameStats.Instance;
 
                         if (gameStat.PlayerSpeed < 50)
                         {
@@ -944,7 +943,7 @@ namespace JAKE.client
                             Base text = new Base(currentPlayer);
                             testLabel.Text = text.DisplayObject("speed").text;
                             HideDisplay();
-
+                            StopSpeed();
                             await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
                         }
 
@@ -970,16 +969,12 @@ namespace JAKE.client
                     double healthBoostX = Canvas.GetLeft(healthBoostRect);
                     double healthBoostY = Canvas.GetTop(healthBoostRect);
 
-                    if (playerX + playerVisual.Width >= healthBoostX &&
-                        playerX <= healthBoostX + healthBoostRect.Width &&
-                        playerY + playerVisual.Height >= healthBoostY &&
-                        playerY <= healthBoostY + healthBoostRect.Height)
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, healthBoostX, healthBoostY, healthBoostRect.Height))
                     {
                         isCollidingWithHealthBoost = true;
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //healthBoost.Interact(player, healthBoost.Health);
-                        Debug.WriteLine("health pries: " + gameStat.PlayerHealth);
-                        Debug.WriteLine("health reiksme: " + healthBoost.Health);
+                        GameStats gameStat = GameStats.Instance;
                         healthBoost.Interact(gameStat);
                         if (gameStat.PlayerHealth > 100)
                         {
@@ -987,8 +982,6 @@ namespace JAKE.client
                         }
                         
                         healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-                        Debug.WriteLine("health po: " + gameStat.PlayerHealth);
-                        Debug.WriteLine("CIA IEINA");
                         healthBoosts.Remove(healthBoost);
                         healthBoostsVisuals.Remove(healthBoost);
                         HealthBoostContainer.Children.Remove(healthBoostRect);
@@ -997,7 +990,6 @@ namespace JAKE.client
                         HideDisplay();
                         HealthAdd healthObj = new HealthAdd(currentPlayer);
                         healthBar.Width = healthObj.DisplayHealth(gameStat.PlayerHealth/2).health;
-                        //await connection.SendAsync("UpdatePlayerHealth", currentPlayer.GetId(), gameStat.PlayerHealth);
                         await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
                         isCollidingWithHealthBoost = false;
                     }
@@ -1005,7 +997,7 @@ namespace JAKE.client
             }
         }
 
-        private object miniZombiesListLock = new object();
+       
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
         {
             bool CountKills = false;
@@ -1023,8 +1015,9 @@ namespace JAKE.client
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
-
+                    Debug.WriteLine("SHEIPAS create shot" + shape);
                     SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
+                    Debug.WriteLine("SHEIPAS po single shot" + shape);
                     ShotVisual shotVisual = shotVisualBuilder.New()
                                 .SetColor($"{color},{shape}")
                                 .SetSize(shot.getSize())
@@ -1085,6 +1078,7 @@ namespace JAKE.client
 
                                     if (CountKills)
                                     {
+                                        GameStats gameStat = GameStats.Instance;
                                         enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
                                         gameStat.PlayerScore += 5;
                                         Debug.WriteLine("score: " + gameStat.PlayerScore);
@@ -1109,8 +1103,7 @@ namespace JAKE.client
                             }
 
                         }
-                        //Debug.WriteLine("po break"); //lygiai du praeina tarp shots
-                        // Remove the enemies that need to be removed
+
                         foreach (Enemy enemyToRemove in enemiesToRemove)
                         {
                             enemies.Remove(enemyToRemove);
@@ -1136,7 +1129,6 @@ namespace JAKE.client
 
                 });
             }
-
         }
 
         public static Shot RemoveShot(Shot shot, double newX, double newY, Obstacle obstacle, double elipse)
@@ -1160,23 +1152,29 @@ namespace JAKE.client
             {
                 shotColor = new BlueColor();
             }
-            IShape shotShape;
+
+            Shot localShot = new Shot(shotColor, 5, 10, 5);
+
             if (shape == "triangle")
             {
-                shotShape = new TriangleShot();
+                localShot = new TriangleShot(localShot);
             }
             else
             {
-                shotShape = new RoundShot();
-            }
-
-            Shot localShot = new Shot(shotColor, shotShape, 5, 10, 5);
+                localShot = new RoundShot(localShot);
+            }     
 
             double playerCenterX = playerX + playerWidth / 2;
             double playerCenterY = playerY + playerHeight / 2;
 
             localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
             shot = localShot;
+        }
+
+        public static bool playerTouchesMapObject(double playerX, double playerY, double playerSize, double objectX, double objectY, double objectSize)
+        {           
+            if (playerX + playerSize >= objectX &&  playerX <= objectX + objectSize &&  playerY + playerSize >= objectY && playerY <= objectY + objectSize) return true;
+            else return false;
         }
     }
 }

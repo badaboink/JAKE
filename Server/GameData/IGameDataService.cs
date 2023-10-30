@@ -46,16 +46,8 @@ namespace Server.GameData
         SpeedBoost AddSpeedBoost(int speed);
         void RemoveSpeedBoost(int id);
         List<string> GetSpeedBoosts();
-        bool isBossAlive();
-        Enemy AddZombieBoss();
 
-        //BossZombie AddBossZombie(string name, int health);
-        //void RemoveBossZombie();
-        //void RemoveMiniZombie();
-        //void UpdateBossZombie(int health, bool mini);
-        //List<string> GetBossZombie();
-        //bool GetBossNull();
-        //List<string> UpdateBossZombiePosition();
+        Coin returnCoin(int id);
 
     }
 }

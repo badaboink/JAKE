@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,7 @@ using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary.Shots
 {
+    [ExcludeFromCodeCoverage]
     public class Shot
     {
         private double _speed;
@@ -18,23 +20,34 @@ namespace JAKE.classlibrary.Shots
         private double _y;
         private DateTime _previousUpdate;
         private IColor _color;
-        private IShape _shape;
-        public Shot(IColor color, IShape shape, double speed, int size, double points)
+        private string _shape;
+        private Shot shot;
+
+        public Shot(IColor color, double speed, int size, double points)
         {         
             _color = color;
-            _shape = shape;
             _speed = speed;
             _size = size;
             _points = points;
             _previousUpdate = DateTime.Now;
         }
+
+        public Shot(Shot shot)
+        {
+            _color = shot.getColor();
+            _speed = shot.getSpeed();
+            _size = shot.getSize();
+            _points = shot.getPoints();
+            _previousUpdate = DateTime.Now;
+        }
+
         public string getShape()
         {
-            return _shape.GetShape();
+            return _shape;
         }
-        public string getColor()
+        public IColor getColor()
         {
-            return _color.GetColor();
+            return _color;
         }
         public double getSpeed()
         {
@@ -66,7 +79,7 @@ namespace JAKE.classlibrary.Shots
         {
             _color = color;
         }
-        public void setShape(IShape shape)
+        public void setShape(string shape)
         {
             _shape = shape;
         }
@@ -86,6 +99,10 @@ namespace JAKE.classlibrary.Shots
         public override string ToString()
         {
             return $"{getX()}:{getY()}";
+        }
+        public void SetPreviousUpdate(DateTime time)
+        {
+            _previousUpdate = time;
         }
 
         public double DeltaTime

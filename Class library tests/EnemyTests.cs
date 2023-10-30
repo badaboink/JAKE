@@ -25,9 +25,9 @@ namespace Class_library_tests
         [Fact]
         public void Test_Closest_Player_1()
         {
-            Player player1 = new Player(1, "a", "red", "red", "circle");
-            Player player2 = new Player(2, "a", "red", "red", "circle");
-            Player player3 = new Player(3, "a", "red", "red", "circle");
+            Player player1 = new Player(1, "a", "red", "red", "round");
+            Player player2 = new Player(2, "a", "red", "red", "round");
+            Player player3 = new Player(3, "a", "red", "red", "round");
             player1.SetCurrentPosition(1, 1);
             player2.SetCurrentPosition(1, 0);
             player3.SetCurrentPosition(2, 1);
@@ -87,8 +87,6 @@ namespace Class_library_tests
 
             patrollingStrategy.Move(enemy, players);
 
-            // if direction is changed enemy does not move till next assertion to move
-            // might be problematic, but good for now
             Assert.InRange(enemy.GetCurrentX(), enemy.GetSize(), maxX);
             Assert.InRange(enemy.GetCurrentY(), enemy.GetSize(), maxY);
             Assert.Equal(presumed_x, enemy.GetCurrentX());
@@ -96,6 +94,7 @@ namespace Class_library_tests
             Assert.NotEqual(1, patrollingStrategy.GetCurrentX());
             Assert.NotEqual(0, patrollingStrategy.GetCurrentY());
         }
+
         [Fact]
         public void Move_WhenClosestPlayerFound_ShouldUpdateEnemyPosition()
         {
@@ -103,9 +102,9 @@ namespace Class_library_tests
             enemy.SetSpeed(5.0);
             var strategy = new ChasePlayerStrategy(obstacles);
 
-            Player player1 = new Player(1, "a", "red", "red", "circle");
-            Player player2 = new Player(2, "a", "red", "red", "circle");
-            Player player3 = new Player(3, "a", "red", "red", "circle");
+            Player player1 = new Player(1, "a", "red", "red", "round");
+            Player player2 = new Player(2, "a", "red", "red", "round");
+            Player player3 = new Player(3, "a", "red", "red", "round");
             player1.SetCurrentPosition(1, 1);
             player2.SetCurrentPosition(100, 100);
             player3.SetCurrentPosition(25, 25);
@@ -135,19 +134,82 @@ namespace Class_library_tests
         [Fact]
         public void Test_Move_WhenClosestPlayerIsNull_ShouldNotChangePosition()
         {
-            // Arrange
             Enemy enemy = new(1, "red");
             List<Player> players = new List<Player>();
             var obstacles = new List<Obstacle>();
             ChaseAndHopStrategy strategy = new ChaseAndHopStrategy(obstacles);
 
-            // Act
             strategy.Move(enemy, players);
 
-            // Assert
             Assert.Equal(0, enemy.GetCurrentX());
             Assert.Equal(0, enemy.GetCurrentY());
         }
+        [Fact]
+        public void Move_EnemyMovesAndSetsNewStrategy()
+        {
+            // Arrange
+            double moveDirectionX = 1.0;
+            double moveDirectionY = 0.5;
+            double enemySpeed = 5.0;
+            Obstacle obstacle = new Obstacle(10.0, 10.0, 0, 0);
+            List<Obstacle> obstacles = new List<Obstacle>();
 
+            var enemy = new Enemy(1, "Red", enemySpeed, 30, 25, 15); 
+            // Enemy is way out of where the obstacle is thus it should change strategies
+            enemy.SetCurrentPosition(20, 20);
+            var hoppingStrategy = new HoppingStrategy(moveDirectionX, moveDirectionY, obstacle, obstacles);
+
+            hoppingStrategy.Move(enemy, new List<Player>());
+
+            double newX = enemy.GetCurrentX();
+            double newY = enemy.GetCurrentY();
+
+            Assert.NotEqual(20, newX);
+            Assert.NotEqual(20, newY);
+
+            var newStrategy = enemy.GetCurrentMovementStrategy();
+            Assert.IsType<ChaseAndHopStrategy>(newStrategy);
+        }
+        [Fact]
+        public void Move_MovesTowardsKing()
+        {
+            var obstacles = new List<Obstacle>();
+            var king = new Enemy(1, "King", 5.0, 30, 25, 15);
+            king.SetCurrentPosition(50, 50);
+            var enemy = new Enemy(2, "Minion", 3.0, 20, 15, 10);
+
+            king.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
+            var groupToOneStrategy = new GroupToOneStrategy(obstacles, king);
+            enemy.SetMovementStrategy(groupToOneStrategy);
+
+            Player player1 = new Player(1, "a", "red", "red", "round");
+            Player player2 = new Player(2, "a", "red", "red", "round");
+            Player player3 = new Player(3, "a", "red", "red", "round");
+            player1.SetCurrentPosition(1, 1);
+            player2.SetCurrentPosition(100, 100);
+            player3.SetCurrentPosition(25, 25);
+            var players = new List<Player>
+            {
+                player1, player2, player3
+            };
+            double initialDistance = CalculateDistance(enemy.GetCurrentX(), enemy.GetCurrentY(), king.GetCurrentX(), king.GetCurrentY());
+
+            king.Move(players);
+            groupToOneStrategy.Move(enemy, players);
+
+            double newX = enemy.GetCurrentX();
+            double newY = enemy.GetCurrentY();
+
+            Assert.NotEqual(0.0, newX);
+            Assert.NotEqual(0.0, newY);
+            double newDistance = CalculateDistance(enemy.GetCurrentX(), enemy.GetCurrentY(), king.GetCurrentX(), king.GetCurrentY());
+            Assert.True(newDistance < initialDistance);
+        }
+        private double CalculateDistance(double x1, double y1, double x2, double y2)
+        {
+            double dx = x2 - x1;
+            double dy = y2 - y1;
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
     }
 }
