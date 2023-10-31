@@ -367,7 +367,6 @@ namespace JAKE.client
                         int coinHeight = int.Parse(parts[4]);
                         int points = int.Parse(parts[5]);
                         Coin coin = new Coin(coinId, coinX, coinY, points, image);
-                        Debug.WriteLine("coin to string: " + coin.ToString());
                         if (!coins.Contains(coin))
                         {                         
                             coins.Add(coin);
@@ -472,7 +471,6 @@ namespace JAKE.client
                 string image = "healthBoost.png";
                 foreach (string healthstring in healthdata)
                 {
-                    Debug.WriteLine("health: " + healthstring);
                     string[] parts = healthstring.Split(':');
                     if (parts.Length == 6)
                     {
@@ -522,7 +520,6 @@ namespace JAKE.client
               
                 foreach (string speedstring in speeddata)
                 {
-                    Debug.WriteLine("speedboost: " + speedstring);
                     string image = "speedboost.png";
                     string[] parts = speedstring.Split(':');
                     if (parts.Length == 7)
@@ -537,7 +534,6 @@ namespace JAKE.client
                         SpeedBoost speed = new SpeedBoost(speedId, speedX, speedY, speedVal, image);
                         if (!speedBoosts.Contains(speed))
                         {
-                            Debug.WriteLine("kuria speedboost");
                             speedBoosts.Add(speed);
                             Dispatcher.Invoke(() =>
                             {
@@ -810,27 +806,6 @@ namespace JAKE.client
 
             collisionCheckedEnemies[enemy] = true;
         }
-   
-        private async Task HandleCollisionZ(int damage)
-        {
-            GameStats gameStat = GameStats.Instance;
-            if (!gameStat.ShieldOn)
-            {
-                gameStat.PlayerHealth -= damage;
-                healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-
-                HealthAdd healthObj = new HealthAdd(currentPlayer);
-                healthBar.Width = gameStat.PlayerHealth <= 0
-                                    ? healthObj.DisplayHealth(0).health
-                                    : healthObj.DisplayHealth(gameStat.PlayerHealth / 2).health;
-
-                if (gameStat.PlayerHealth <= 0)
-                {
-                    HandlePlayerDeath(currentPlayer);
-                    await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
-                }
-            }
-        }
 
         public void HandlePlayerDeath(Player player)
         {
@@ -952,7 +927,6 @@ namespace JAKE.client
         {
             if (isCollidingWithHealthBoost)
             {
-                Debug.WriteLine("skippp");
                 return; // Skip collision handling if already colliding
             }
             double playerX = Canvas.GetLeft(playerVisual);
@@ -1011,9 +985,7 @@ namespace JAKE.client
                     double playerY = Canvas.GetTop(playerVisual);
                     double playerWidth = playerVisual.Width;
                     double playerHeight = playerVisual.Height;
-                    Debug.WriteLine("SHEIPAS create shot" + shape);
                     SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
-                    Debug.WriteLine("SHEIPAS po single shot" + shape);
                     ShotVisual shotVisual = shotVisualBuilder.New()
                                 .SetColor($"{color},{shape}")
                                 .SetSize(shot.getSize())
@@ -1077,16 +1049,13 @@ namespace JAKE.client
                                         GameStats gameStat = GameStats.Instance;
                                         enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
                                         gameStat.PlayerScore += 5;
-                                        Debug.WriteLine("score: " + gameStat.PlayerScore);
                                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-                                        Debug.WriteLine("pataike i enemy");
                                         await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
                                         if (enemy.GetHealth() <= 0)
                                         {
                                             enemiesToRemove.Add(enemy); // Add the enemy to the removal list
                                             enemyVisuals.Remove(enemy);
                                             EnemyContainer.Children.Remove(enemyRect);
-                                            Debug.WriteLine("mire enemy");
                                             await connection.SendAsync("SendDeadEnemy", enemy.ToString());
                                         }
                                     }
@@ -1103,13 +1072,11 @@ namespace JAKE.client
                         foreach (Enemy enemyToRemove in enemiesToRemove)
                         {
                             enemies.Remove(enemyToRemove);
-                            Debug.WriteLine("removed enemy");
                         }
 
                         // Update the shot's position
                         if (!shotHitEnemy)
                         {
-                            //Debug.WriteLine("paskutinis if");
                             Canvas.SetLeft(shotVisual, newX);
                             Canvas.SetTop(shotVisual, newY);
 

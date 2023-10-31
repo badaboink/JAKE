@@ -49,24 +49,18 @@ namespace Server.Hubs
 
         public async Task SendColor(string color, string name, string shotcolor, string shotshape)
         {
-            try
-            {
-                Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId, shotcolor, shotshape);
+            Player newPlayer = _gameDataService.AddPlayer(name, color, Context.ConnectionId, shotcolor, shotshape);
 
-                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
 
-                await observers[Context.ConnectionId].GameStart(newPlayer, _gameDataService.GetObstacleData());
-                List<string> playerlist = _gameDataService.GetPlayerList();
-                DateTime currentgametime = _gameDataService.GetCurrentGameTime();
-                foreach (var observerEntry in observers)
-                {
-                    await observerEntry.Value.GameUpdate(playerlist, currentgametime);
-                }
-            }
-            catch (Exception ex)
+            await observers[Context.ConnectionId].GameStart(newPlayer, _gameDataService.GetObstacleData());
+            List<string> playerlist = _gameDataService.GetPlayerList();
+            DateTime currentgametime = _gameDataService.GetCurrentGameTime();
+            foreach (var observerEntry in observers)
             {
-                Console.WriteLine(ex.ToString());
+                await observerEntry.Value.GameUpdate(playerlist, currentgametime);
             }
+                
         }
         public async Task SendEnemies()
         {
