@@ -26,6 +26,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\JAKE.classlibrary\JAKE.classlibrary.csproj" />
+    <ProjectReference Include="..\Server\Server.csproj" />
   </ItemGroup>
 
 </Project>
