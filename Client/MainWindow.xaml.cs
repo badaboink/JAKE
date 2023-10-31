@@ -37,7 +37,7 @@ namespace JAKE.client
     {
         private Player currentPlayer;
         public bool gamestarted = false;
-        private List<Player> playerInfoList = new List<Player>();
+        public List<Player> playerInfoList = new List<Player>();
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
         private List<Obstacle> obstacles = new List<Obstacle>();
