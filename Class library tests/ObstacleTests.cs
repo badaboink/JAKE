@@ -79,14 +79,13 @@ namespace Class_library_tests
         {
             // Arrange
             var obstacle = new Obstacle(5, 5, 10, 10);
-            GameStats stats = GameStats.Instance;
-            stats.PlayerSpeed = 1;
+            double playerSpeed = 1;
             double playerDirectionX = 1;
             double playerCurrentX = 5;
             double playerWidth = 2;
 
             // Act
-            double result = obstacle.DistanceFromObstacleX(stats, playerDirectionX, playerCurrentX, playerWidth);
+            double result = obstacle.DistanceFromObstacleX(playerSpeed, playerDirectionX, playerCurrentX, playerWidth);
 
             // Assert
             Assert.True(result > 0);
@@ -96,14 +95,13 @@ namespace Class_library_tests
         {
             // Arrange
             var obstacle = new Obstacle(5, 5, 10, 10);
-            GameStats stats = GameStats.Instance;
-            stats.PlayerSpeed = 1;
+            double playerSpeed = 1;
             double playerDirectionX = -1;
             double playerCurrentX = 5;
             double playerWidth = 2;
 
             // Act
-            double result = obstacle.DistanceFromObstacleX(stats, playerDirectionX, playerCurrentX, playerWidth);
+            double result = obstacle.DistanceFromObstacleX(playerSpeed, playerDirectionX, playerCurrentX, playerWidth);
 
             // Assert
             Assert.True(result < 0);
@@ -114,14 +112,13 @@ namespace Class_library_tests
         {
             // Arrange
             var obstacle = new Obstacle(5, 5, 10, 10);
-            GameStats stats = GameStats.Instance;
-            stats.PlayerSpeed = 1;
+            double playerSpeed = 1;
             double playerDirectionX = 0;
             double playerCurrentX = 5;
             double playerWidth = 2;
 
             // Act
-            double result = obstacle.DistanceFromObstacleX(stats, playerDirectionX, playerCurrentX, playerWidth);
+            double result = obstacle.DistanceFromObstacleX(playerSpeed, playerDirectionX, playerCurrentX, playerWidth);
 
             // Assert
             Assert.Equal(0, result);

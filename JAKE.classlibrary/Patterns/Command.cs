@@ -26,8 +26,8 @@ namespace JAKE.classlibrary.Patterns
                 if (obstacle.WouldOverlap(newX, newY, 50, 50))
                 {
                     overlap = true;
-                    double distanceX = obstacle.DistanceFromObstacleX(gameStat, player.GetDirectionX(), player.GetCurrentX(), 50);
-                    double distanceY = obstacle.DistanceFromObstacleY(gameStat, player.GetDirectionY(), player.GetCurrentY(), 50);
+                    double distanceX = obstacle.DistanceFromObstacleX(gameStat.PlayerSpeed, player.GetDirectionX(), player.GetCurrentX(), 50);
+                    double distanceY = obstacle.DistanceFromObstacleY(gameStat.PlayerSpeed, player.GetDirectionY(), player.GetCurrentY(), 50);
                     double distance = distanceX * distanceX + distanceY * distanceY;
                     if (distance < minDistance)
                     {

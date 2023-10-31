@@ -77,7 +77,104 @@ namespace JAKE.classlibrary
             return distance;
         }
 
-        public double DistanceFromObstacleX(GameStats gameStat, double playerDirectionX, double playerCurrentX, double playerWidth)
+        public Coordinates MoveToClosestEdge(Coordinates position, double width, double height)
+        {
+            return this.MoveToClosestEdge(position, new Coordinates(width, height));
+
+        }
+        public Coordinates MoveToClosestEdge(Coordinates position, Coordinates size)
+        {
+            
+            Coordinates center = new Coordinates(position.x + size.x/2, position.y + size.y/2);
+            
+            if (WouldOverlap(center.x, center.y))
+            {
+                double distanceTop = Math.Abs(this.PositionY - center.y);
+                double distanceRight = Math.Abs(this.PositionX + this.Width - center.x);
+                double distanceBottom = Math.Abs(this.PositionY + this.Height - center.y);
+                double distanceLeft = Math.Abs(this.PositionX - center.x);
+                double minDistance = Math.Min(Math.Min(distanceTop, distanceBottom), Math.Min(distanceLeft, distanceRight));
+                if(distanceTop <= minDistance)
+                {
+                    return new Coordinates(position.x, this.PositionY - size.y);
+                }
+                else if(distanceBottom <= minDistance)
+                {
+                    return new Coordinates(position.x, this.PositionY + this.Height);
+                }
+                else if(distanceLeft <= minDistance)
+                {
+                    return new Coordinates(this.PositionX - size.x, position.y);
+                }
+                else if(distanceRight <= minDistance)
+                {
+                    return new Coordinates(this.PositionX + this.Width, position.y);
+                }
+                else
+                {
+                    return position;
+                }
+            }
+            else
+            {
+                int topLeft = WouldOverlap(position.x, position.y) ? 1 : 0;
+                int topRight = WouldOverlap(position.x + size.x, position.y) ? 1 : 0;
+                int bottomRight = WouldOverlap(position.x + size.x, position.y + size.y) ? 1 : 0;
+                int bottomLeft = WouldOverlap(position.x, position.y + size.y) ? 1 : 0;
+                double distanceTop = Math.Abs(this.PositionY - (position.y + size.y));
+                double distanceRight = Math.Abs(this.PositionX + this.Width - position.x);
+                double distanceBottom = Math.Abs(this.PositionY + this.Height - position.y);
+                double distanceLeft = Math.Abs(this.PositionX - (position.x + size.x));
+                double minDistance = Math.Min(Math.Min(distanceTop, distanceBottom), Math.Min(distanceLeft, distanceRight));
+                int cornerCount = topLeft + topRight + bottomRight + bottomLeft;
+                if(cornerCount == 2)
+                {
+                    int top = topLeft + topRight;
+                    int bottom = bottomLeft + bottomRight;
+                    int right = topRight + bottomRight;
+                    int left = topLeft + bottomLeft;
+                    if(top == 2)
+                    {
+                        return new Coordinates(position.x, position.y + distanceBottom);
+                    }
+                    if(bottom == 2)
+                    {
+                        return new Coordinates(position.x, position.y - distanceTop);
+                    }
+                    if(left == 2)
+                    {
+                        return new Coordinates(position.x + distanceRight, position.y);
+                    }
+                    if(right == 2)
+                    {
+                        return new Coordinates(position.x - distanceLeft, position.y);
+                    }
+                    return position;
+                }
+                if(cornerCount == 1)
+                {
+                    if(topLeft == 1)
+                    {
+                        return distanceBottom < distanceRight ? new Coordinates(position.x, position.y + distanceBottom) : new Coordinates(position.x + distanceRight, position.y);
+                    }
+                    if(topRight == 1)
+                    {
+                        return distanceBottom < distanceLeft ? new Coordinates(position.x, position.y + distanceBottom) : new Coordinates(position.x - distanceLeft, position.y);
+                    }
+                    if(bottomLeft == 1)
+                    {
+                        return distanceTop < distanceRight ? new Coordinates(position.x, position.y - distanceTop) : new Coordinates(position.x + distanceRight, position.y);
+                    }
+                    if(bottomRight == 1)
+                    {
+                        return distanceTop < distanceLeft ? new Coordinates(position.x, position.y - distanceTop) : new Coordinates(position.x - distanceLeft, position.y);
+                    }
+                }
+                return position;
+            }
+        }
+
+        public double DistanceFromObstacleX(double speed, double playerDirectionX, double playerCurrentX, double playerWidth)
         {
             double obstacleLeft = this.PositionX;
             double obstacleRight = this.PositionX + this.Width;
@@ -89,22 +186,23 @@ namespace JAKE.classlibrary
             {
                 // Player is moving right
                 double distanceToObstacle = obstacleLeft - playerRight;
-                return distanceToObstacle < playerDirectionX*gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle > playerDirectionX * speed ? distanceToObstacle : 0;
             }
             else if (playerDirectionX < 0)
             {
                 // Player is moving left
                 double distanceToObstacle = playerLeft - obstacleRight;
-                return distanceToObstacle > playerDirectionX*gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle > playerDirectionX * speed ? distanceToObstacle : 0;
             }
             else
             {
                 // Player is not moving horizontally
                 return 0;
             }
+
         }
 
-        public double DistanceFromObstacleY(GameStats gameStat, double playerDirectionY, double playerCurrentY, double playerHeight)
+        public double DistanceFromObstacleY(double speed, double playerDirectionY, double playerCurrentY, double playerHeight)
         {
             double obstacleTop = this.PositionY;
             double obstacleBottom = this.PositionY + this.Height;
@@ -116,13 +214,13 @@ namespace JAKE.classlibrary
             {
                 // Player is moving down
                 double distanceToObstacle = obstacleTop - playerBottom;
-                return distanceToObstacle < playerDirectionY * gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle < playerDirectionY * speed ? distanceToObstacle : 0;
             }
             else if (playerDirectionY < 0)
             {
                 // Player is moving up
                 double distanceToObstacle = playerTop - obstacleBottom;
-                return distanceToObstacle > playerDirectionY * gameStat.PlayerSpeed ? distanceToObstacle : 0;
+                return distanceToObstacle > playerDirectionY * speed ? distanceToObstacle : 0;
             }
             else
             {

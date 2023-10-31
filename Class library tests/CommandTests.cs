@@ -14,6 +14,7 @@ namespace Class_library_tests
         public CommandTests()
         {
             GameStats gameStats = GameStats.Instance;
+            gameStats.PlayerSpeed = 10;
             gameStats.WindowHeight = 500;
             gameStats.WindowWidth = 500;
         }
@@ -21,6 +22,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Execute_Move_Up()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveUp(player, new List<Obstacle>());
@@ -34,6 +36,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Undo_Move_Up()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveUp(player, new List<Obstacle>());
@@ -48,6 +51,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Execute_Move_Left()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveLeft(player, new List<Obstacle>());
@@ -61,6 +65,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Undo_Move_Left()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveLeft(player, new List<Obstacle>());
@@ -75,6 +80,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Execute_Move_Right()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveRight(player, new List<Obstacle>());
@@ -88,6 +94,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Undo_Move_Right()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveRight(player, new List<Obstacle>());
@@ -102,6 +109,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Execute_Move_Down()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveDown(player, new List<Obstacle>());
@@ -115,6 +123,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Undo_Move_Down()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveDown(player, new List<Obstacle>());
@@ -129,6 +138,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Controller_Execute()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveDown(player, new List<Obstacle>());
@@ -145,6 +155,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Controller_Execute_null()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveDown(player, new List<Obstacle>());
@@ -160,6 +171,7 @@ namespace Class_library_tests
         [Fact]
         public void Test_Controller_Execute_Undo()
         {
+            GameStats.Instance.PlayerSpeed = 10;
             Player player = new Player();
             player.SetCurrentPosition(50, 50);
             Command command = new MoveDown(player, new List<Obstacle>());

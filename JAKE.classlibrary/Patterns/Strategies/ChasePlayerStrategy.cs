@@ -42,36 +42,15 @@ namespace JAKE.classlibrary.Patterns.Strategies
 
                 double newX = enemyCurrent.x + directionX * enemySpeed;
                 double newY = enemyCurrent.y + directionY * enemySpeed;
-                Coordinates nextCoords = new Coordinates(newX, newY);
-                //checker.PositionNextToObstacle(enemyCurrent, direction, ref nextCoords);
-                //enemy.SetCurrentPosition(nextCoords.x, nextCoords.y);
-                bool CantMove = false;
+                Coordinates next = new Coordinates(newX, newY);
                 foreach (Obstacle obstacle in obstacles)
                 {
                     if (obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()))
                     {
-                        CantMove = true;
-
-                        // Stops at the wall of the direction that it's moving towards most
-                        directionX = Math.Abs(directionX) > Math.Abs(directionY) ? directionX < 0 ? -1 : 1 : 0;
-                        directionY = Math.Abs(directionY) > Math.Abs(directionX) ? directionY < 0 ? -1 : 1 : 0;
-
-                        double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
-                        if (distance != 0)
-                        {
-                            newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
-                            newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentY() + distance;
-
-                            enemy.SetCurrentPosition(newX, newY);
-                        }
-                        break;
+                        next = obstacle.MoveToClosestEdge(next, enemy.GetSize(), enemy.GetSize());
                     }
                 }
-                // Update enemy position based on direction and speed
-                if (!CantMove)
-                {
-                    enemy.SetCurrentPosition(newX, newY);
-                }
+                enemy.SetCurrentPosition(next.x, next.y);
             }
         }
     }

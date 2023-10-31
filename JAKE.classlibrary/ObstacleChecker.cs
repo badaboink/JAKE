@@ -53,39 +53,12 @@ namespace JAKE.classlibrary
         {
             bool overlap = false;
             GameStats gameStat = GameStats.Instance;
-            double minDistance = double.MaxValue;
             foreach (Obstacle obstacle in obstacles)
             {
                 if (obstacle.WouldOverlap(next.x, next.y, 50, 50))
                 {
                     overlap = true;
-                    double distanceX = obstacle.DistanceFromObstacleX(gameStat, direction.x, current.x, 50);
-                    double distanceY = obstacle.DistanceFromObstacleY(gameStat, direction.y, current.y, 50);
-                    double distance = distanceX * distanceX + distanceY * distanceY;
-                    if (distance < minDistance)
-                    {
-                        minDistance = distance;
-                    }
-                    else
-                    {
-                        continue;
-                    }
-                    // Move player to the closest edge of the obstacle
-                    next.x = current.x + distanceX;
-                    next.y = current.y + distanceY;
-
-                    // Adjust player position so that its side touches the obstacle's side
-                    if (direction.x < 0)
-                    {
-                        // Player is moving left, adjust X position
-                        next.x = current.x - distanceX;
-                    }
-
-                    if (direction.y < 0)
-                    {
-                        // Player is moving up, adjust Y position
-                        next.y = current.y - distanceY;
-                    }
+                    next = obstacle.MoveToClosestEdge(next, 50, 50);
                 }
             }
             double minX = 0; // Minimum X-coordinate
