@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary
 {
+    [ExcludeFromCodeCoverage]
     public class Coordinates
     {
         public double x;

@@ -10,7 +10,6 @@ using JAKE.classlibrary.Patterns;
 
 namespace JAKE.classlibrary.Shots
 {
-    [ExcludeFromCodeCoverage]
     public class Shot
     {
         private double _speed;
@@ -70,41 +69,48 @@ namespace JAKE.classlibrary.Shots
         {
             return _y;
         }
-
+        [ExcludeFromCodeCoverage]
         public void setSpeed(double speed)
         { 
             _speed = speed; 
         }
+        [ExcludeFromCodeCoverage]
         public void setColor(IColor color) 
         {
             _color = color;
         }
+        [ExcludeFromCodeCoverage]
         public void setShape(string shape)
         {
             _shape = shape;
         }
+        [ExcludeFromCodeCoverage]
         public void setSize(int size) 
         {
             _size = size;
         }
+        [ExcludeFromCodeCoverage]
         public void setPoints(double points) 
         {
             _points = points;
         }
+        [ExcludeFromCodeCoverage]
         public void setPosition(double x, double y) 
         { 
             _x = x;
             _y = y;
         }
+        [ExcludeFromCodeCoverage]
         public override string ToString()
         {
             return $"{getX()}:{getY()}";
         }
+        [ExcludeFromCodeCoverage]
         public void SetPreviousUpdate(DateTime time)
         {
             _previousUpdate = time;
         }
-
+        [ExcludeFromCodeCoverage]
         public double DeltaTime
         {
             get

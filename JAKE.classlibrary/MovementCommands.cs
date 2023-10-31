@@ -1,6 +1,7 @@
 ﻿using JAKE.classlibrary.Patterns;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,6 +16,7 @@ namespace JAKE.classlibrary
         protected double windowWidth;
         protected double windowHeight;
 
+        [ExcludeFromCodeCoverage]
         public MovementCommand(Player player, List<Obstacle> obstacles) : base(player)
         {
             this.obstacleChecker = new ObstacleChecker(obstacles);

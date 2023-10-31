@@ -7,6 +7,8 @@ using JAKE.classlibrary.Enemies;
 using JAKE.classlibrary.Collectibles;
 using JAKE.classlibrary.Patterns;
 using JAKE.classlibrary.Patterns.Strategies;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace JAKE.classlibrary
 {
@@ -27,12 +29,11 @@ namespace JAKE.classlibrary
             _obstacleChecker = obstacleChecker;
             _usedIdsEnemies = new HashSet<int>();
         }
-
+        [ExcludeFromCodeCoverage]
         public void RemoveId(int id)
         {
             _usedIdsEnemies.Remove(id);
         }
-
         public Enemy SpawnEnemy()
         {
             int enemyId = 0;

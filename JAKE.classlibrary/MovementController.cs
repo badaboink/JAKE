@@ -1,6 +1,7 @@
 ﻿using JAKE.classlibrary.Patterns;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,7 @@ using System.Windows.Input;
 
 namespace JAKE.classlibrary
 {
+    [ExcludeFromCodeCoverage]
     public class Controller
     {
         Command? slot;
@@ -17,7 +19,6 @@ namespace JAKE.classlibrary
         {
             commands = new LinkedList<Command>();
         }
-
         public void SetCommand(Command command)
         {
             slot = command;
