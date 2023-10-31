@@ -75,7 +75,6 @@ namespace Server.Hubs
                 DateTime startTime = _gameDataService.GetCurrentGameTime();
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
-                //Console.WriteLine($"Sending enemy update {DateTime.Now}");
 
 
                 _gameDataService.UpdateEnemyPositions();
@@ -99,7 +98,6 @@ namespace Server.Hubs
                 if (_gameDataService.GetSpeedBoosts().Count <= 2)
                 {
                     _gameDataService.AddSpeedBoost(5);
-                    Console.WriteLine("pridejo speed5");
                 }
                 if (!_gameDataService.IsBossAlive() && _gameDataService.GetEnemies().Count <= 20)
                 {
@@ -109,7 +107,6 @@ namespace Server.Hubs
             List<string> enemies = _gameDataService.GetEnemies();
             if (enemies.Count > 0)
             {
-                //Console.WriteLine($"Sending Enemies {Context.ConnectionId}");
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleEnemies(enemies);
             }
             List<string> coins = _gameDataService.GetCoins();
@@ -132,9 +129,6 @@ namespace Server.Hubs
             {
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleSpeedBoosts(speedBoosts);
             }
-
-
-
         }
         public async Task SendPickedCoin(string coin)
         {
@@ -259,7 +253,6 @@ namespace Server.Hubs
                 {
                     var connectionId = observerEntry.Key;
                     var observer = observerEntry.Value;
-                    Console.WriteLine($"{connectionId} vs {Context.ConnectionId}");
                     if (connectionId != Context.ConnectionId)
                     {
                         await observer.HandleEnemyUpdate(id, color, health);
@@ -267,7 +260,8 @@ namespace Server.Hubs
                 }
             }
         }
-
+        // only used to notify observer
+        [ExcludeFromCodeCoverage]
         public async Task ShotFired(int player_id, double directionX, double directionY)
         {
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
