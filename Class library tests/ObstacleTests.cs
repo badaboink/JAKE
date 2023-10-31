@@ -1,4 +1,5 @@
 ﻿using JAKE.classlibrary;
+using JAKE.classlibrary.Patterns;
 using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.Resources;
 using System;
 using System.Collections.Generic;
@@ -60,6 +61,70 @@ namespace Class_library_tests
             double distance = obstacle1.DistanceFromObstacle(a, b, c, d, e, f);
 
             Assert.Equal(expectedDistance, distance);
+        }
+        [Fact]
+        public void WouldOverlap_ShouldReturnFalse_WhenNoOverlapOccurs()
+        {
+            // Arrange
+            var obstacle = new Obstacle(5, 5, 10, 10);
+
+            // Act
+            bool result = obstacle.WouldOverlap(20, 20); // Coordinates that do not overlap with the obstacle
+
+            // Assert
+            Assert.False(result);
+        }
+        [Fact]
+        public void DistanceFromObstacleX_ShouldReturnPositiveDistance_WhenPlayerMovingRight()
+        {
+            // Arrange
+            var obstacle = new Obstacle(5, 5, 10, 10);
+            GameStats stats = GameStats.Instance;
+            stats.PlayerSpeed = 1;
+            double playerDirectionX = 1;
+            double playerCurrentX = 5;
+            double playerWidth = 2;
+
+            // Act
+            double result = obstacle.DistanceFromObstacleX(stats, playerDirectionX, playerCurrentX, playerWidth);
+
+            // Assert
+            Assert.True(result > 0);
+        }
+        [Fact]
+        public void DistanceFromObstacleX_ShouldReturnNegativeDistance_WhenPlayerMovingLeft()
+        {
+            // Arrange
+            var obstacle = new Obstacle(5, 5, 10, 10);
+            GameStats stats = GameStats.Instance;
+            stats.PlayerSpeed = 1;
+            double playerDirectionX = -1;
+            double playerCurrentX = 5;
+            double playerWidth = 2;
+
+            // Act
+            double result = obstacle.DistanceFromObstacleX(stats, playerDirectionX, playerCurrentX, playerWidth);
+
+            // Assert
+            Assert.True(result < 0);
+        }
+
+        [Fact]
+        public void DistanceFromObstacleX_ShouldReturnZero_WhenPlayerNotMovingHorizontally()
+        {
+            // Arrange
+            var obstacle = new Obstacle(5, 5, 10, 10);
+            GameStats stats = GameStats.Instance;
+            stats.PlayerSpeed = 1;
+            double playerDirectionX = 0;
+            double playerCurrentX = 5;
+            double playerWidth = 2;
+
+            // Act
+            double result = obstacle.DistanceFromObstacleX(stats, playerDirectionX, playerCurrentX, playerWidth);
+
+            // Assert
+            Assert.Equal(0, result);
         }
     }
 }
