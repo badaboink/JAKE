@@ -10,6 +10,13 @@ namespace Class_library_tests
 {
     public class ObstacleTests
     {
+        public static IEnumerable<object[]> TestData()
+        {
+            yield return new object[] { 0, -1, 0, 10, 5, 5, 0 };
+            yield return new object[] { 0, -1, 0, 0, 7, 5, 10 };
+            yield return new object[] { -1, -1, 5, 5, 5, 5, 5 };
+        }
+
         private readonly Obstacle obstacle1;
         public ObstacleTests()
         {
@@ -32,23 +39,25 @@ namespace Class_library_tests
         // obstacle is at 0;0 and 10x10
         // player is 5x5
         // player is at the bottom of the obstacle right by the edge of it
-        [Fact]
-        public void Test_DistanceFromObstacle_Returns_CorrectDistance_FromAbove()
+        [Theory]
+        [MemberData(nameof(TestData))]
+        public void Test_DistanceFromObstacle_Returns_CorrectDistance_FromAbove(int a, int b, double c, double d, double e, double f, double g)
         {
-            double expectedDistance = 0;
+            double expectedDistance = g;
             
-            double distance = obstacle1.DistanceFromObstacle(0, -1, 0, 10, 5, 5);
+            double distance = obstacle1.DistanceFromObstacle(a, b, c, d, e, f);
 
             Assert.Equal(expectedDistance, distance);
         }
         // player is on the right side of the obstacle
         // moving towards it
-        [Fact]
-        public void Test_DistanceFromObstacle_Returns_CorrectDistance_FromLeft()
+        [Theory]
+        [MemberData(nameof(TestData))]
+        public void Test_DistanceFromObstacle_Returns_CorrectDistance_FromLeft(int a, int b, double c, double d, double e, double f, double g)
         {
-            double expectedDistance = 10;
+            double expectedDistance = g;
 
-            double distance = obstacle1.DistanceFromObstacle(-1, 0, 0, 20, 5, 5);
+            double distance = obstacle1.DistanceFromObstacle(a, b, c, d, e, f);
 
             Assert.Equal(expectedDistance, distance);
         }
