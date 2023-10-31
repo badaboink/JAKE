@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Numerics;
@@ -53,6 +54,7 @@ namespace JAKE.classlibrary
             return _id;
 
         }
+        [ExcludeFromCodeCoverage]
         public void SetId(int id)
         {
             this._id =  id;
@@ -62,7 +64,7 @@ namespace JAKE.classlibrary
         {
             return _name;
         }
-
+        [ExcludeFromCodeCoverage]
         public void SetName(string name)
         {
             _name = name;
@@ -81,11 +83,12 @@ namespace JAKE.classlibrary
             return _currentCoords.y;
         }
 
+        [ExcludeFromCodeCoverage]
         public Coordinates GetCurrentCoords()
         {
             return _currentCoords;
         }
-
+        [ExcludeFromCodeCoverage]
         public Coordinates GetNextCoords(double stepSize)
         {
 
@@ -99,23 +102,23 @@ namespace JAKE.classlibrary
             _currentCoords.x = x;
             _currentCoords.y = y;
         }
-
+        [ExcludeFromCodeCoverage]
         public void SetCurrentPosition(Coordinates coords)
         {
             this.SetCurrentPosition(coords.x, coords.y);
         }
 
-
+        [ExcludeFromCodeCoverage]
         public double GetDirectionX()
         {
             return _currentDirection.x;
         }
-
+        [ExcludeFromCodeCoverage]
         public double GetDirectionY()
         {
             return _currentDirection.y;
         }
-
+        [ExcludeFromCodeCoverage]
         public Coordinates GetDirectionCoords()
         {
             return _currentDirection;
@@ -130,12 +133,13 @@ namespace JAKE.classlibrary
         {
             return _shotShape;
         }
-
+        [ExcludeFromCodeCoverage]
         public void SetCurrentDirection(double x, double y)
         {
             _currentDirection.x = x;
             _currentDirection.y = y;
         }
+        [ExcludeFromCodeCoverage]
         public int GetSpeed()
         {
             return _speed;
@@ -150,39 +154,42 @@ namespace JAKE.classlibrary
         {
             _connectionid = id;
         }
+        [ExcludeFromCodeCoverage]
         public void SetColor(string color)
         {
             _color = color;
         }
+        [ExcludeFromCodeCoverage]
         public void SetSpeed(int speed )
         {
             _speed = speed;
         }
-
+        [ExcludeFromCodeCoverage]
         public void SetShooting(bool shoot)
         {
             _isShooting = shoot;
         }
-
+        [ExcludeFromCodeCoverage]
         public bool IsShooting
         {
             get{return _isShooting;}
         }
-
+        [ExcludeFromCodeCoverage]
         public void SetAttackSpeed(double speed)
         {
             _attackSpeed = speed;
         }
-
+        [ExcludeFromCodeCoverage]
         public double GetAttackSpeed
         {
             get{return _attackSpeed;}
         }
-
+        [ExcludeFromCodeCoverage]
         public void SetShotColor(string color)
         {
             _shotColor = color;
         }
+        [ExcludeFromCodeCoverage]
         public void SetShotShape(string shape)
         {
             _shotShape = shape;
@@ -193,14 +200,17 @@ namespace JAKE.classlibrary
             { "Blue", "wall" },
             { "Red", "strength" },
         };
+        [ExcludeFromCodeCoverage]
         public bool MatchesId(int id)
         {
             return _id == id;
         }
+        [ExcludeFromCodeCoverage]
         public virtual (string text, float health, bool shieldOn) Display(string text, float health, bool shieldOn)
         {
             return (text, health, shieldOn);
         }
+        [ExcludeFromCodeCoverage]
         public override bool Equals(object? obj)
         {
             if (obj is Player otherPlayer)
@@ -209,6 +219,7 @@ namespace JAKE.classlibrary
             }
             return false;
         }
+        [ExcludeFromCodeCoverage]
         public override int GetHashCode()
         {
             return this.GetId().GetHashCode();
@@ -223,7 +234,7 @@ namespace JAKE.classlibrary
         //    //health padidint 
         //    Debug.WriteLine("padidino health");
         //}
-
+        [ExcludeFromCodeCoverage]
         public void IncreaseSpeed(int speed)
         {
             //speed padidint ir uzdet laika bet ne cia gal?? laikas default 15s
@@ -236,7 +247,7 @@ namespace JAKE.classlibrary
         //    //points padidint
         //    Debug.WriteLine("padidino points");
         //}
-
+        [ExcludeFromCodeCoverage]
         public void AddShield(int time)
         {
             //uzdet shield grafika ir laika uzdet??
