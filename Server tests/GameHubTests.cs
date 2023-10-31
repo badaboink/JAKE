@@ -47,7 +47,6 @@ namespace Server_tests
         public void ResetGameData()
         {
             IGameDataService memory = new InMemoryGameDataService();
-            // Update the game data service in the game hub
             var field = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
             field.SetValue(gameHub, memory);
         }
