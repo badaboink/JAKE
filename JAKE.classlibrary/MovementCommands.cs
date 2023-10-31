@@ -10,6 +10,7 @@ namespace JAKE.classlibrary
 
     public abstract class MovementCommand : Command
     {
+        protected Player _player;
         protected ObstacleChecker obstacleChecker;
         protected double windowWidth;
         protected double windowHeight;
@@ -17,6 +18,7 @@ namespace JAKE.classlibrary
         public MovementCommand(Player player, List<Obstacle> obstacles) : base(player)
         {
             this.obstacleChecker = new ObstacleChecker(obstacles);
+            this._player = player;
         }
 
         public override bool Execute()

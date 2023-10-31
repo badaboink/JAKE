@@ -832,7 +832,7 @@ namespace JAKE.client
             }
         }
 
-        private void HandlePlayerDeath(Player player)
+        public void HandlePlayerDeath(Player player)
         {
             if(player.Equals(currentPlayer))
             {
@@ -993,8 +993,7 @@ namespace JAKE.client
                 }
             }
         }
-
-       
+ 
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
         {
             bool CountKills = false;
