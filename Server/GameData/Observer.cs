@@ -25,12 +25,18 @@ namespace Server.GameData
         }
         public async Task HandleMoveUpdate(string player)
         {
-            await clientProxy.SendAsync("UpdateUsers", player);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("UpdateUsers", player);
+            }
         }
 
         public async Task HandleEnemyUpdate(int id, string color, int health)
         {
-            await clientProxy.SendAsync("UpdateEnemyHealth", id, color, health);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("UpdateEnemyHealth", id, color, health);
+            }
         }
 
         public async Task HandleShotFired(int player_id, double directionX, double directionY)
@@ -40,7 +46,10 @@ namespace Server.GameData
 
         public async Task HandleDeadEnemy(int id, string color)
         {
-            await clientProxy.SendAsync("UpdateDeadEnemy", id, color);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("UpdateDeadEnemy", id, color);
+            }
         }
         public async Task GameStart(Player newPlayer, string obstacles)
         {
@@ -51,46 +60,76 @@ namespace Server.GameData
         }
         public async Task HandleEnemies(List<string> enemies)
         {
-            await clientProxy.SendAsync("SendingEnemies", enemies);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingEnemies", enemies);
+            }
         }
         public async Task HandleDisconnectedPlayer(string player)
         {
-            await clientProxy.SendAsync("DisconnectedPlayer", player);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("DisconnectedPlayer", player);
+            }
         }
 
         public async Task HandleCoins(List<string> coins)
         {
-            await clientProxy.SendAsync("SendingCoins", coins);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingCoins", coins);
+            }
         }
         public async Task HandlePickedCoin(string id)
         {
-            await clientProxy.SendAsync("SendingPickedCoin", id);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingPickedCoin", id);
+            }
         }
         public async Task HandleShields(List<string> shields)
         {
-            await clientProxy.SendAsync("SendingShields", shields);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingShields", shields);
+            }
         }
         public async Task HandlePickedShield(int id)
         {
-            await clientProxy.SendAsync("SendingPickedShield", id);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingPickedShield", id);
+            }
         }
 
         public async Task HandleHealthBoosts(List<string> healthBoosts)
         {
-            await clientProxy.SendAsync("SendingHealthBoosts", healthBoosts);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingHealthBoosts", healthBoosts);
+            }
         }
         public async Task HandlePickedHealthBoost(int id)
         {
-            await clientProxy.SendAsync("SendingPickedHealthBoost", id);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingPickedHealthBoost", id);
+            }
         }
 
         public async Task HandleSpeedBoosts(List<string> speedBoosts)
         {
-            await clientProxy.SendAsync("SendingSpeedBoosts", speedBoosts);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingSpeedBoosts", speedBoosts);
+            }
         }
         public async Task HandlePickedSpeedBoost(int id)
         {
-            await clientProxy.SendAsync("SendingPickedSpeedBoost", id);
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingPickedSpeedBoost", id);
+            }
         }
 
     }

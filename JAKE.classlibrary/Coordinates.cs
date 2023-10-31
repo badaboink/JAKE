@@ -13,6 +13,7 @@ namespace JAKE.classlibrary
         public double x;
         public double y;
 
+        [ExcludeFromCodeCoverage]
         public Coordinates()
         {
         }

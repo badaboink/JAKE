@@ -57,7 +57,6 @@ namespace Class_library_tests
 
             Obstacle obstacle = new Obstacle(obstacleWidth, obstacleHeight, obstacleX, obstacleY);
             IColor color = new RedColor();
-            //IShape shape = new RoundShot();
             Shot shot = new Shot(color, 5, 10, 5);
             shot = new RoundShot(shot);
 
