@@ -83,6 +83,20 @@ namespace JAKE.classlibrary.Patterns
                 }
                 return instance;
             }
+            set
+            {
+                if (instance != null)
+                {
+                    lock (lockObject)
+                    {
+                        if (instance != null)
+                        {
+                            instance = null;
+                        }
+                    }
+                }
+                
+            }
         }
 
     }
