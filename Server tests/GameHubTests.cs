@@ -109,6 +109,7 @@ namespace Server_tests
         public async Task SendColor_AddsPlayer()
         {
             GameHub gameHub = fixture.gameHub;
+            await gameHub.OnConnectedAsync();
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
             Player expectedPlayer = new Player(1, "TestPlayer", "TestColor", "TestShotColor", "TestShotShape");

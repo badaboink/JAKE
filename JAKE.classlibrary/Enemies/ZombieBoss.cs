@@ -33,7 +33,6 @@ namespace JAKE.classlibrary.Enemies
             {
               
                 ZombieMinion zombieMinion = new ZombieMinion(id, "green", 10);
-                Console.WriteLine("Original minion hash: " + zombieMinion.GetHashCode());
                 zombieMinion.SetCurrentPosition(xx, yy);
                 zombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
                 //zombieMinion.SetMovementStrategy(new DontMoveStrategy());
@@ -45,7 +44,6 @@ namespace JAKE.classlibrary.Enemies
                 copyZombieMinion.SetId(id);
                 copyZombieMinion.SetCurrentPosition(xx, yy);
                 copyZombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
-                Console.WriteLine("Deep copy minion hash: " + copyZombieMinion.GetHashCode());
                 minions.Add(copyZombieMinion);
             }
         }

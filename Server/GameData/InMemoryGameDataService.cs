@@ -44,7 +44,6 @@ namespace Server.GameData
         public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
             int playerId = 0;
-            Console.WriteLine("addplayer inmemory");
             do
             {
                 playerId = new Random().Next(minId, maxId);
@@ -54,7 +53,6 @@ namespace Server.GameData
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);
-            Console.WriteLine("playerscount inmemorydataservce: " + players.Count);
             return newPlayer;
 
         }
