@@ -34,13 +34,14 @@ namespace JAKE.classlibrary
         public bool Move()
         {
             GameStats gameStat = GameStats.Instance;
+            double stepSize = gameStat.PlayerSpeed;
             Coordinates playerCurrent = player.GetCurrentCoords();
             Coordinates playerDirection = player.GetDirectionCoords();
-            double stepSize = gameStat.PlayerSpeed;
             Coordinates nextCoords = player.GetNextCoords(stepSize);
             obstacleChecker.PositionNextToObstacle(playerCurrent, playerDirection, ref nextCoords);
+            bool res = !(Math.Abs(playerCurrent.x - nextCoords.x) < 0.001 && Math.Abs(playerCurrent.y - nextCoords.y) < 0.001);
             player.SetCurrentPosition(nextCoords);
-            return !(Math.Abs(playerCurrent.x - nextCoords.x) < 0.001 && Math.Abs(playerCurrent.y - nextCoords.y) < 0.001);
+            return res;
         }
     }
     
