@@ -147,7 +147,6 @@ namespace Class_library_tests
         [Fact]
         public void Move_EnemyMovesAndSetsNewStrategy()
         {
-            // Arrange
             double moveDirectionX = 1.0;
             double moveDirectionY = 0.5;
             double enemySpeed = 5.0;
@@ -155,7 +154,6 @@ namespace Class_library_tests
             List<Obstacle> obstacles = new List<Obstacle>();
 
             var enemy = new Enemy(1, "Red", enemySpeed, 30, 25, 15); 
-            // Enemy is way out of where the obstacle is thus it should change strategies
             enemy.SetCurrentPosition(20, 20);
             var hoppingStrategy = new HoppingStrategy(moveDirectionX, moveDirectionY, obstacle, obstacles);
 

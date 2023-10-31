@@ -253,7 +253,6 @@ namespace Server.Hubs
                 {
                     var connectionId = observerEntry.Key;
                     var observer = observerEntry.Value;
-                    Console.WriteLine($"{connectionId} vs {Context.ConnectionId}");
                     if (connectionId != Context.ConnectionId)
                     {
                         await observer.HandleEnemyUpdate(id, color, health);
@@ -261,7 +260,8 @@ namespace Server.Hubs
                 }
             }
         }
-
+        // only used to notify observer
+        [ExcludeFromCodeCoverage]
         public async Task ShotFired(int player_id, double directionX, double directionY)
         {
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
