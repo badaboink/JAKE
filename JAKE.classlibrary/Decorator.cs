@@ -7,16 +7,19 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary
 {
-    public abstract class Decorator 
+    public abstract class Decorator : Player
     {
         protected Player wrapper;
+
         public Decorator(Player player)
         {
             wrapper = player;
         }
-        public virtual (string text, float health, bool shieldOn) Display(string text, float health, bool shieldOn)
+
+        public override (string text, float health, bool shieldOn) Display(float health)
         {
-            return wrapper.Display(text, health, shieldOn);
+            Debug.WriteLine("decorator atejo");
+            return wrapper.Display(health);
         }
     }
 }

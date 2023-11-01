@@ -8,12 +8,14 @@ using System.Threading.Tasks;
 namespace JAKE.classlibrary.Collectibles
 {
     [ExcludeFromCodeCoverage]
-    public class HealthAdd : Decorator
+    public class HealthDecorator : Decorator
     {
-        public HealthAdd(Player player) : base(player) { }
-        public (string text, float health, bool shieldOn) DisplayHealth(float health)
+        public HealthDecorator(Player player) : base(player) 
+        { 
+        }
+        public override (string text, float health, bool shieldOn) Display(float health)
         {           
-            return base.Display("", health, false);          
+            return base.Display(health);          
         }
     }
 }

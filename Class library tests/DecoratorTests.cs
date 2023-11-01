@@ -14,37 +14,28 @@ namespace Class_library_tests
         public void Test_DecorateText()
         {
             Player player = new Player();
-            Base text = new Base(player);
-            string decoratedText = text.DisplayObject("coin").text;
+            CoinDecorator text = new CoinDecorator(player);
+            string decoratedText = text.Display(10).text;
 
-            Assert.Equal("+10 POINTS!", decoratedText);
+            Assert.Equal("+10 Points!", decoratedText);
         }
         [Fact]
         public void Test_DecorateShield()
         {
             Player player = new Player();
-            ShieldOn shield = new ShieldOn(player);
-            bool isShieldOn = shield.DisplayShield().shieldOn;
+            ShieldDecorator shield = new ShieldDecorator(player);
+            bool isShieldOn = shield.Display(10).shieldOn;
 
             Assert.True(isShieldOn);
-        }
-        [Fact]
-        public void Test_HideShield()
-        {
-            Player player = new Player();
-            ShieldOn shield = new ShieldOn(player);
-            bool isShieldOn = shield.HideShield().shieldOn;
-
-            Assert.False(isShieldOn);
         }
         [Fact]
         public void Test_ShowHealthBar()
         {
             Player player = new Player();
-            HealthAdd health = new HealthAdd(player);
-            float heart = health.DisplayHealth(80).health;
+            HealthDecorator health = new HealthDecorator(player);
+            float heart = health.Display(80).health;
 
-            Assert.Equal(80, heart);
+            Assert.Equal(80 / 2, heart);
         }
 
 

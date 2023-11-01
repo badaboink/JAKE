@@ -24,6 +24,7 @@ namespace JAKE.classlibrary
         private string? _shotShape;
         private bool _isShooting = false;
         private double _attackSpeed;
+        private string _lastObjectPicked;
         public string? Ability { get; set; }
         
 
@@ -95,6 +96,14 @@ namespace JAKE.classlibrary
             double newX = _currentCoords.x + _currentDirection.x * stepSize;
             double newY = _currentCoords.y + _currentDirection.y * stepSize;
             return new Coordinates(newX, newY);
+        }
+        public string GetLastObjectPicked()
+        {
+            return _lastObjectPicked;
+        }
+        public void SetLastObjectPicked(string obj)
+        {
+            _lastObjectPicked = obj;
         }
 
         public void SetCurrentPosition(double x, double y)
@@ -206,9 +215,10 @@ namespace JAKE.classlibrary
             return _id == id;
         }
         [ExcludeFromCodeCoverage]
-        public virtual (string text, float health, bool shieldOn) Display(string text, float health, bool shieldOn)
+        public virtual (string text, float health, bool shieldOn) Display(float health)
         {
-            return (text, health, shieldOn);
+            Debug.WriteLine("player atejo");
+            return (GetLastObjectPicked(), health / 2, true);
         }
         [ExcludeFromCodeCoverage]
         public override bool Equals(object? obj)

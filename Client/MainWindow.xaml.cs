@@ -744,8 +744,8 @@ namespace JAKE.client
             timer.Interval = TimeSpan.FromSeconds(10);
             timer.Tick += (sender, args) =>
             {
-                ShieldOn shieldObj = new ShieldOn(currentPlayer);
-                bool shieldVisible = shieldObj.HideShield().shieldOn;
+                ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
+                bool shieldVisible = false; ;
                 if (!shieldVisible)
                 {
                     GameStats gameStat = GameStats.Instance;
@@ -792,10 +792,10 @@ namespace JAKE.client
                 gameStat.PlayerHealth -= 5;
                 healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
 
-                HealthAdd healthObj = new HealthAdd(currentPlayer);
+                HealthDecorator healthObj = new HealthDecorator(currentPlayer);
                 healthBar.Width = gameStat.PlayerHealth <= 0
-                                    ? healthObj.DisplayHealth(0).health
-                                    : healthObj.DisplayHealth(gameStat.PlayerHealth / 2).health;
+                                    ? healthObj.Display(0).health
+                                    : healthObj.Display(gameStat.PlayerHealth).health;
 
                 if (gameStat.PlayerHealth <= 0)
                 {
@@ -842,8 +842,8 @@ namespace JAKE.client
                         GameStats gameStat = GameStats.Instance;
                         coin.Interact(gameStat);
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-                        Base text = new Base(currentPlayer);
-                        testLabel.Text = text.DisplayObject("coin").text;
+                        Player text = new CoinDecorator(currentPlayer);
+                        testLabel.Text = text.Display(gameStat.PlayerHealth).text;
                         HideDisplay();
 
                         // Convert coin to a JSON string
@@ -870,16 +870,14 @@ namespace JAKE.client
 
                     if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, shieldX, shieldY, shieldRect.Height))
                     {
-
                         //TODO: dingsta kitas shield ne ta kuri paliecia
-                        
-                        Base baseObj = new Base(currentPlayer);
-                        testLabel.Text = baseObj.DisplayObject("shield").text;
-                        ShieldOn shieldObj = new ShieldOn(currentPlayer);
-                        bool shieldVisible = shieldObj.DisplayShield().shieldOn;
+                        GameStats gameStat = GameStats.Instance;
+                        Player text = new ShieldItemDecorator(currentPlayer);
+                        testLabel.Text = text.Display(gameStat.PlayerHealth).text;
+                        ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
+                        bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth).shieldOn;
                         if (shieldVisible)
                         {
-                            GameStats gameStat = GameStats.Instance;
                             shieldBorder.Visibility = Visibility.Visible;
                             gameStat.ShieldOn = true;
                             shield.Interact(gameStat);
@@ -912,8 +910,8 @@ namespace JAKE.client
                         if (gameStat.PlayerSpeed < 50)
                         {
                             speedBoost.Interact(gameStat);
-                            Base text = new Base(currentPlayer);
-                            testLabel.Text = text.DisplayObject("speed").text;
+                            Player text = new SpeedDecorator(currentPlayer);
+                            testLabel.Text = text.Display(gameStat.PlayerHealth).text;
                             HideDisplay();
                             StopSpeed();
                             await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
@@ -956,11 +954,11 @@ namespace JAKE.client
                         healthBoosts.Remove(healthBoost);
                         healthBoostsVisuals.Remove(healthBoost);
                         HealthBoostContainer.Children.Remove(healthBoostRect);
-                        Base text = new Base(currentPlayer);
-                        testLabel.Text = text.DisplayObject("health").text;
+                        Player text = new HealthBoostDecorator(currentPlayer);
+                        testLabel.Text = text.Display(gameStat.PlayerHealth).text;
                         HideDisplay();
-                        HealthAdd healthObj = new HealthAdd(currentPlayer);
-                        healthBar.Width = healthObj.DisplayHealth(gameStat.PlayerHealth/2).health;
+                        HealthDecorator healthObj = new HealthDecorator(currentPlayer);
+                        healthBar.Width = healthObj.Display(gameStat.PlayerHealth).health;
                         await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
                         isCollidingWithHealthBoost = false;
                     }
