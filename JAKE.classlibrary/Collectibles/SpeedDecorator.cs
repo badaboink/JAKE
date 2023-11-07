@@ -12,9 +12,9 @@ namespace JAKE.classlibrary.Collectibles
         {
             player.SetLastObjectPicked("TUTUTURU Max Verstappen!");
         }
-        public override (string text, float health, bool shieldOn) Display(float health)
+        public override (string text, float health, bool shieldOn) Display(float health, bool shield)
         {
-            return base.Display(health);
+            return base.Display(health, shield);
         }
     }
 }

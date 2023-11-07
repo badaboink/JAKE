@@ -794,8 +794,8 @@ namespace JAKE.client
 
                 HealthDecorator healthObj = new HealthDecorator(currentPlayer);
                 healthBar.Width = gameStat.PlayerHealth <= 0
-                                    ? healthObj.Display(0).health
-                                    : healthObj.Display(gameStat.PlayerHealth).health;
+                                    ? healthObj.Display(0, gameStat.ShieldOn).health
+                                    : healthObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
 
                 if (gameStat.PlayerHealth <= 0)
                 {
@@ -843,7 +843,7 @@ namespace JAKE.client
                         coin.Interact(gameStat);
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
                         Player text = new CoinDecorator(currentPlayer);
-                        testLabel.Text = text.Display(gameStat.PlayerHealth).text;
+                        testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
                         HideDisplay();
 
                         // Convert coin to a JSON string
@@ -873,9 +873,9 @@ namespace JAKE.client
                         //TODO: dingsta kitas shield ne ta kuri paliecia
                         GameStats gameStat = GameStats.Instance;
                         Player text = new ShieldItemDecorator(currentPlayer);
-                        testLabel.Text = text.Display(gameStat.PlayerHealth).text;
+                        testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
                         ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
-                        bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth).shieldOn;
+                        bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).shieldOn;
                         if (shieldVisible)
                         {
                             shieldBorder.Visibility = Visibility.Visible;
@@ -911,7 +911,7 @@ namespace JAKE.client
                         {
                             speedBoost.Interact(gameStat);
                             Player text = new SpeedDecorator(currentPlayer);
-                            testLabel.Text = text.Display(gameStat.PlayerHealth).text;
+                            testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
                             HideDisplay();
                             StopSpeed();
                             await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
@@ -954,11 +954,11 @@ namespace JAKE.client
                         healthBoosts.Remove(healthBoost);
                         healthBoostsVisuals.Remove(healthBoost);
                         HealthBoostContainer.Children.Remove(healthBoostRect);
-                        Player text = new HealthBoostDecorator(currentPlayer);
-                        testLabel.Text = text.Display(gameStat.PlayerHealth).text;
+                        Player health = new HealthBoostDecorator(currentPlayer);
+                        testLabel.Text = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
                         HideDisplay();
-                        HealthDecorator healthObj = new HealthDecorator(currentPlayer);
-                        healthBar.Width = healthObj.Display(gameStat.PlayerHealth).health;
+                        health = new HealthDecorator(currentPlayer);
+                        healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
                         await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
                         isCollidingWithHealthBoost = false;
                     }

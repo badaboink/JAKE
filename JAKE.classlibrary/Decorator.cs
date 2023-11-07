@@ -16,10 +16,9 @@ namespace JAKE.classlibrary
             wrapper = player;
         }
 
-        public override (string text, float health, bool shieldOn) Display(float health)
+        public override (string text, float health, bool shieldOn) Display(float health, bool shield)
         {
-            Debug.WriteLine("decorator atejo");
-            return wrapper.Display(health);
+            return wrapper.Display(health, shield);
         }
     }
 }

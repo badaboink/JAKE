@@ -215,10 +215,9 @@ namespace JAKE.classlibrary
             return _id == id;
         }
         [ExcludeFromCodeCoverage]
-        public virtual (string text, float health, bool shieldOn) Display(float health)
+        public virtual (string text, float health, bool shieldOn) Display(float health, bool shield)
         {
-            Debug.WriteLine("player atejo");
-            return (GetLastObjectPicked(), health / 2, true);
+            return (GetLastObjectPicked(), health / 2, shield);
         }
         [ExcludeFromCodeCoverage]
         public override bool Equals(object? obj)

@@ -14,9 +14,10 @@ namespace JAKE.classlibrary.Collectibles
         { 
 
         }
-        public override (string text, float health, bool shieldOn) Display(float health)
-        {          
-            return base.Display(health);        
+        public override (string text, float health, bool shieldOn) Display(float health, bool shield)
+        {
+            shield = true;
+            return base.Display(health, shield);        
         }
     }
 }
