@@ -55,9 +55,7 @@ namespace JAKE.client
         private Dictionary<Shield, ShieldVisual> shieldVisuals = new Dictionary<Shield, ShieldVisual>();
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
         private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
-        private List<Weapon> weapons = new List<Weapon>();
         private readonly object enemyListLock = new object();
-        //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         Controller controller = new Controller();
 
 
@@ -363,8 +361,6 @@ namespace JAKE.client
                         int coinId = int.Parse(parts[0]);
                         double coinX = double.Parse(parts[1]);
                         double coinY = double.Parse(parts[2]);
-                        int coinWidth = int.Parse(parts[3]);
-                        int coinHeight = int.Parse(parts[4]);
                         int points = int.Parse(parts[5]);
                         Coin coin = new Coin(coinId, coinX, coinY, points, image);
                         if (!coins.Contains(coin))
@@ -422,8 +418,6 @@ namespace JAKE.client
                         int shieldId = int.Parse(parts[0]);
                         double shieldX = double.Parse(parts[1]);
                         double shieldY = double.Parse(parts[2]);
-                        int shieldWidth = int.Parse(parts[3]);
-                        int shieldHeight = int.Parse(parts[4]);
                         int time = int.Parse(parts[5]);
                         Shield shield = new Shield(shieldId, shieldX, shieldY, time, image);
                         
@@ -477,8 +471,6 @@ namespace JAKE.client
                         int healthId = int.Parse(parts[0]);
                         double healthX = double.Parse(parts[1]);
                         double healthY = double.Parse(parts[2]);
-                        int healthWidth = int.Parse(parts[3]);
-                        int healthHeight = int.Parse(parts[4]);
                         int healthVal = int.Parse(parts[5]);
                         HealthBoost health = new HealthBoost(healthId, healthX, healthY, healthVal, image);
                         if (!healthBoosts.Contains(health))
@@ -527,8 +519,6 @@ namespace JAKE.client
                         int speedId = int.Parse(parts[0]);
                         double speedX = double.Parse(parts[1]);
                         double speedY = double.Parse(parts[2]);
-                        int speedWidth = int.Parse(parts[3]);
-                        int speedHeight = int.Parse(parts[4]);
                         int speedVal = int.Parse(parts[5]);
                         int time = int.Parse(parts[6]);
                         SpeedBoost speed = new SpeedBoost(speedId, speedX, speedY, speedVal, image);
@@ -716,8 +706,6 @@ namespace JAKE.client
             timer.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
-                //heartLabel.Visibility = Visibility.Hidden;
-                //shieldBorder.Visibility = Visibility.Hidden;
                 timer.Stop();
             };
 
@@ -941,8 +929,6 @@ namespace JAKE.client
                     if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, healthBoostX, healthBoostY, healthBoostRect.Height))
                     {
                         isCollidingWithHealthBoost = true;
-                        //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
-                        //healthBoost.Interact(player, healthBoost.Health);
                         GameStats gameStat = GameStats.Instance;
                         healthBoost.Interact(gameStat);
                         if (gameStat.PlayerHealth > 100)

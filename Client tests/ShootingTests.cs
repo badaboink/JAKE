@@ -23,7 +23,6 @@ namespace Class_library_tests
             // Arrange
             Shot shot;
 
-            //MainWindow a = new MainWindow();
 
             // Act
             MainWindow.SingleShot(10,10,10,10, "red", "triangle", out shot);  // spalvos kodas cia (melyna)
@@ -81,7 +80,6 @@ namespace Class_library_tests
 
             Obstacle obstacle = new Obstacle(obstacleWidth, obstacleHeight, obstacleX, obstacleY);
             IColor color = new RedColor();
-            //IShape shape = new RoundShot();
             Shot shot = new Shot(color, 5, 10, 5);
             shot = new TriangleShot(shot);
             // Act

@@ -8,7 +8,7 @@ namespace JAKE.classlibrary.Patterns
 {
     public class ConsoleAdapter : IStringAdapter
     {
-        private ConsoleAdaptee _consoleConverter = new ConsoleAdaptee();
+        private readonly ConsoleAdaptee _consoleConverter = new ConsoleAdaptee();
 
         public string Convert(string inputString)
         {

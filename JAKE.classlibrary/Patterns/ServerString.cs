@@ -11,7 +11,7 @@ namespace JAKE.classlibrary
     {
         public string ConvertedString { get; }
 
-        private IStringAdapter _adapter;
+        private readonly IStringAdapter _adapter;
 
         public ServerString(string inputString)
         {
@@ -19,9 +19,9 @@ namespace JAKE.classlibrary
             {
                 _adapter = new JsonAdapter();
             }
-            else if (inputString.StartsWith("<") && inputString.EndsWith(">"))
+            else if (inputString.StartsWith('<') && inputString.EndsWith('>'))
             {
-                _adapter = new XMLAdapter();
+                _adapter = new XmlAdapter();
             }
             else if (inputString.Contains(":") && inputString.Contains(","))
             {

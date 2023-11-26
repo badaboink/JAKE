@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace JAKE.classlibrary.Patterns
 {
-    public class XMLAdaptee
+    public class XmlAdaptee
     {
         public string ConvertFromXML(string xmlString)
         {

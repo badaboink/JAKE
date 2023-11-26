@@ -88,5 +88,10 @@ namespace JAKE.classlibrary.Collectibles
                 return stringwriter.ToString();
             }
         }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

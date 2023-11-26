@@ -14,9 +14,6 @@ namespace UI_tests
             string jakeClientPath = GetJakeClientPath();
             var msApplication = Application.Launch(jakeClientPath);
 
-            //var msApplication = JakeClientHelper.LaunchJakeClient();
-            //var automation = new UIA3Automation();
-            //var mainWindow = msApplication.GetMainWindow(automation);
             return msApplication;
         }
         private static string GetJakeClientPath()
