@@ -23,6 +23,9 @@ namespace JAKE.classlibrary.Patterns
                     return new Shield(value);
                 case "speedboost":
                     return new SpeedBoost(value);
+                case "corona":
+                    return new Corona();
+
                 default:
                     throw new ArgumentException("Invalid object type");
             }

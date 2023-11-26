@@ -81,6 +81,10 @@ namespace Server.Hubs
                 {
                     _gameDataService.AddCoin(10);
                 }
+                if (_gameDataService.GetCoronas().Count <= 1)
+                {
+                    _gameDataService.AddCorona();
+                }
                 if (_gameDataService.GetShields().Count <= 2)
                 {
                     _gameDataService.AddShield(30);
@@ -107,6 +111,11 @@ namespace Server.Hubs
             if (coins.Count > 0)
             {
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleCoins(coins);
+            }
+            List<string> coronas = _gameDataService.GetCoronas();
+            if (coronas.Count > 0)
+            {
+                await _gameDataService.GetObservers()[Context.ConnectionId].HandleCoronas(coronas);
             }
             List<string> shields = _gameDataService.GetShields();
             if (shields.Count > 0)
@@ -148,7 +157,28 @@ namespace Server.Hubs
 
             }
         }
+        public async Task SendPickedCorona(string corona)
+        {
+            string[] parts = corona.Split(':');
+            if (parts.Length == 5)
+            {
+                int id = int.Parse(parts[0]);
 
+                Console.WriteLine("coronas pries remove: " + _gameDataService.GetCoronas().Count);
+                _gameDataService.RemoveCorona(id);
+                Console.WriteLine("coronas po remove: " + _gameDataService.GetCoronas().Count);
+                Console.WriteLine("remeovino corona");
+
+
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var observer = observerEntry.Value;
+                    await observer.HandlePickedCorona(id);
+                }
+
+            }
+        }
         public async Task SendPickedShield(string shield)
         {
             string[] parts = shield.Split(':');

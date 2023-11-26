@@ -72,7 +72,20 @@ namespace Server.GameData
                 await clientProxy.SendAsync("DisconnectedPlayer", player);
             }
         }
-
+        public async Task HandleCoronas(List<string> coronas)
+        {
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingCoronas", coronas);
+            }
+        }
+        public async Task HandlePickedCorona(int id)
+        {
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingPickedCorona", id);
+            }
+        }
         public async Task HandleCoins(List<string> coins)
         {
             if (clientProxy != null)

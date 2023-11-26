@@ -46,7 +46,9 @@ namespace Server.GameData
         SpeedBoost AddSpeedBoost(int speed);
         void RemoveSpeedBoost(int id);
         List<string> GetSpeedBoosts();
-
+        Corona AddCorona();
+        void RemoveCorona(int id);
+        List<string> GetCoronas();
         Coin returnCoin(int id);
         Enemy AddZombieBoss();
         bool IsBossAlive();

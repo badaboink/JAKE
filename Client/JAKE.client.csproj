@@ -10,6 +10,7 @@
   <ItemGroup>
     <None Remove="coin.png" />
     <None Remove="images\coin.png" />
+    <None Remove="images\corona.png" />
     <None Remove="images\healthboost.png" />
     <None Remove="images\shield.png" />
     <None Remove="images\speedboost.png" />
@@ -29,6 +30,7 @@
 
   <ItemGroup>
     <Resource Include="images\coin.png" />
+    <Resource Include="images\corona.png" />
     <Resource Include="images\healthboost.png" />
     <Resource Include="images\shield.png" />
     <Resource Include="images\speedboost.png" />

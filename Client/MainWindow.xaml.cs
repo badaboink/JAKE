@@ -56,6 +56,8 @@ namespace JAKE.client
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
         private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
         private List<Weapon> weapons = new List<Weapon>();
+        private List<Corona> coronas = new List<Corona>();
+        private Dictionary<Corona, CoronaVisual> coronaVisuals = new Dictionary<Corona, CoronaVisual>();
         private readonly object enemyListLock = new object();
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         Controller controller = new Controller();
@@ -386,6 +388,40 @@ namespace JAKE.client
                 }
 
             });
+            connection.On<List<string>>("SendingCoronas", (coronasdata) =>
+            {
+                string image = "corona.png";
+                foreach (string coronastring in coronasdata)
+                {
+                    string[] parts = coronastring.Split(':');
+                    if (parts.Length == 5)
+                    {
+                        int coronaId = int.Parse(parts[0]);
+                        double coronaX = double.Parse(parts[1]);
+                        double coronaY = double.Parse(parts[2]);
+                        int coronaWidth = int.Parse(parts[3]);
+                        int coronaHeight = int.Parse(parts[4]);
+                        
+                        Corona corona = new Corona(coronaId, coronaX, coronaY, image);
+                        if (!coronas.Contains(corona))
+                        {
+                            coronas.Add(corona);
+                            Dispatcher.Invoke(() =>
+                            {
+
+                                CoronaVisual coronaVisual = new CoronaVisual();
+                                Canvas.SetLeft(coronaVisual, coronaX);
+                                Canvas.SetTop(coronaVisual, coronaY);
+                                coronaVisuals[corona] = coronaVisual;
+                                CoronaContainer.Children.Add(coronaVisual);
+
+                                HandleCoronaCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                    }
+                }
+
+            });
 
             connection.On<string>("SendingPickedCoin", (coinObj) =>
             {
@@ -410,7 +446,34 @@ namespace JAKE.client
                        
                 });
             });
-          
+            connection.On<int>("SendingPickedCorona", (coronaID) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    foreach (var pair in coronaVisuals)
+                    {
+                        Debug.WriteLine("ieina i pickedcorona");
+                        Corona corona = pair.Key;
+                        CoronaVisual coronaVisual = pair.Value;
+                        Debug.WriteLine("key id: " + corona.id);
+                        Debug.WriteLine("server  id: " + coronaID);
+                        if (corona.id == coronaID)
+                        {
+                            Debug.WriteLine("removina corona pries");
+                            Debug.WriteLine("coroniukiu pries: " + coronas.Count);
+                            Debug.WriteLine("coroniukiu visulas pries: " + coronaVisuals.Count);
+                            coronas.Remove(corona);
+                            coronaVisuals.Remove(corona);
+                            CoronaContainer.Children.Remove(coronaVisual);
+                            Debug.WriteLine("coroniukiu po: " + coronas.Count);
+                            Debug.WriteLine("coroniukiu visulas po: " + coronaVisuals.Count);
+                            break;
+                        }
+                    }
+
+                });
+            });
+
             connection.On<List<string>>("SendingShields", (shieldsdata) =>
             {
                 string image = "shield.png";
@@ -641,6 +704,7 @@ namespace JAKE.client
                 UpdateTextLabelPosition();
                 HandleEnemyCollisions(playerVisuals[currentPlayer]);
                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                HandleCoronaCollisions(playerVisuals[currentPlayer]);
                 HandleShieldsCollisions(playerVisuals[currentPlayer]);
                 HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
                 HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
@@ -854,7 +918,37 @@ namespace JAKE.client
                 }
             }
         }
-        
+
+        private async void HandleCoronaCollisions(PlayerVisual playerVisual)
+        {
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
+            List<Corona> coronasCopy = new List<Corona>(coronas);
+
+            foreach (Corona corona in coronasCopy)
+            {
+                if (coronaVisuals.ContainsKey(corona))
+                {
+                    CoronaVisual coronaRect = coronaVisuals[corona];
+                    double coronaX = Canvas.GetLeft(coronaRect);
+                    double coronaY = Canvas.GetTop(coronaRect);
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coronaX, coronaY, coronaRect.Height))
+                    {
+                        GameStats gameStat = GameStats.Instance;
+                        corona.Interact(gameStat);
+                        Debug.WriteLine("AJAJAJAJ CORONA");
+                        Debug.WriteLine("state: " + gameStat.state);
+
+                        // Convert coin to a JSON string
+
+                        //-----------
+                        Debug.WriteLine("tostring: " + corona.ToString());
+                        await connection.SendAsync("SendPickedCorona", corona.ToString());
+                    }
+                }
+            }
+        }
+
         private async void HandleShieldsCollisions(PlayerVisual playerVisual)
         {
             double playerX = Canvas.GetLeft(playerVisual);

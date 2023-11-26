@@ -23,7 +23,7 @@ namespace Server.GameData
         private List<HealthBoost> healthBoosts = new List<HealthBoost>();
         private List<Shield> shields = new List<Shield>();
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
-        private List<Weapon> weapons = new List<Weapon>();
+        private List<Corona> coronas = new List<Corona>();
         public MapObjectFactory objectFactory = new MapObjectFactory();
         public ZombieFactory zombieFactory = new ZombieFactory();
         public ObstacleChecker obstacleChecker;
@@ -217,6 +217,52 @@ namespace Server.GameData
             playerToUpdate.SetColor("Black");
         }
         private readonly object coinsListLock = new object();
+        private readonly object coronalock = new object();
+        public Corona AddCorona()
+        {
+            lock (coronalock)
+            {
+                Random random = new Random();
+                double x = 0, y = 0;
+                bool overlap = true;
+                Corona corona = (Corona)objectFactory.CreateMapObject("corona", 0);
+
+                while (overlap)
+                {
+                    x = random.Next(0, 1536);
+                    y = random.Next(0, 800);
+
+                    // Check for overlap with obstacles
+                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, corona.Width, corona.Height));
+                }
+
+                corona.SetPosition(x, y);
+                Console.WriteLine("coronacount: " + coronas.Count);
+                corona.id = coronas.Count + 1;
+                coronas.Add(corona);
+                return corona;
+            }
+        }
+        public void RemoveCorona(int id)
+        {
+            lock (coronalock)
+            {
+                Corona coronaToRemove = coronas.FirstOrDefault(corona => corona.MatchesId(id));
+                if (coronaToRemove != null)
+                {
+                    coronas.Remove(coronaToRemove);
+                }
+            }
+        }
+        public List<string> GetCoronas()
+        {
+            lock (coronalock)
+            {
+                return coronas.Select(corona => corona.ToString()).ToList();
+            }
+        }
+
+       
         public Coin AddCoin(int points)
         {
             //Console.WriteLine("ADDCOIN inemmory");
