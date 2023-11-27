@@ -13,11 +13,9 @@ namespace JAKE.classlibrary.Enemies
     {
         private int _id;
         private double _speed;
-        private string _color;
-        private Coordinates coordinates;
-        private Trigger trigger = new Trigger();
-        private double _currentX;
-        private double _currentY;
+        private readonly string _color;
+        private readonly Coordinates coordinates;
+        private readonly Trigger trigger = new Trigger();
         private int _health;
         private int _size;
         private int _points;
@@ -163,10 +161,5 @@ namespace JAKE.classlibrary.Enemies
         {
             return $"{GetId()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetHealth()}:{GetSize()}";
         }
-
-        //public Enemy DeepClone()
-        //{
-        //    throw new NotImplementedException();
-        //}
     }
 }

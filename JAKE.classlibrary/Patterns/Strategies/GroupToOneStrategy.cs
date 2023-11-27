@@ -10,8 +10,8 @@ namespace JAKE.classlibrary.Patterns.Strategies
 {
     public class GroupToOneStrategy : IMoveStrategy
     {
-        private List<Obstacle> obstacles;
-        private Enemy King;
+        private readonly List<Obstacle> obstacles;
+        private readonly Enemy King;
         public GroupToOneStrategy(List<Obstacle> obstacles, Enemy king)
         {
             this.obstacles = obstacles;

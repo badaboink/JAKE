@@ -10,7 +10,7 @@ namespace JAKE.classlibrary.Patterns.Strategies
 {
     public class ChaseAndHopStrategy : IMoveStrategy
     {
-        private List<Obstacle> obstacles;
+        private readonly List<Obstacle> obstacles;
         public ChaseAndHopStrategy(List<Obstacle> obstacles)
         {
             this.obstacles = obstacles;

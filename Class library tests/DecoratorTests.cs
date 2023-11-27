@@ -35,7 +35,7 @@ namespace Class_library_tests
             HealthDecorator health = new HealthDecorator(player);
             float heart = health.Display(80, false).health;
 
-            Assert.Equal(80 / 2, heart);
+            Assert.Equal(80.0F / 2, heart);
         }
 
 

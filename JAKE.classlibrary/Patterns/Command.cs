@@ -10,7 +10,7 @@ namespace JAKE.classlibrary.Patterns
     public abstract class Command
     {
         protected Player player;
-        public Command(Player player)
+        protected Command(Player player)
         {
             this.player = player;
         }

@@ -12,10 +12,10 @@ namespace JAKE.classlibrary.Patterns.Strategies
     [ExcludeFromCodeCoverage]
     public class CircleStrategy : IMoveStrategy
     {
-        private double radius;
+        private readonly double radius;
         private double angle;
-        private Enemy center;
-        List<Obstacle> obstacles;
+        private readonly Enemy center;
+        readonly List<Obstacle> obstacles;
 
         public CircleStrategy(double radius, double angle, Enemy center, List<Obstacle> obstacles)
         {

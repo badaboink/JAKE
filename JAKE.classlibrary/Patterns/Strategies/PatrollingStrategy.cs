@@ -11,13 +11,13 @@ namespace JAKE.classlibrary.Patterns.Strategies
 {
     public class PatrollingStrategy : IMoveStrategy
     {
-        private List<Obstacle> obstacles;
-        private Random random;
+        private readonly List<Obstacle> obstacles;
+        private readonly Random random;
         private int directionX;
         private int directionY;
-        private double maxX;
-        private double maxY;
-        private double enemySpeed;
+        private readonly double maxX;
+        private readonly double maxY;
+        private readonly double enemySpeed;
         public PatrollingStrategy(double maxX, double maxY, double enemySpeed, List<Obstacle> obstacles)
         {
             random = new Random();

@@ -10,10 +10,10 @@ namespace JAKE.classlibrary.Patterns.Strategies
 {
     public class HoppingStrategy : IMoveStrategy
     {
-        private double moveDirectionX;
-        private double moveDirectionY;
-        private Obstacle obstacle;
-        private List<Obstacle> obstacles;
+        private readonly double moveDirectionX;
+        private readonly double moveDirectionY;
+        private readonly Obstacle obstacle;
+        private readonly List<Obstacle> obstacles;
 
         public HoppingStrategy(double moveDirectionX, double moveDirectionY, Obstacle obstacle, List<Obstacle> obstacles)
         {

@@ -11,8 +11,8 @@ namespace JAKE.classlibrary.Enemies
 {
     public class ZombieBoss : Boss
     {
-        private List<ZombieMinion> minions = new List<ZombieMinion>();
-        private int maxMinions;
+        private readonly List<ZombieMinion> minions = new List<ZombieMinion>();
+        private readonly int maxMinions;
         public ZombieBoss(int id, string color, double speed = 2, int health = 20, int size = 20) : base(id, color, speed, health, size)
         {
             maxMinions = 8;
@@ -35,7 +35,6 @@ namespace JAKE.classlibrary.Enemies
                 ZombieMinion zombieMinion = new ZombieMinion(id, "green", 10);
                 zombieMinion.SetCurrentPosition(xx, yy);
                 zombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
-                //zombieMinion.SetMovementStrategy(new DontMoveStrategy());
                 minions.Add(zombieMinion);
             }
             else
