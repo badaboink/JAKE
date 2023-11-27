@@ -10,7 +10,6 @@ namespace Server_tests
     public class InMemoryGameDataServiceTests
     {
         private readonly InMemoryGameDataService gameDataService;
-        private List<Enemy> enemies = new List<Enemy>();
         
         public InMemoryGameDataServiceTests()
         {
@@ -42,7 +41,9 @@ namespace Server_tests
             string shotColor = "red";
             string shotShape = "round";
             Player player1 = gameDataService.AddPlayer(playerName, playerColor, shotColor, shotShape, connectionID);
+#pragma warning disable CS8604 // Possible null reference argument.
             Player player2 = gameDataService.RemovePlayer(player1.GetConnectionId());
+#pragma warning restore CS8604 // Possible null reference argument.
             Assert.Equal(player1.GetId(), player2.GetId());
             Assert.Equal(player1.GetName(), player2.GetName());
             Assert.Equal(player1.GetColor(), player2.GetColor());
@@ -160,7 +161,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_Enemies()
         {
-            Enemy enemy = gameDataService.AddEnemies();
+            gameDataService.AddEnemies();
             int actual = gameDataService.GetEnemies().Count;
             int expected = 1;
 

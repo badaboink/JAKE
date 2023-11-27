@@ -10,8 +10,12 @@ namespace JAKE.classlibrary
     [ExcludeFromCodeCoverage]
     public class Coordinates
     {
+#pragma warning disable S1104 // Fields should not have public accessibility
         public double x;
+#pragma warning restore S1104 // Fields should not have public accessibility
+#pragma warning disable S1104 // Fields should not have public accessibility
         public double y;
+#pragma warning restore S1104 // Fields should not have public accessibility
 
         [ExcludeFromCodeCoverage]
         public Coordinates()
@@ -27,7 +31,9 @@ namespace JAKE.classlibrary
 
     public class Trigger
     {
+#pragma warning disable S1104 // Fields should not have public accessibility
         public bool trigger;
+#pragma warning restore S1104 // Fields should not have public accessibility
         public Trigger()
         {
             trigger = false;

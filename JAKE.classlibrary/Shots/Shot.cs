@@ -22,7 +22,9 @@ namespace JAKE.classlibrary.Shots
         private string _shape;
 
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Shot(IColor color, double speed, int size, double points)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {         
             _color = color;
             _speed = speed;
@@ -31,7 +33,9 @@ namespace JAKE.classlibrary.Shots
             _previousUpdate = DateTime.Now;
         }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Shot(Shot shot)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             _color = shot.getColor();
             _speed = shot.getSpeed();

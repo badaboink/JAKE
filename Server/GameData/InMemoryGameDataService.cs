@@ -56,8 +56,12 @@ namespace Server.GameData
         }
         public Player RemovePlayer(string connectionID)
         {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player playerToRemove = players.Find(player => player.GetConnectionId() == connectionID);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             _ = usedIds.Remove(item: playerToRemove.GetId());
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             players.Remove(playerToRemove);
             return playerToRemove;
         }
@@ -65,7 +69,9 @@ namespace Server.GameData
 
         public void EditPlayerPosition(int id, double x, double y)
         {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player playerToEdit = players.Find(p => p.GetId() == id);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             playerToEdit.SetCurrentPosition(x, y);
         }
 
@@ -73,7 +79,9 @@ namespace Server.GameData
         {
             Player player = players.Find(p => p.GetId() == id);
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             return player.ToString();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         public List<string> GetPlayerList()
@@ -128,11 +136,15 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 Enemy enemyToUpdate = enemies.Find(enemy => enemy.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (enemyToUpdate != null)
                 {
                     enemyToUpdate.SetHealth(health);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     IMoveStrategy currentStrategy = enemyToUpdate.GetCurrentMovementStrategy();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                     if (currentStrategy is PatrollingStrategy || currentStrategy is CircleStrategy)
                     {
                         enemyToUpdate.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
@@ -150,7 +162,9 @@ namespace Server.GameData
                 {
                     bossId = -1;
                 }
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 Enemy enemyToRemove = enemies.Find(enemy => enemy.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (enemyToRemove != null)
                 {
                     enemies.Remove(enemyToRemove);
@@ -173,13 +187,17 @@ namespace Server.GameData
                 foreach (var enemy in enemies)
                 { 
                     enemy.Move(players);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     Debug.WriteLine("{0} {1}", enemy.GetCurrentMovementStrategy().GetType().ToString(), enemy.ToString());
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
                 return enemies.Select(enemy => enemy.ToString()).ToList();
             }
         }
 
+#pragma warning disable CS8603 // Possible null reference return.
         public Coin ReturnCoin(int id) => coins.Find(coin => coin.id == id);
+#pragma warning restore CS8603 // Possible null reference return.
         public DateTime GetCurrentGameTime()
         {
             return gametime;
@@ -207,7 +225,9 @@ namespace Server.GameData
         {
             Player playerToUpdate = players.Find(p => p.GetId() == id);
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetName("DEAD");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetColor("Black");
         }
         private readonly object coinsListLock = new();
@@ -239,7 +259,9 @@ namespace Server.GameData
         {
             lock (coinsListLock)
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 Coin coinToRemove = coins.Find(coin => coin.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (coinToRemove != null)
                 {
                     coins.Remove(coinToRemove);
@@ -284,7 +306,9 @@ namespace Server.GameData
         {
             lock (healthListLock)
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 HealthBoost healthToRemove = healthBoosts.Find(health => health.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (healthToRemove != null)
                 {
                     healthBoosts.Remove(healthToRemove);
@@ -329,7 +353,9 @@ namespace Server.GameData
         {
             lock (speedListLock)
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 SpeedBoost speedToRemove = speedBoosts.Find(speed => speed.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (speedToRemove != null)
                 {
                     speedBoosts.Remove(speedToRemove);
@@ -374,7 +400,9 @@ namespace Server.GameData
         {
             lock (shieldListLock)
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 Shield shieldToRemove = shields.Find(shield => shield.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (shieldToRemove != null)
                 {
                     shields.Remove(shieldToRemove);

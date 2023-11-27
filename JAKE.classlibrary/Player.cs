@@ -17,8 +17,12 @@ namespace JAKE.classlibrary
         private int _id;
         private string _name;
         private string _color;
+#pragma warning disable S2933 // Fields that are only assigned in the constructor should be "readonly"
         private Coordinates _currentDirection = new(0, 1);
+#pragma warning restore S2933 // Fields that are only assigned in the constructor should be "readonly"
+#pragma warning disable S2933 // Fields that are only assigned in the constructor should be "readonly"
         private Coordinates _currentCoords = new(0, 0);
+#pragma warning restore S2933 // Fields that are only assigned in the constructor should be "readonly"
         private int _speed;
         private string? _shotColor;
         private string? _shotShape;
@@ -97,7 +101,7 @@ namespace JAKE.classlibrary
             double newY = _currentCoords.y + _currentDirection.y * stepSize;
             return new Coordinates(newX, newY);
         }
-        public string GetLastObjectPicked()
+        public string? GetLastObjectPicked()
         {
             return _lastObjectPicked;
         }

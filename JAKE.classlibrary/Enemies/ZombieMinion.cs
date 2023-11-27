@@ -28,7 +28,9 @@ namespace JAKE.classlibrary.Enemies
 
         public override Enemy ShallowClone()
         {
+#pragma warning disable CS8603 // Possible null reference return.
             return base.ShallowClone();
+#pragma warning restore CS8603 // Possible null reference return.
         }
         
     }
