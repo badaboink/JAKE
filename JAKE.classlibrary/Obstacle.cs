@@ -61,8 +61,8 @@ namespace JAKE.classlibrary
 
         public double DistanceFromObstacle(int x, int y, double playerX, double playerY, double playerWidth, double playerHeight)
         {
-            double distance = 0;
-            if(x!=0)
+            double distance;
+            if (x!=0)
             {
                 double Distance_X_Left = x == -1 ? (playerX - Width - PositionX)*-1 : double.MaxValue;
                 double Distance_X_Right = x == 1 ? PositionX - playerWidth - playerX : double.MaxValue;
@@ -79,13 +79,13 @@ namespace JAKE.classlibrary
 
         public Coordinates MoveToClosestEdge(Coordinates position, double width, double height)
         {
-            return this.MoveToClosestEdge(position, new Coordinates(width, height));
+            return MoveToClosestEdge(position, new Coordinates(width, height));
 
         }
         public Coordinates MoveToClosestEdge(Coordinates position, Coordinates size)
         {
             
-            Coordinates center = new Coordinates(position.x + size.x/2, position.y + size.y/2);
+            Coordinates center = new(position.x + size.x/2, position.y + size.y/2);
             
             if (WouldOverlap(center.x, center.y))
             {
@@ -125,7 +125,7 @@ namespace JAKE.classlibrary
                 double distanceRight = Math.Abs(this.PositionX + this.Width - position.x);
                 double distanceBottom = Math.Abs(this.PositionY + this.Height - position.y);
                 double distanceLeft = Math.Abs(this.PositionX - (position.x + size.x));
-                double minDistance = Math.Min(Math.Min(distanceTop, distanceBottom), Math.Min(distanceLeft, distanceRight));
+                _ = Math.Min(Math.Min(distanceTop, distanceBottom), Math.Min(distanceLeft, distanceRight));
                 int cornerCount = topLeft + topRight + bottomRight + bottomLeft;
                 if(cornerCount == 2)
                 {

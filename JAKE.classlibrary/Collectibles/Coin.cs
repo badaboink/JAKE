@@ -19,7 +19,7 @@ namespace JAKE.classlibrary.Collectibles
         public double Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        public string Image { get; set; }
+        public string? Image { get; set; }
         public Coin(int id, double x, double y, int points, string image)
         {
             this.id = id;
@@ -81,12 +81,10 @@ namespace JAKE.classlibrary.Collectibles
         }
         public string ToXML()
         {
-            using (var stringwriter = new System.IO.StringWriter())
-            {
-                var serializer = new XmlSerializer(this.GetType());
-                serializer.Serialize(stringwriter, this);
-                return stringwriter.ToString();
-            }
+            using var stringwriter = new System.IO.StringWriter();
+            var serializer = new XmlSerializer(this.GetType());
+            serializer.Serialize(stringwriter, this);
+            return stringwriter.ToString();
         }
 
         public override int GetHashCode()

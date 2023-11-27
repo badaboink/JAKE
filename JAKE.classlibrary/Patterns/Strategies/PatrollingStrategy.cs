@@ -48,8 +48,22 @@ namespace JAKE.classlibrary.Patterns.Strategies
             }
             else
             {
-                directionX = directionX == 1 || directionX == -1 ? 0 : random.Next(0, 2) == 0 ? -1 : 1;
-                directionY = directionY == 1 || directionY == -1 ? 0 : random.Next(0, 2) == 0 ? -1 : 1;
+                if (random.Next(0, 2) == 0)
+                {
+                    directionX = directionX == 1 || directionX == -1 ? 0 : -1;
+                }
+                else
+                {
+                    directionX = directionX == 1 || directionX == -1 ? 0 : 1;
+                }
+                if (random.Next(0, 2) == 0)
+                {
+                    directionY = directionY == 1 || directionY == -1 ? 0 : -1;
+                }
+                else
+                {
+                    directionY = directionY == 1 || directionY == -1 ? 0 : 1;
+                }
             }
 
         }
@@ -67,22 +81,21 @@ namespace JAKE.classlibrary.Patterns.Strategies
             }
             else
             {
-                foreach (Obstacle obstacle in obstacles)
+                foreach (var distance in from Obstacle obstacle in obstacles
+                                         where obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize())
+                                         let distance = obstacle.DistanceFromObstacle(directionX, directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize())
+                                         select distance)
                 {
-                    if (obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()))
+                    if (distance != 0)
                     {
+                        newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
+                        newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentY() + distance;
 
-                        double distance = obstacle.DistanceFromObstacle(directionX, directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
-                        if (distance != 0)
-                        {
-                            newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
-                            newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentY() + distance;
-
-                            enemy.SetCurrentPosition(newX, newY);
-                        }
-                        GenerateRandomDirection();
-                        break;
+                        enemy.SetCurrentPosition(newX, newY);
                     }
+
+                    GenerateRandomDirection();
+                    break;
                 }
 
                 enemy.SetCurrentPosition(newX, newY);

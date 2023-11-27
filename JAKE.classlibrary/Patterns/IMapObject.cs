@@ -15,6 +15,8 @@ namespace JAKE.classlibrary.Patterns
         public int Height { get; set; }
 
         public string Image { get; set; }
+
+        bool Equals(object obj);
         void Interact(GameStats gameStats);
         bool MatchesId(int id);
         public void SetPosition(double x, double y);

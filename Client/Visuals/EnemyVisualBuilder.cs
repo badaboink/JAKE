@@ -23,13 +23,13 @@ namespace JAKE.classlibrary.Patterns
         public IBuilderVisual<EnemyVisual> SetColor(string color)
         {
             Color enemyColor = (Color)ColorConverter.ConvertFromString(color);
-            SolidColorBrush solidColorBrush = new SolidColorBrush(enemyColor);
+            SolidColorBrush solidColorBrush = new(enemyColor);
             enemyVisual.FillColor = solidColorBrush;
             enemyVisual.UpdateEnemy(solidColorBrush);
             return this;
         }
 
-        public IBuilderVisual<EnemyVisual> SetName(string name)
+        public IBuilderVisual<EnemyVisual> SetName(string color)
         {
             return this;
         }

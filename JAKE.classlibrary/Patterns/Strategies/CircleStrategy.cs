@@ -34,7 +34,7 @@ namespace JAKE.classlibrary.Patterns.Strategies
                 double newX = x + radius * Math.Cos(angle);
                 double newY = y + radius * Math.Sin(angle);
                 angle += (Math.PI / 8) * (enemy.GetSpeed() / 7);
-                angle = angle % (Math.PI * 2);
+                angle %= (Math.PI * 2);
                 enemy.SetCurrentPosition(newX, newY);
                 return;
             }
@@ -61,14 +61,14 @@ namespace JAKE.classlibrary.Patterns.Strategies
                 double newX = enemy.GetCurrentX() + directionX * enemySpeed * 2;
                 double newY = enemy.GetCurrentY() + directionY * enemySpeed * 2;
 
-                Coordinates next = new Coordinates(newX, newY);
-                foreach (Obstacle obstacle in obstacles)
+                Coordinates next = new(newX, newY);
+                foreach (var obstacle in from Obstacle obstacle in obstacles
+                                         where obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize())
+                                         select obstacle)
                 {
-                    if (obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()))
-                    {
-                        next = obstacle.MoveToClosestEdge(next, enemy.GetSize(), enemy.GetSize());
-                    }
+                    next = obstacle.MoveToClosestEdge(next, enemy.GetSize(), enemy.GetSize());
                 }
+
                 enemy.SetCurrentPosition(next.x, next.y);
                 
             }

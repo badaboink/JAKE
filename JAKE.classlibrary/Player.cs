@@ -24,7 +24,7 @@ namespace JAKE.classlibrary
         private string? _shotShape;
         private bool _isShooting = false;
         private double _attackSpeed;
-        private string _lastObjectPicked;
+        private string? _lastObjectPicked;
         public string? Ability { get; set; }
         
 
@@ -203,12 +203,6 @@ namespace JAKE.classlibrary
         {
             _shotShape = shape;
         }
-        private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
-        {
-            { "Green", "heal" },
-            { "Blue", "wall" },
-            { "Red", "strength" },
-        };
         [ExcludeFromCodeCoverage]
         public bool MatchesId(int id)
         {
@@ -246,7 +240,7 @@ namespace JAKE.classlibrary
         }
 
         [ExcludeFromCodeCoverage]
-        public void AddShield(int time)
+        public static void AddShield()
         {
             Debug.WriteLine("uzdejo shield");
         }

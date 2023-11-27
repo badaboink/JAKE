@@ -24,7 +24,7 @@ namespace JAKE.classlibrary.Patterns.Strategies
 
             if (closestPlayer != null)
             {
-                Coordinates enemyCurrent = new Coordinates(enemy.GetCurrentX(), enemy.GetCurrentY());
+                Coordinates enemyCurrent = new(enemy.GetCurrentX(), enemy.GetCurrentY());
                 // Calculate direction vector from enemy to closest player
                 double directionX = closestPlayer.GetCurrentX() - enemyCurrent.x;
                 double directionY = closestPlayer.GetCurrentY() - enemyCurrent.y;
@@ -35,21 +35,20 @@ namespace JAKE.classlibrary.Patterns.Strategies
                     directionX /= length;
                     directionY /= length;
                 }
-                Coordinates direction = new Coordinates(directionX, directionY);
 
                 // Define enemy movement speed
                 double enemySpeed = enemy.GetSpeed();
 
                 double newX = enemyCurrent.x + directionX * enemySpeed;
                 double newY = enemyCurrent.y + directionY * enemySpeed;
-                Coordinates next = new Coordinates(newX, newY);
-                foreach (Obstacle obstacle in obstacles)
+                Coordinates next = new(newX, newY);
+                foreach (var obstacle in from Obstacle obstacle in obstacles
+                                         where obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize())
+                                         select obstacle)
                 {
-                    if (obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()))
-                    {
-                        next = obstacle.MoveToClosestEdge(next, enemy.GetSize(), enemy.GetSize());
-                    }
+                    next = obstacle.MoveToClosestEdge(next, enemy.GetSize(), enemy.GetSize());
                 }
+
                 enemy.SetCurrentPosition(next.x, next.y);
             }
         }

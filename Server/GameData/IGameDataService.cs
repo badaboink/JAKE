@@ -27,7 +27,6 @@ namespace Server.GameData
         void UpdateEnemy(int id, int health);
         List<string> GetEnemies();
         List<string> UpdateEnemyPositions();
-        //Player FindClosestPlayer(Enemy enemy);
         DateTime GetCurrentGameTime();
         void SetGameTime(DateTime gametime);
         void AddObserver(string connectionID, Observer observer);
@@ -47,7 +46,7 @@ namespace Server.GameData
         void RemoveSpeedBoost(int id);
         List<string> GetSpeedBoosts();
 
-        Coin returnCoin(int id);
+        Coin ReturnCoin(int id);
         Enemy AddZombieBoss();
         bool IsBossAlive();
     }

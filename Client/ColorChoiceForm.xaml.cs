@@ -23,7 +23,7 @@ namespace JAKE.Client
     public partial class ColorChoiceForm : Window
     {
         public string SelectedColor { get; private set; }
-        public string Name { get; private set; }
+        public new string Name { get; private set; }
         public string ShotColor { get; private set; }
         public string ShotShape { get; private set; }
 

@@ -27,25 +27,25 @@ namespace JAKE.classlibrary
         }
         public bool IsPointOverlapping(double x, double y)
         {
-            foreach (Obstacle obstacle in obstacles)
+            foreach (var _ in from Obstacle obstacle in obstacles
+                              where obstacle.WouldOverlap(x, y)
+                              select new { })
             {
-                if (obstacle.WouldOverlap(x, y))
-                {
-                    return true;
-                }
+                return true;
             }
+
             return false;
         }
 
         public bool IsRectangleOverlapping(double xStart, double yStart, double xWidth, double yWidth)
         {
-            foreach (Obstacle obstacle in obstacles)
+            foreach (var _ in from Obstacle obstacle in obstacles
+                              where obstacle.WouldOverlap(xStart, yStart, xWidth, yWidth)
+                              select new { })
             {
-                if (obstacle.WouldOverlap(xStart, yStart, xWidth, yWidth))
-                {
-                    return true;
-                }
+                return true;
             }
+
             return false;
         }
 
@@ -53,8 +53,9 @@ namespace JAKE.classlibrary
         {
             bool overlap = false;
             GameStats gameStat = GameStats.Instance;
-            foreach (Obstacle obstacle in obstacles)
+            for (int i = 0; i < obstacles.Count; i++)
             {
+                Obstacle obstacle = obstacles[i];
                 if (obstacle.WouldOverlap(next.x, next.y, 50, 50))
                 {
                     overlap = true;

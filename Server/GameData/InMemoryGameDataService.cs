@@ -13,18 +13,18 @@ namespace Server.GameData
     public class InMemoryGameDataService : IGameDataService
     {
 
-        private Dictionary<string, Observer> observers = new Dictionary<string, Observer>();
-        private List<Player> players = new List<Player>();
-        private List<Obstacle> obstacles = new List<Obstacle>();
-        private List<Enemy> enemies = new List<Enemy>();
+        private Dictionary<string, Observer> observers = new();
+        private List<Player> players = new();
+        private List<Obstacle> obstacles = new();
+        private List<Enemy> enemies = new();
         private DateTime gametime = DateTime.Now;
 
-        private readonly List<Coin> coins = new List<Coin>();
-        private readonly List<HealthBoost> healthBoosts = new List<HealthBoost>();
-        private readonly List<Shield> shields = new List<Shield>();
-        private readonly List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
-        public MapObjectFactory objectFactory = new MapObjectFactory();
-        public ZombieFactory zombieFactory = new ZombieFactory();
+        private readonly List<Coin> coins = new();
+        private readonly List<HealthBoost> healthBoosts = new();
+        private readonly List<Shield> shields = new();
+        private readonly List<SpeedBoost> speedBoosts = new();
+        public MapObjectFactory objectFactory = new();
+        public ZombieFactory zombieFactory = new();
         public ObstacleChecker obstacleChecker;
         public Spawner spawner;
         private int bossId = -1;
@@ -35,20 +35,19 @@ namespace Server.GameData
             obstacleChecker = new ObstacleChecker(obstacles);
             spawner = new Spawner(objectFactory, zombieFactory, obstacleChecker);
         }
-        Random random = new Random();
-        int minId = 1;
-        int maxId = Int32.MaxValue;
-        HashSet<int> usedIds = new HashSet<int>();
-        HashSet<int> usedIdsEnemies = new HashSet<int>();
+        readonly Random random = new();
+        readonly int minId = 1;
+        readonly int maxId = Int32.MaxValue;
+        HashSet<int> usedIds = new();
         public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
-            int playerId = 0;
+            int playerId;
             do
             {
                 playerId = new Random().Next(minId, maxId);
             } while (usedIds.Contains(playerId));
             usedIds.Add(playerId);
-            Player newPlayer = new Player(playerId, playerName, playerColor, shotcolor, shotshape);
+            Player newPlayer = new(playerId, playerName, playerColor, shotcolor, shotshape);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);
@@ -57,8 +56,8 @@ namespace Server.GameData
         }
         public Player RemovePlayer(string connectionID)
         {
-            Player playerToRemove = players.FirstOrDefault(player => player.GetConnectionId() == connectionID);
-            usedIds.Remove(playerToRemove.GetId());
+            Player playerToRemove = players.Find(player => player.GetConnectionId() == connectionID);
+            _ = usedIds.Remove(item: playerToRemove.GetId());
             players.Remove(playerToRemove);
             return playerToRemove;
         }
@@ -66,13 +65,13 @@ namespace Server.GameData
 
         public void EditPlayerPosition(int id, double x, double y)
         {
-            Player playerToEdit = players.FirstOrDefault(p => p.GetId() == id);
+            Player playerToEdit = players.Find(p => p.GetId() == id);
             playerToEdit.SetCurrentPosition(x, y);
         }
 
         public string GetPlayerData(int id)
         {
-            Player player = players.FirstOrDefault(p => p.GetId() == id);
+            Player player = players.Find(p => p.GetId() == id);
 
             return player.ToString();
         }
@@ -87,7 +86,7 @@ namespace Server.GameData
         {
             return string.Join(",", obstacles.Select(obstacle => obstacle.ToString()));
         }
-        private readonly object enemyListLock = new object();
+        private readonly object enemyListLock = new();
         public Enemy AddEnemies()
         {
             lock (enemyListLock)
@@ -98,7 +97,7 @@ namespace Server.GameData
                 return newEnemy;
             }
         }
-        List<ZombieMinion> tempminions;
+
         public Enemy AddZombieBoss()
         {
             lock (enemyListLock)
@@ -107,7 +106,6 @@ namespace Server.GameData
                 newEnemy.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - newEnemy.GetSize(), 1080 - 80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
                 List<ZombieMinion> minions = newEnemy.GetMinions();
-                tempminions = newEnemy.GetMinions();
                 foreach (ZombieMinion minion in minions)
                 {
                     Console.WriteLine("original minion in zombieBoss list hash: " + minion.GetHashCode());
@@ -152,7 +150,7 @@ namespace Server.GameData
                 {
                     bossId = -1;
                 }
-                Enemy enemyToRemove = enemies.FirstOrDefault(enemy => enemy.MatchesId(id));
+                Enemy enemyToRemove = enemies.Find(enemy => enemy.MatchesId(id));
                 if (enemyToRemove != null)
                 {
                     enemies.Remove(enemyToRemove);
@@ -181,10 +179,7 @@ namespace Server.GameData
             }
         }
 
-        public Coin returnCoin(int id)
-        {
-            return coins.Find(coin => coin.id == id);
-        }
+        public Coin ReturnCoin(int id) => coins.Find(coin => coin.id == id);
         public DateTime GetCurrentGameTime()
         {
             return gametime;
@@ -197,11 +192,11 @@ namespace Server.GameData
         {
             observers[connectionID] = observer;
         }
-        public void RemoveObserver(string connectionId)
+        public void RemoveObserver(string connectionID)
         {
-            if (observers.ContainsKey(connectionId))
+            if (observers.ContainsKey(connectionID))
             {
-                observers.Remove(connectionId);
+                observers.Remove(connectionID);
             }
         }
         public Dictionary<string, Observer> GetObservers()
@@ -210,12 +205,12 @@ namespace Server.GameData
         }
         public void UpdateDeadPlayer(int id)
         {
-            Player playerToUpdate = players.FirstOrDefault(p => p.GetId() == id);
+            Player playerToUpdate = players.Find(p => p.GetId() == id);
 
             playerToUpdate.SetName("DEAD");
             playerToUpdate.SetColor("Black");
         }
-        private readonly object coinsListLock = new object();
+        private readonly object coinsListLock = new();
         public Coin AddCoin(int points)
         {
             lock (coinsListLock)
@@ -260,7 +255,7 @@ namespace Server.GameData
             }
         }
 
-        private readonly object healthListLock = new object();
+        private readonly object healthListLock = new();
         public HealthBoost AddHealthBoost(int health)
         {
             lock (healthListLock)
@@ -305,7 +300,7 @@ namespace Server.GameData
             }
         }
 
-        private readonly object speedListLock = new object();
+        private readonly object speedListLock = new();
         public SpeedBoost AddSpeedBoost(int speed)
         {
             lock (speedListLock)
@@ -350,7 +345,7 @@ namespace Server.GameData
             }
         }
 
-        private readonly object shieldListLock = new object();
+        private readonly object shieldListLock = new();
         public Shield AddShield(int time)
         {
             lock (shieldListLock)

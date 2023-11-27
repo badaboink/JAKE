@@ -20,10 +20,10 @@ namespace JAKE.classlibrary.Patterns
             return this;
         }
 
-        public IBuilderVisual<ShotVisual> SetColor(string colorshape)
+        public IBuilderVisual<ShotVisual> SetColor(string color)
         {
 
-            string[] data = colorshape.Split(',');
+            string[] data = color.Split(',');
             if (data[1] == "")
             {
                 data[1] = "round";
@@ -40,7 +40,7 @@ namespace JAKE.classlibrary.Patterns
             return this;
         }
 
-        public IBuilderVisual<ShotVisual> SetName(string name)
+        public IBuilderVisual<ShotVisual> SetName(string color)
         {
             return this;
         }
