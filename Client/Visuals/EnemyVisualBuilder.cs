@@ -12,7 +12,7 @@ namespace JAKE.classlibrary.Patterns
 {
     public class EnemyVisualBuilder : IBuilderVisual<EnemyVisual>
     {
-        private EnemyVisual enemyVisual;
+        private EnemyVisual? enemyVisual;
 
         public IBuilderVisual<EnemyVisual> New()
         {

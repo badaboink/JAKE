@@ -10,7 +10,6 @@ namespace Server_tests
     public class InMemoryGameDataServiceTests
     {
         private readonly InMemoryGameDataService gameDataService;
-        private List<Enemy> enemies = new List<Enemy>();
         
         public InMemoryGameDataServiceTests()
         {
@@ -160,7 +159,6 @@ namespace Server_tests
         [Fact]
         public void Test_Get_Enemies()
         {
-            Enemy enemy = gameDataService.AddEnemies();
             int actual = gameDataService.GetEnemies().Count;
             int expected = 1;
 

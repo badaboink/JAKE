@@ -13,10 +13,10 @@ namespace Server.GameData
     public class InMemoryGameDataService : IGameDataService
     {
 
-        private Dictionary<string, Observer> observers = new();
-        private List<Player> players = new();
-        private List<Obstacle> obstacles = new();
-        private List<Enemy> enemies = new();
+        private readonly Dictionary<string, Observer> observers = new();
+        private readonly List<Player> players = new();
+        private readonly List<Obstacle> obstacles;
+        private readonly List<Enemy> enemies = new();
         private DateTime gametime = DateTime.Now;
 
         private readonly List<Coin> coins = new();
@@ -38,7 +38,7 @@ namespace Server.GameData
         readonly Random random = new();
         readonly int minId = 1;
         readonly int maxId = Int32.MaxValue;
-        HashSet<int> usedIds = new();
+        readonly HashSet<int> usedIds = new();
         public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
             int playerId;

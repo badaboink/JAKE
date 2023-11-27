@@ -18,7 +18,7 @@ namespace JAKE.classlibrary.Enemies
         private readonly Trigger trigger = new Trigger();
         private int _health;
         private int _size;
-        private int _points;
+        private readonly int _points;
         protected IMoveStrategy? movementStrategy;
 
         public virtual Enemy ShallowClone()

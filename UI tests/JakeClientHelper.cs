@@ -7,7 +7,7 @@ using FlaUI.UIA3;
 namespace UI_tests
 {
     [ExcludeFromCodeCoverage]
-    public class JakeClientHelper
+    public static class JakeClientHelper
     {
         public static Application LaunchJakeClient()
         {

@@ -10,7 +10,7 @@ namespace JAKE.classlibrary
 {
     public class ObstacleChecker
     {
-        List<Obstacle> obstacles;
+        readonly List<Obstacle> obstacles;
 
         public ObstacleChecker(List<Obstacle> obstacles)
         {
