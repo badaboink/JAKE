@@ -840,6 +840,7 @@ namespace JAKE.client
                     if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height)) 
                     {
                         GameStats gameStat = GameStats.Instance;
+                        Debug.WriteLine("singleton " + gameStat.GetHashCode());
                         coin.Interact(gameStat);
                         scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
                         Player text = new CoinDecorator(currentPlayer);
@@ -944,6 +945,7 @@ namespace JAKE.client
                         //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
                         //healthBoost.Interact(player, healthBoost.Health);
                         GameStats gameStat = GameStats.Instance;
+                        Debug.WriteLine("singleton " + gameStat.GetHashCode());
                         healthBoost.Interact(gameStat);
                         if (gameStat.PlayerHealth > 100)
                         {

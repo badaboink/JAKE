@@ -15,7 +15,7 @@ namespace Class_library_tests
         {
             Player player = new Player();
             CoinDecorator text = new CoinDecorator(player);
-            string decoratedText = text.Display(10).text;
+            string decoratedText = text.Display(10, false).text;
 
             Assert.Equal("+10 Points!", decoratedText);
         }
@@ -24,7 +24,7 @@ namespace Class_library_tests
         {
             Player player = new Player();
             ShieldDecorator shield = new ShieldDecorator(player);
-            bool isShieldOn = shield.Display(10).shieldOn;
+            bool isShieldOn = shield.Display(10, true).shieldOn;
 
             Assert.True(isShieldOn);
         }
@@ -33,7 +33,7 @@ namespace Class_library_tests
         {
             Player player = new Player();
             HealthDecorator health = new HealthDecorator(player);
-            float heart = health.Display(80).health;
+            float heart = health.Display(80, false).health;
 
             Assert.Equal(80 / 2, heart);
         }
