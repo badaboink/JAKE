@@ -27,6 +27,7 @@ namespace JAKE.classlibrary
             this.x = x;
             this.y = y;
         }
+
     }
 
     public class Trigger

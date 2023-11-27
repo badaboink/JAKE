@@ -15,12 +15,12 @@ namespace JAKE.classlibrary
     public class Spawner
     {
         private readonly MapObjectFactory _mapObjectFactory;
-        private ZombieFactory _zombieFactory;
-        private ObstacleChecker _obstacleChecker;
-        int maxAttempts = 1000;
-        HashSet<int> _usedIdsEnemies;
-        int minId = 1;
-        int maxId = Int32.MaxValue;
+        private readonly ZombieFactory _zombieFactory;
+        private readonly ObstacleChecker _obstacleChecker;
+        readonly int maxAttempts = 1000;
+        readonly HashSet<int> _usedIdsEnemies;
+        readonly int minId = 1;
+        readonly int maxId = Int32.MaxValue;
 
         public Spawner(MapObjectFactory mapObjectFactory, ZombieFactory zombieFactory, ObstacleChecker obstacleChecker)
         {
