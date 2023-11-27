@@ -35,28 +35,31 @@ namespace JAKE.client
 {
     public partial class MainWindow : Window
     {
-        private Player currentPlayer;
-        public bool gamestarted = false;
-        public List<Player> playerInfoList = new List<Player>();
+        private const string UrlToGameHub = "https://localhost:7039/gamehub";
+        private Player? currentPlayer;
+        private bool gamestarted = false;
+        private List<Player> playerInfoList = new();
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
-        private List<Obstacle> obstacles = new List<Obstacle>();
-        private List<Enemy> enemies = new List<Enemy>();
-        private List<Shot> shots = new List<Shot>();
+        private List<Obstacle> obstacles = new();
+        private List<Enemy> enemies = new();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
+#pragma warning disable IDE0052 // Remove unread private members
+#pragma warning disable S4487 // Unread "private" fields should be removed
         private DateTime lastGameTime = DateTime.MinValue;
-        //private GameStats gameStat = GameStats.Instance;
-        private Dictionary<Enemy, bool> collisionCheckedEnemies = new Dictionary<Enemy, bool>();
-        private List<Coin> coins = new List<Coin>();
-        private Dictionary<Coin, CoinVisual> coinVisuals = new Dictionary<Coin, CoinVisual>();
-        private List<HealthBoost> healthBoosts = new List<HealthBoost>();
-        private Dictionary<HealthBoost, HealthBoostVisual> healthBoostsVisuals = new Dictionary<HealthBoost, HealthBoostVisual>();
-        private List<Shield> shields = new List<Shield>(); 
-        private Dictionary<Shield, ShieldVisual> shieldVisuals = new Dictionary<Shield, ShieldVisual>();
+#pragma warning restore S4487 // Unread "private" fields should be removed
+#pragma warning restore IDE0052 // Remove unread private members
+        private Dictionary<Enemy, bool> collisionCheckedEnemies = new();
+        private List<Coin> coins = new();
+        private Dictionary<Coin, CoinVisual> coinVisuals = new();
+        private List<HealthBoost> healthBoosts = new();
+        private Dictionary<HealthBoost, HealthBoostVisual> healthBoostsVisuals = new();
+        private List<Shield> shields = new(); 
+        private Dictionary<Shield, ShieldVisual> shieldVisuals = new();
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
-        private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
-        private readonly object enemyListLock = new object();
-        Controller controller = new Controller();
+        private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new();
+        private readonly object enemyListLock = new();
+        Controller controller = new();
 
 
         private bool isCollidingWithHealthBoost = false;
@@ -65,7 +68,7 @@ namespace JAKE.client
         public MainWindow()
         {
             connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:7039/gamehub")
+                .WithUrl(UrlToGameHub)
                 .Build();
             InitializeComponent();
             WindowState = WindowState.Maximized;
@@ -83,7 +86,7 @@ namespace JAKE.client
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             await StartSignalRConnection();
-            Task.Run(() => ListenForGameUpdates());
+            await Task.Run(() => ListenForGameUpdates());
         }
 
         private async Task StartSignalRConnection()
@@ -201,10 +204,16 @@ namespace JAKE.client
                 playersContainer.Items.Add(playerVisual);
             });
         }
+#pragma warning disable S4487 // Unread "private" fields should be removed
+#pragma warning disable IDE0052 // Remove unread private members
         private Timer? timer;
+#pragma warning restore IDE0052 // Remove unread private members
+#pragma warning restore S4487 // Unread "private" fields should be removed
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task ListenForGameUpdates()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            connection.On<string>("UpdateUsers", (player) =>
+            connection.On("UpdateUsers", (Action<string>)((player) =>
             {
                 string[] parts = player.Split(':');
 
@@ -212,18 +221,16 @@ namespace JAKE.client
                 {
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
-                    string playerColor = parts[2];
                     int x = int.Parse(parts[3]);
                     int y = int.Parse(parts[4]);
-                    string shotColor = parts[5];
-                    string shotShape = parts[6];
-                    Player? playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
+                    Player? playerInfo = playerInfoList.Find(p => p.GetId() == playerId);
                     if (playerInfo == null)
                     {
-                        throw new Exception("PlayerInfo is null");
+                        Exception exception = new("PlayerInfo is null");
+                        throw exception;
                     }
                     playerInfo.SetCurrentPosition(x, y);
-                    
+
                     Dispatcher.Invoke(() =>
                     {
                         PlayerVisual playerVisual = playerVisuals[playerInfo];
@@ -237,9 +244,11 @@ namespace JAKE.client
                         }
                     });
                 }
-            });
+            }));
         
+#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
            timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
+#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
 
             connection.On<List<string>>("SendingEnemies", (enemydata) =>
             {
@@ -273,7 +282,9 @@ namespace JAKE.client
 
                                     enemyVisuals[enemy] = enemyVisual;
                                     EnemyContainer.Children.Add(enemyVisual);
+#pragma warning disable CS8604 // Possible null reference argument.
                                     HandleEnemyCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
                         
                                 });
                             }
@@ -290,7 +301,9 @@ namespace JAKE.client
                                     Canvas.SetLeft(enemyVisual, enemyX);
                                     Canvas.SetTop(enemyVisual, enemyY);
 
+#pragma warning disable CS8604 // Possible null reference argument.
                                     HandleEnemyCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
                                 });
                             }
                         }
@@ -303,10 +316,14 @@ namespace JAKE.client
             });
             connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
             {
-                Player? playerToUpdate = playerInfoList.FirstOrDefault(player => player.MatchesId(playerid));
+                Player? playerToUpdate = playerInfoList.Find(player => player.MatchesId(playerid));
                 if (playerToUpdate != null)
                 {
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8604 // Possible null reference argument.
                     CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8604 // Possible null reference argument.
                 }
             });
             connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
@@ -322,7 +339,7 @@ namespace JAKE.client
             });
             connection.On<int, string, int>("UpdateEnemyHealth", (enemyid, enemycolor, enemyhealth) =>
             {
-                Enemy? enemyToUpdate = enemies.FirstOrDefault(enemy => enemy.MatchesId(enemyid));
+                Enemy? enemyToUpdate = enemies.Find(enemy => enemy.MatchesId(enemyid));
                 if (enemyToUpdate != null)
                 {
                     enemyToUpdate.SetHealth(enemyhealth);
@@ -336,8 +353,6 @@ namespace JAKE.client
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
                     string playerColor = parts[2];
-                    int x = int.Parse(parts[3]);
-                    int y = int.Parse(parts[4]);
                     string shotColor = parts[5];
                     string shotShape = parts[6];
                     Player playerToDelete = new Player(playerId, playerName, playerColor , shotColor, shotShape);
@@ -375,7 +390,9 @@ namespace JAKE.client
                                 coinVisuals[coin] = coinVisual;
                                 CoinContainer.Children.Add(coinVisual);
 
+#pragma warning disable CS8604 // Possible null reference argument.
                                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
                             });
                         }
                     }
@@ -432,7 +449,9 @@ namespace JAKE.client
                                 Canvas.SetTop(shieldVisual, shieldY);
                                 shieldVisuals[shield] = shieldVisual;
                                 ShieldContainer.Children.Add(shieldVisual);
+#pragma warning disable CS8604 // Possible null reference argument.
                                 HandleShieldsCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
                             });
                         }
                         
@@ -483,7 +502,9 @@ namespace JAKE.client
                                 Canvas.SetLeft(healthVisual, healthX);
                                 Canvas.SetTop(healthVisual, healthY);
                                 HealthBoostContainer.Children.Add(healthVisual);
+#pragma warning disable CS8604 // Possible null reference argument.
                                 HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
                             });
                         }     
                     }
@@ -520,7 +541,6 @@ namespace JAKE.client
                         double speedX = double.Parse(parts[1]);
                         double speedY = double.Parse(parts[2]);
                         int speedVal = int.Parse(parts[5]);
-                        int time = int.Parse(parts[6]);
                         SpeedBoost speed = new SpeedBoost(speedId, speedX, speedY, speedVal, image);
                         if (!speedBoosts.Contains(speed))
                         {
@@ -532,7 +552,9 @@ namespace JAKE.client
                                 Canvas.SetLeft(speedVisual, speedX);
                                 Canvas.SetTop(speedVisual, speedY);
                                 SpeedBoostContainer.Children.Add(speedVisual);
+#pragma warning disable CS8604 // Possible null reference argument.
                                 HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
                             });
                         }                      
                     }
@@ -599,23 +621,33 @@ namespace JAKE.client
                 switch (e.Key)
                 {
                     case Key.Left:
+#pragma warning disable CS8604 // Possible null reference argument.
                         controller.SetCommand(new MoveLeft(currentPlayer, obstacles));
+#pragma warning restore CS8604 // Possible null reference argument.
                         break;
                     case Key.Right:
+#pragma warning disable CS8604 // Possible null reference argument.
                         controller.SetCommand(new MoveRight(currentPlayer, obstacles));
+#pragma warning restore CS8604 // Possible null reference argument.
                         break;
                     case Key.Up:
+#pragma warning disable CS8604 // Possible null reference argument.
                         controller.SetCommand(new MoveUp(currentPlayer, obstacles));
+#pragma warning restore CS8604 // Possible null reference argument.
                         break;
                     case Key.Down:
+#pragma warning disable CS8604 // Possible null reference argument.
                         controller.SetCommand(new MoveDown(currentPlayer, obstacles));
+#pragma warning restore CS8604 // Possible null reference argument.
                         break;
                     case Key.Z:
                         controller.Undo();
                         execute = false;
                         break;
                     case Key.Space:
+#pragma warning disable CS8604 // Possible null reference argument.
                         controller.SetCommand(new ShootCommand(currentPlayer, this));
+#pragma warning restore CS8604 // Possible null reference argument.
                         break;
                     default:
                         execute = false;
@@ -627,7 +659,9 @@ namespace JAKE.client
                     controller.Execute();
                 }
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                 Move(currentPlayer.GetCurrentX(), currentPlayer.GetCurrentY());
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 UpdateTextLabelPosition();
                 HandleEnemyCollisions(playerVisuals[currentPlayer]);
                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
@@ -645,13 +679,19 @@ namespace JAKE.client
 
         private async void Move(double newX, double newY)
         {
+#pragma warning disable CS8604 // Possible null reference argument.
             UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
+#pragma warning restore CS8604 // Possible null reference argument.
             await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
         }
 
-        private class ShootCommand : Command
+        sealed class ShootCommand : Command
         {
-            MainWindow window;
+#pragma warning disable S2933 // Fields that are only assigned in the constructor should be "readonly"
+#pragma warning disable IDE0044 // Add readonly modifier
+            private MainWindow window;
+#pragma warning restore IDE0044 // Add readonly modifier
+#pragma warning restore S2933 // Fields that are only assigned in the constructor should be "readonly"
             public ShootCommand(Player player, MainWindow mainWindow) : base(player)
             {
                 this.window = mainWindow;
@@ -671,18 +711,24 @@ namespace JAKE.client
 
         protected void Shoot()
         {
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             if (!currentPlayer.IsShooting)
             {
                 currentPlayer.SetShooting(true);
+#pragma warning disable CS8604 // Possible null reference argument.
                 CreateShot(playerVisuals[currentPlayer], currentPlayer.GetDirectionX(), currentPlayer.GetDirectionY(), currentPlayer.GetShotColor(), currentPlayer.GetShotShape());
+#pragma warning restore CS8604 // Possible null reference argument.
                 Task.Delay(TimeSpan.FromSeconds(1 / currentPlayer.GetAttackSpeed)).ContinueWith(t => currentPlayer.SetShooting(false));
             }
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         private void UpdateTextLabelPosition()
         {
             // pastoviai updatinama, kad tekstas sekiotu zaideja
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             double playerX = currentPlayer.GetCurrentX();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             double playerY = currentPlayer.GetCurrentY();
 
             // object paemimo text
@@ -701,49 +747,47 @@ namespace JAKE.client
         private void HideDisplay()
         {
             // tekstas dingsta po puse sekundes
-            var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(0.5);
-            timer.Tick += (sender, args) =>
+            var timerT = new DispatcherTimer();
+            timerT.Interval = TimeSpan.FromSeconds(0.5);
+            timerT.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
-                timer.Stop();
+                timerT.Stop();
             };
 
-            timer.Start();
+            timerT.Start();
         }
         private void StopSpeed()
         {
             // tekstas dingsta po puse sekundes
-            var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(10);
-            timer.Tick += (sender, args) =>
+            var timerT = new DispatcherTimer();
+            timerT.Interval = TimeSpan.FromSeconds(10);
+            timerT.Tick += (sender, args) =>
             {
                 GameStats gameStat = GameStats.Instance;
                 gameStat.PlayerSpeed = 10;
-                timer.Stop();
+                timerT.Stop();
             };
 
-            timer.Start();
+            timerT.Start();
         }
         private void HideShieldDisplay()
         {
             // tekstas dingsta po 10 sekundziu
-            var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(10);
-            timer.Tick += (sender, args) =>
+            var timerT = new DispatcherTimer();
+            timerT.Interval = TimeSpan.FromSeconds(10);
+            timerT.Tick += (sender, args) =>
             {
-                ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
-                bool shieldVisible = false; ;
-                if (!shieldVisible)
+                if (true)
                 {
                     GameStats gameStat = GameStats.Instance;
                     shieldBorder.Visibility = Visibility.Hidden;
                     gameStat.ShieldOn = false;
-                    timer.Stop();
-                }          
+                    timerT.Stop();
+                }
             };
 
-            timer.Start();
+            timerT.Start();
         }
 
         public static bool CheckCollision(double x1, double y1, double width1, double height1, double x2, double y2, double width2, double height2)
@@ -755,21 +799,16 @@ namespace JAKE.client
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-
-            foreach (Enemy enemy in enemies)
+            foreach (var enemy in from Enemy enemy in enemies
+                                  where enemyVisuals.ContainsKey(enemy)
+                                  let enemyRect = enemyVisuals[enemy]
+                                  let enemyX = Canvas.GetLeft(enemyRect)
+                                  let enemyY = Canvas.GetTop(enemyRect)
+                                  where CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
+                                                                   enemyX, enemyY, enemyRect.Width, enemyRect.Height)
+                                  select enemy)
             {
-                if (enemyVisuals.ContainsKey(enemy))
-                {
-                    EnemyVisual enemyRect = enemyVisuals[enemy];
-                    double enemyX = Canvas.GetLeft(enemyRect);
-                    double enemyY = Canvas.GetTop(enemyRect);
-
-                    if (CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
-                                                       enemyX, enemyY, enemyRect.Width, enemyRect.Height))
-                    {
-                        await HandleCollision(playerVisual, enemy);
-                    }
-                }
+                await HandleCollision(playerVisual, enemy);
             }
         }
         public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
@@ -780,7 +819,9 @@ namespace JAKE.client
                 gameStat.PlayerHealth -= 5;
                 healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
 
+#pragma warning disable CS8604 // Possible null reference argument.
                 HealthDecorator healthObj = new HealthDecorator(currentPlayer);
+#pragma warning restore CS8604 // Possible null reference argument.
                 healthBar.Width = gameStat.PlayerHealth <= 0
                                     ? healthObj.Display(0, gameStat.ShieldOn).health
                                     : healthObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
@@ -817,30 +858,27 @@ namespace JAKE.client
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<Coin> coinsCopy = new List<Coin>(coins);
-
-            foreach (Coin coin in coinsCopy)
+            foreach (var (coin, gameStat) in from Coin coin in coinsCopy
+                                             where coinVisuals.ContainsKey(coin)
+                                             let coinRect = coinVisuals[coin]
+                                             let coinX = Canvas.GetLeft(coinRect)
+                                             let coinY = Canvas.GetTop(coinRect)
+                                             where playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height)
+                                             let gameStat = GameStats.Instance
+                                             select (coin, gameStat))
             {
-                if (coinVisuals.ContainsKey(coin))
-                {
-                    CoinVisual coinRect = coinVisuals[coin];
-                    double coinX = Canvas.GetLeft(coinRect);
-                    double coinY = Canvas.GetTop(coinRect);
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height)) 
-                    {
-                        GameStats gameStat = GameStats.Instance;
-                        Debug.WriteLine("singleton " + gameStat.GetHashCode());
-                        coin.Interact(gameStat);
-                        scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-                        Player text = new CoinDecorator(currentPlayer);
-                        testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                        HideDisplay();
-
-                        // Convert coin to a JSON string
-                        string json = JsonConvert.SerializeObject(coin);
-                        //-----------
-                        await connection.SendAsync("SendPickedCoin", json);
-                    }
-                }
+                Debug.WriteLine("singleton " + gameStat.GetHashCode());
+                coin.Interact(gameStat);
+                scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
+#pragma warning disable CS8604 // Possible null reference argument.
+                Player text = new CoinDecorator(currentPlayer);
+#pragma warning restore CS8604 // Possible null reference argument.
+                testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                HideDisplay();
+                // Convert coin to a JSON string
+                string json = JsonConvert.SerializeObject(coin);
+                //-----------
+                await connection.SendAsync("SendPickedCoin", json);
             }
         }
         
@@ -849,65 +887,58 @@ namespace JAKE.client
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<Shield> shieldsCopy = new List<Shield>(shields);
-            foreach (Shield shield in shieldsCopy)
+#pragma warning disable CS8604 // Possible null reference argument.
+            foreach (var (shield, gameStat, text) in from Shield shield in shieldsCopy
+                                                     where shieldVisuals.ContainsKey(shield)
+                                                     let shieldRect = shieldVisuals[shield]
+                                                     let shieldX = Canvas.GetLeft(shieldRect)
+                                                     let shieldY = Canvas.GetTop(shieldRect)
+                                                     where playerTouchesMapObject(playerX, playerY, playerVisual.Height, shieldX, shieldY, shieldRect.Height)
+                                                     let gameStat = GameStats.Instance
+                                                     let text = new ShieldItemDecorator(currentPlayer)
+                                                     select (shield, gameStat, text))
             {
-                if (shieldVisuals.ContainsKey(shield))
+                testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+#pragma warning disable CS8604 // Possible null reference argument.
+                ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
+#pragma warning restore CS8604 // Possible null reference argument.
+                bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).shieldOn;
+                if (shieldVisible)
                 {
-                    ShieldVisual shieldRect = shieldVisuals[shield];
-                    double shieldX = Canvas.GetLeft(shieldRect);
-                    double shieldY = Canvas.GetTop(shieldRect);
-
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, shieldX, shieldY, shieldRect.Height))
-                    {
-                        //TODO: dingsta kitas shield ne ta kuri paliecia
-                        GameStats gameStat = GameStats.Instance;
-                        Player text = new ShieldItemDecorator(currentPlayer);
-                        testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                        ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
-                        bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).shieldOn;
-                        if (shieldVisible)
-                        {
-                            shieldBorder.Visibility = Visibility.Visible;
-                            gameStat.ShieldOn = true;
-                            shield.Interact(gameStat);
-                        }
-                        HideDisplay();
-                        HideShieldDisplay();
-                        await connection.SendAsync("SendPickedShield", shield.ToString());
-
-                    }
+                    shieldBorder.Visibility = Visibility.Visible;
+                    gameStat.ShieldOn = true;
+                    shield.Interact(gameStat);
                 }
+
+                HideDisplay();
+                HideShieldDisplay();
+                await connection.SendAsync("SendPickedShield", shield.ToString());
             }
+#pragma warning restore CS8604 // Possible null reference argument.
         }
         private async void HandleSpeedBoostsCollisions(PlayerVisual playerVisual)
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<SpeedBoost> speedBoostCopy = new List<SpeedBoost>(speedBoosts);
-            foreach (SpeedBoost speedBoost in speedBoostCopy)
+            foreach (var (speedBoost, gameStat) in from SpeedBoost speedBoost in speedBoostCopy
+                                                   where speedBoostsVisuals.ContainsKey(speedBoost)
+                                                   let speedBoostRect = speedBoostsVisuals[speedBoost]
+                                                   let speedBoostX = Canvas.GetLeft(speedBoostRect)
+                                                   let speedBoostY = Canvas.GetTop(speedBoostRect)
+                                                   where playerTouchesMapObject(playerX, playerY, playerVisual.Height, speedBoostX, speedBoostY, speedBoostRect.Height)
+                                                   let gameStat = GameStats.Instance
+                                                   where gameStat.PlayerSpeed < 50
+                                                   select (speedBoost, gameStat))
             {
-                if (speedBoostsVisuals.ContainsKey(speedBoost))
-                {
-                    SpeedBoostVisual speedBoostRect = speedBoostsVisuals[speedBoost];
-                    double speedBoostX = Canvas.GetLeft(speedBoostRect);
-                    double speedBoostY = Canvas.GetTop(speedBoostRect);
-
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, speedBoostX, speedBoostY, speedBoostRect.Height))
-                    {
-                        GameStats gameStat = GameStats.Instance;
-
-                        if (gameStat.PlayerSpeed < 50)
-                        {
-                            speedBoost.Interact(gameStat);
-                            Player text = new SpeedDecorator(currentPlayer);
-                            testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                            HideDisplay();
-                            StopSpeed();
-                            await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
-                        }
-
-                    }
-                }
+                speedBoost.Interact(gameStat);
+#pragma warning disable CS8604 // Possible null reference argument.
+                Player text = new SpeedDecorator(player: currentPlayer);
+#pragma warning restore CS8604 // Possible null reference argument.
+                testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                HideDisplay();
+                StopSpeed();
+                await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
             }
         }
         private async void HandleHealthBoostsCollisions(PlayerVisual playerVisual)
@@ -919,50 +950,50 @@ namespace JAKE.client
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<HealthBoost> healthBoostCopy = new List<HealthBoost>(healthBoosts);
-            foreach (HealthBoost healthBoost in healthBoostCopy)
+            foreach (var (healthBoost, healthBoostRect) in from HealthBoost healthBoost in healthBoostCopy
+                                                           where healthBoostsVisuals.ContainsKey(healthBoost)
+                                                           let healthBoostRect = healthBoostsVisuals[healthBoost]
+                                                           let healthBoostX = Canvas.GetLeft(healthBoostRect)
+                                                           let healthBoostY = Canvas.GetTop(healthBoostRect)
+                                                           where playerTouchesMapObject(playerX, playerY, playerVisual.Height, healthBoostX, healthBoostY, healthBoostRect.Height)
+                                                           select (healthBoost, healthBoostRect))
             {
-                if (healthBoostsVisuals.ContainsKey(healthBoost))
+                isCollidingWithHealthBoost = true;
+                GameStats gameStat = GameStats.Instance;
+                Debug.WriteLine("singleton " + gameStat.GetHashCode());
+                healthBoost.Interact(gameStat);
+                if (gameStat.PlayerHealth > 100)
                 {
-                    HealthBoostVisual healthBoostRect = healthBoostsVisuals[healthBoost];
-                    double healthBoostX = Canvas.GetLeft(healthBoostRect);
-                    double healthBoostY = Canvas.GetTop(healthBoostRect);
-
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, healthBoostX, healthBoostY, healthBoostRect.Height))
-                    {
-                        isCollidingWithHealthBoost = true;
-                        GameStats gameStat = GameStats.Instance;
-                        Debug.WriteLine("singleton " + gameStat.GetHashCode());
-                        healthBoost.Interact(gameStat);
-                        if (gameStat.PlayerHealth > 100)
-                        {
-                            gameStat.PlayerHealth = 100;
-                        }
-                        
-                        healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-                        healthBoosts.Remove(healthBoost);
-                        healthBoostsVisuals.Remove(healthBoost);
-                        HealthBoostContainer.Children.Remove(healthBoostRect);
-                        Player health = new HealthBoostDecorator(currentPlayer);
-                        testLabel.Text = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                        HideDisplay();
-                        health = new HealthDecorator(currentPlayer);
-                        healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
-                        await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
-                        isCollidingWithHealthBoost = false;
-                    }
+                    gameStat.PlayerHealth = 100;
                 }
+
+                healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                healthBoosts.Remove(healthBoost);
+                healthBoostsVisuals.Remove(healthBoost);
+                HealthBoostContainer.Children.Remove(healthBoostRect);
+#pragma warning disable CS8604 // Possible null reference argument.
+                Player health = new HealthBoostDecorator(currentPlayer);
+#pragma warning restore CS8604 // Possible null reference argument.
+                testLabel.Text = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                HideDisplay();
+                health = new HealthDecorator(currentPlayer);
+                healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
+                await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
+                isCollidingWithHealthBoost = false;
             }
         }
  
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
         {
             bool CountKills = false;
+#pragma warning disable CS8604 // Possible null reference argument.
             if (playerVisual == playerVisuals[currentPlayer])
             {
                 await connection.SendAsync("ShotFired", currentPlayer.GetId(), directionX, directionY);
                 CountKills = true;
             }
-            lock(enemyListLock)
+#pragma warning restore CS8604 // Possible null reference argument.
+            lock (enemyListLock)
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -1014,45 +1045,37 @@ namespace JAKE.client
                         List<Enemy> enemiesToRemove = new List<Enemy>(); // Create a list to store enemies to be removed
 
                         bool shotHitEnemy = false;
-                        bool overlapWithEnemy = false;
-
-                        foreach (Enemy enemy in enemies)
+                        foreach (var (enemy, enemyRect) in from Enemy enemy in enemies
+                                                           where enemyVisuals.ContainsKey(enemy)
+                                                           let enemyRect = enemyVisuals[enemy]
+                                                           let enemyX = Canvas.GetLeft(enemyRect)
+                                                           let enemyY = Canvas.GetTop(enemyRect)
+                                                           where newX + shotVisual.EllipseSize >= enemyX &&
+                                                            newX <= enemyX + enemyRect.Width &&
+                                                            newY + shotVisual.EllipseSize >= enemyY &&
+                                                            newY <= enemyY + enemyRect.Height
+                                                           select (enemy, enemyRect))
                         {
-                            if (enemyVisuals.ContainsKey(enemy))
+                            if (CountKills)
                             {
-                                EnemyVisual enemyRect = enemyVisuals[enemy];
-                                double enemyX = Canvas.GetLeft(enemyRect);
-                                double enemyY = Canvas.GetTop(enemyRect);
-
-                                if (newX + shotVisual.EllipseSize >= enemyX &&
-                                    newX <= enemyX + enemyRect.Width &&
-                                    newY + shotVisual.EllipseSize >= enemyY &&
-                                    newY <= enemyY + enemyRect.Height)
+                                GameStats gameStat = GameStats.Instance;
+                                enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
+                                gameStat.PlayerScore += 5;
+                                scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
+                                await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
+                                if (enemy.GetHealth() <= 0)
                                 {
-
-                                    if (CountKills)
-                                    {
-                                        GameStats gameStat = GameStats.Instance;
-                                        enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
-                                        gameStat.PlayerScore += 5;
-                                        scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-                                        await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
-                                        if (enemy.GetHealth() <= 0)
-                                        {
-                                            enemiesToRemove.Add(enemy); // Add the enemy to the removal list
-                                            enemyVisuals.Remove(enemy);
-                                            EnemyContainer.Children.Remove(enemyRect);
-                                            await connection.SendAsync("SendDeadEnemy", enemy.ToString());
-                                        }
-                                    }
-
-                                    ShotContainer.Children.Remove(shotVisual);
-                                    shotHitEnemy = true;
-                                    shouldRender = false;
-                                    break;
+                                    enemiesToRemove.Add(enemy); // Add the enemy to the removal list
+                                    enemyVisuals.Remove(enemy);
+                                    EnemyContainer.Children.Remove(enemyRect);
+                                    await connection.SendAsync("SendDeadEnemy", enemy.ToString());
                                 }
                             }
 
+                            ShotContainer.Children.Remove(shotVisual);
+                            shotHitEnemy = true;
+                            shouldRender = false;
+                            break;
                         }
 
                         foreach (Enemy enemyToRemove in enemiesToRemove)
@@ -1071,7 +1094,6 @@ namespace JAKE.client
                             {
                                 ShotContainer.Children.Remove(shotVisual);
                                 shouldRender = false;
-                                return;
                             }
                         }
                     };
@@ -1084,9 +1106,13 @@ namespace JAKE.client
         {
             if (obstacle.WouldOverlap(newX, newY, elipse, elipse))
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 shot = null;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             }
+#pragma warning disable CS8603 // Possible null reference return.
             return shot;
+#pragma warning restore CS8603 // Possible null reference return.
         }
 
         public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, string color, string shape, out Shot shot)
