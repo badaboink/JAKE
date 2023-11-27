@@ -72,12 +72,16 @@ namespace Server.GameData
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player playerToEdit = players.Find(p => p.GetId() == id);
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             playerToEdit.SetCurrentPosition(x, y);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         public string GetPlayerData(int id)
         {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player player = players.Find(p => p.GetId() == id);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             return player.ToString();
@@ -116,10 +120,12 @@ namespace Server.GameData
                 List<ZombieMinion> minions = newEnemy.GetMinions();
                 foreach (ZombieMinion minion in minions)
                 {
-                    Console.WriteLine("original minion in zombieBoss list hash: " + minion.GetHashCode());
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     Enemy copy = minion.ShallowClone();
-                    Console.WriteLine("shallow copy minion in enemies list hash: " + copy.GetHashCode());
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8604 // Possible null reference argument.
                     enemies.Add(copy); //minion.ShallowClone()
+#pragma warning restore CS8604 // Possible null reference argument.
 
                     minion.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
                 }
@@ -223,7 +229,9 @@ namespace Server.GameData
         }
         public void UpdateDeadPlayer(int id)
         {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player playerToUpdate = players.Find(p => p.GetId() == id);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetName("DEAD");
