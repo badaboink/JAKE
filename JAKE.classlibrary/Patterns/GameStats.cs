@@ -11,60 +11,24 @@ namespace JAKE.classlibrary.Patterns
         private static GameStats? instance = null;
         private static readonly object lockObject = new object();
 
-        private int playersCount;
-        private float playerHealth;
-        private int playerScore;
-        private int playerSpeed;
-        private bool shieldOn;
-        private double windowHeight;
-        private double windowWidth;
+        public double WindowWidth { get; set; }
+        public double WindowHeight { get; set; }
 
-        public double WindowWidth
-        {
-            get { return windowWidth; }
-            set { windowWidth = value; }
-        }
-        public double WindowHeight
-        {
-            get { return windowHeight; }
-            set { windowHeight = value; }
-        }
+        public int PlayersCount { get; set; }
 
-        public int PlayersCount
-        {
-            get { return playersCount; }
-            set { playersCount = value; }
-        }
+        public float PlayerHealth { get; set; }
 
-        public float PlayerHealth
-        {
-            get { return playerHealth; }
-            set { playerHealth = value; }
-        }
+        public int PlayerScore { get; set; }
 
-        public int PlayerScore
-        {
-            get { return playerScore; }
-            set { playerScore = value; }
-        }
-
-        public int PlayerSpeed
-        {
-            get { return playerSpeed; }
-            set { playerSpeed = value; }
-        }
-        public bool ShieldOn
-        {
-            get { return shieldOn; }
-            set { shieldOn = value; }
-        }
+        public int PlayerSpeed { get; set; }
+        public bool ShieldOn { get; set; }
         private GameStats()
         {
-            playersCount = 0;
-            playerHealth = 100f;
-            playerScore = 0;
-            playerSpeed = 10;
-            shieldOn = false;
+            PlayersCount = 0;
+            PlayerHealth = 100f;
+            PlayerScore = 0;
+            PlayerSpeed = 10;
+            ShieldOn = false;
         }
 
         public static GameStats Instance

@@ -19,11 +19,10 @@ namespace Server.GameData
         private List<Enemy> enemies = new List<Enemy>();
         private DateTime gametime = DateTime.Now;
 
-        private List<Coin> coins = new List<Coin>();
-        private List<HealthBoost> healthBoosts = new List<HealthBoost>();
-        private List<Shield> shields = new List<Shield>();
-        private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
-        private List<Weapon> weapons = new List<Weapon>();
+        private readonly List<Coin> coins = new List<Coin>();
+        private readonly List<HealthBoost> healthBoosts = new List<HealthBoost>();
+        private readonly List<Shield> shields = new List<Shield>();
+        private readonly List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
         public MapObjectFactory objectFactory = new MapObjectFactory();
         public ZombieFactory zombieFactory = new ZombieFactory();
         public ObstacleChecker obstacleChecker;
@@ -184,7 +183,7 @@ namespace Server.GameData
 
         public Coin returnCoin(int id)
         {
-            return coins.FirstOrDefault(coin => coin.id == id);
+            return coins.Find(coin => coin.id == id);
         }
         public DateTime GetCurrentGameTime()
         {
@@ -219,10 +218,8 @@ namespace Server.GameData
         private readonly object coinsListLock = new object();
         public Coin AddCoin(int points)
         {
-            //Console.WriteLine("ADDCOIN inemmory");
             lock (coinsListLock)
             {
-                Random random = new Random();
                 double x = 0, y = 0;
                 bool overlap = true;
                 Coin coin = (Coin)objectFactory.CreateMapObject("coin", points);
@@ -233,7 +230,7 @@ namespace Server.GameData
                     y = random.Next(0, 800);
 
                     // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, coin.Width, coin.Height));
+                    overlap = obstacles.Exists(obstacle => obstacle.WouldOverlap(x, y, coin.Width, coin.Height));
                 }
 
                 coin.SetPosition(x, y);
@@ -247,7 +244,7 @@ namespace Server.GameData
         {
             lock (coinsListLock)
             {
-                Coin coinToRemove = coins.FirstOrDefault(coin => coin.MatchesId(id));
+                Coin coinToRemove = coins.Find(coin => coin.MatchesId(id));
                 if (coinToRemove != null)
                 {
                     coins.Remove(coinToRemove);
@@ -266,10 +263,8 @@ namespace Server.GameData
         private readonly object healthListLock = new object();
         public HealthBoost AddHealthBoost(int health)
         {
-            //Console.WriteLine("ADDCOIN inemmory");
             lock (healthListLock)
             {
-                Random random = new Random();
                 double x = 0, y = 0;
                 bool overlap = true;
                 HealthBoost healthBoost = (HealthBoost)objectFactory.CreateMapObject("healthboost", health);
@@ -280,7 +275,7 @@ namespace Server.GameData
                     y = random.Next(0, 800);
 
                     // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, healthBoost.Width, healthBoost.Height));
+                    overlap = obstacles.Exists(obstacle => obstacle.WouldOverlap(x, y, healthBoost.Width, healthBoost.Height));
                 }
 
                 healthBoost.SetPosition(x, y);
@@ -294,7 +289,7 @@ namespace Server.GameData
         {
             lock (healthListLock)
             {
-                HealthBoost healthToRemove = healthBoosts.FirstOrDefault(health => health.MatchesId(id));
+                HealthBoost healthToRemove = healthBoosts.Find(health => health.MatchesId(id));
                 if (healthToRemove != null)
                 {
                     healthBoosts.Remove(healthToRemove);
@@ -313,10 +308,8 @@ namespace Server.GameData
         private readonly object speedListLock = new object();
         public SpeedBoost AddSpeedBoost(int speed)
         {
-            //Console.WriteLine("ADDCOIN inemmory");
             lock (speedListLock)
             {
-                Random random = new Random();
                 double x = 0, y = 0;
                 bool overlap = true;
                 SpeedBoost speedBoost = (SpeedBoost)objectFactory.CreateMapObject("speedboost", speed);
@@ -327,7 +320,7 @@ namespace Server.GameData
                     y = random.Next(0, 800);
 
                     // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, speedBoost.Width, speedBoost.Height));
+                    overlap = obstacles.Exists(obstacle => obstacle.WouldOverlap(x, y, speedBoost.Width, speedBoost.Height));
                 }
 
                 speedBoost.SetPosition(x, y);
@@ -341,7 +334,7 @@ namespace Server.GameData
         {
             lock (speedListLock)
             {
-                SpeedBoost speedToRemove = speedBoosts.FirstOrDefault(speed => speed.MatchesId(id));
+                SpeedBoost speedToRemove = speedBoosts.Find(speed => speed.MatchesId(id));
                 if (speedToRemove != null)
                 {
                     speedBoosts.Remove(speedToRemove);
@@ -360,10 +353,8 @@ namespace Server.GameData
         private readonly object shieldListLock = new object();
         public Shield AddShield(int time)
         {
-            //Console.WriteLine("ADDCOIN inemmory");
             lock (shieldListLock)
             {
-                Random random = new Random();
                 double x = 0, y = 0;
                 bool overlap = true;
                 Shield shield = (Shield)objectFactory.CreateMapObject("shield", time);
@@ -374,7 +365,7 @@ namespace Server.GameData
                     y = random.Next(0, 800);
 
                     // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, shield.Width, shield.Height));
+                    overlap = obstacles.Exists(obstacle => obstacle.WouldOverlap(x, y, shield.Width, shield.Height));
                 }
 
                 shield.SetPosition(x, y);
@@ -388,7 +379,7 @@ namespace Server.GameData
         {
             lock (shieldListLock)
             {
-                Shield shieldToRemove = shields.FirstOrDefault(shield => shield.MatchesId(id));
+                Shield shieldToRemove = shields.Find(shield => shield.MatchesId(id));
                 if (shieldToRemove != null)
                 {
                     shields.Remove(shieldToRemove);

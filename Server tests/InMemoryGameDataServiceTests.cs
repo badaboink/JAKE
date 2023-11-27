@@ -27,9 +27,7 @@ namespace Server_tests
             string shotShape = "round";
             Player player1 = new Player(1, playerName, playerColor, shotColor, shotShape);
             player1.SetConnectionId(connectionID);
-            //int maxInt = gameDataService.MaxId;
             Player player2 = gameDataService.AddPlayer(playerName, playerColor, connectionID, shotColor, shotShape);
-            //Assert.True(player2.GetId() >=1 && player2.GetId() <= maxInt);
             Assert.Equal(player1.GetName(), player2.GetName());
             Assert.Equal(player1.GetColor(), player2.GetColor());
             Assert.Equal(player1.GetConnectionId(), player2.GetConnectionId());
@@ -169,8 +167,6 @@ namespace Server_tests
             Assert.Equal(expected, actual);
         }
 
-        //TODO: updateEnemyPosition, observers
-
         [Fact]
         public void Test_Add_Coin()
         {
@@ -208,7 +204,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_Coins()
         {
-            Coin coin = gameDataService.AddCoin(10);
+            gameDataService.AddCoin(10);
             int actual = gameDataService.GetCoins().Count;
             int expected = 1;
 
@@ -241,7 +237,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_HealthBoost()
         {
-            HealthBoost healthBoost = gameDataService.AddHealthBoost(10);
+            gameDataService.AddHealthBoost(10);
             int actual = gameDataService.GetHealthBoosts().Count;
             int expected = 1;
 
@@ -274,7 +270,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_SpeedBoost()
         {
-            SpeedBoost speedBoost = gameDataService.AddSpeedBoost(10);
+            gameDataService.AddSpeedBoost(10);
             int actual = gameDataService.GetSpeedBoosts().Count;
             int expected = 1;
 
@@ -307,7 +303,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_Shield()
         {
-            Shield shield = gameDataService.AddShield(10);
+            gameDataService.AddShield(10);
             int actual = gameDataService.GetShields().Count;
             int expected = 1;
 

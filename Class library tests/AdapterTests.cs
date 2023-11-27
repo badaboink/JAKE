@@ -14,8 +14,6 @@ namespace Class_library_tests
         [Fact]
         public void Test_ConsoleString_Convert_ToServerString_Coin()
         {
-            //id x y points, width,height = 20
-            Coin coin = new Coin(1, 5, 5, 10, "image");
             string expectedCoinString = "10:1:5:5:20:20:image";
             string consoleCoin = "points:10,id:1,x:5,y:5,width:20,height:20,image:image";
             string coinString = new ServerString(consoleCoin).ConvertedString;

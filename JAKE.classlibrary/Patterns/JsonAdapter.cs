@@ -11,7 +11,7 @@ namespace JAKE.classlibrary.Patterns
     public class JsonAdapter : IStringAdapter
     {
 
-        private JsonAdaptee _jsonConverter = new JsonAdaptee();
+        private readonly JsonAdaptee _jsonConverter = new JsonAdaptee();
 
         public string Convert(string inputString)
         {

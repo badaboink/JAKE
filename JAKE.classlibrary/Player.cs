@@ -237,29 +237,17 @@ namespace JAKE.classlibrary
         {
             return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetShotColor()}:{GetShotShape()}";
         }
-        // :{GetShotColor()}:{GetShotShape()}
-        //public void IncreaseHealth(int health)
-        //{
-        //    //health padidint 
-        //    Debug.WriteLine("padidino health");
-        //}
+
         [ExcludeFromCodeCoverage]
         public void IncreaseSpeed(int speed)
         {
-            //speed padidint ir uzdet laika bet ne cia gal?? laikas default 15s
-            Debug.WriteLine("padidino speed");
+
             _speed += speed;
         }
 
-        //public void IncreasePoints(int points)
-        //{
-        //    //points padidint
-        //    Debug.WriteLine("padidino points");
-        //}
         [ExcludeFromCodeCoverage]
         public void AddShield(int time)
         {
-            //uzdet shield grafika ir laika uzdet??
             Debug.WriteLine("uzdejo shield");
         }
     }

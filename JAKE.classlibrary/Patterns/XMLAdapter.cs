@@ -8,9 +8,9 @@ using System.Xml;
 
 namespace JAKE.classlibrary.Patterns
 {
-    public class XMLAdapter : IStringAdapter
+    public class XmlAdapter : IStringAdapter
     {
-        private XMLAdaptee _xmlConverter = new XMLAdaptee();
+        private readonly XmlAdaptee _xmlConverter = new XmlAdaptee();
 
         public string Convert(string inputString)
         {

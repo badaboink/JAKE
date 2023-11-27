@@ -20,7 +20,7 @@ namespace JAKE.classlibrary.Shots
         private DateTime _previousUpdate;
         private IColor _color;
         private string _shape;
-        private Shot shot;
+
 
         public Shot(IColor color, double speed, int size, double points)
         {         

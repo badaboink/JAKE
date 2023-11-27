@@ -14,7 +14,7 @@ namespace JAKE.classlibrary
 {
     public class Spawner
     {
-        private MapObjectFactory _mapObjectFactory;
+        private readonly MapObjectFactory _mapObjectFactory;
         private ZombieFactory _zombieFactory;
         private ObstacleChecker _obstacleChecker;
         int maxAttempts = 1000;
