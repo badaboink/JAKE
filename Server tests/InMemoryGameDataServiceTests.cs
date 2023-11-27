@@ -42,7 +42,7 @@ namespace Server_tests
             string shotColor = "red";
             string shotShape = "round";
             Player player1 = gameDataService.AddPlayer(playerName, playerColor, shotColor, shotShape, connectionID);
-            Player player2 = gameDataService.RemovePlayer(player1.GetConnectionId(), playerToRemove);
+            Player player2 = gameDataService.RemovePlayer(player1.GetConnectionId());
             Assert.Equal(player1.GetId(), player2.GetId());
             Assert.Equal(player1.GetName(), player2.GetName());
             Assert.Equal(player1.GetColor(), player2.GetColor());
@@ -183,7 +183,7 @@ namespace Server_tests
             Coin coin = gameDataService.AddCoin(10);
             int id = coin.id;
 
-            Coin returned = gameDataService.returnCoin(id);
+            Coin returned = gameDataService.ReturnCoin(id);
 
             Assert.Equal(coin, returned);
         }

@@ -37,7 +37,9 @@ namespace UI_tests
     {
 
         [Fact]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task Build_PlayerVisualBuilder()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             bool tested = false;
             ManualResetEvent manualResetEvent = new ManualResetEvent(false);
@@ -77,7 +79,9 @@ namespace UI_tests
             Assert.True(tested);
         }
         [Fact]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task Build_EnemyVisualBuilder()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             bool tested = false;
             ManualResetEvent manualResetEvent = new ManualResetEvent(false);
@@ -116,7 +120,9 @@ namespace UI_tests
             Assert.True(tested);
         }
         [Fact]
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public async Task Build_ShotVisualBuilder()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             bool tested = false;
             ManualResetEvent manualResetEvent = new ManualResetEvent(false);

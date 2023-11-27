@@ -31,7 +31,7 @@ namespace Server.Hubs
         {
             string connectionId = Context.ConnectionId;
             _gameDataService.RemoveObserver(connectionId);
-            Player playertoremove = _gameDataService.RemovePlayer(connectionId, playerToRemove);
+            Player playertoremove = _gameDataService.RemovePlayer(connectionId);
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {

@@ -22,7 +22,9 @@ namespace Server_tests
     {
         public GameHub gameHub { get; private set; }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public TestFixture()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             InitializeGameHub();
         }
@@ -48,7 +50,9 @@ namespace Server_tests
         {
             IGameDataService memory = new InMemoryGameDataService();
             var field = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             field.SetValue(gameHub, memory);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         public void Dispose()
@@ -71,11 +75,17 @@ namespace Server_tests
             GameHub gameHub = fixture.gameHub;
 
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
             await gameHub.OnConnectedAsync();
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Dictionary<string, Observer> observers = gameDataService.GetObservers();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             string firstKey = observers.FirstOrDefault().Key;
             Assert.NotNull(observers);
             Assert.Equal("mock_connection_id", firstKey);
@@ -87,18 +97,26 @@ namespace Server_tests
             GameHub gameHub = fixture.gameHub;
 
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             await gameHub.OnConnectedAsync();
             await gameHub.SendColor("TestColor", "TestPlayer", "TestShotColor", "TestShotShape");
 
             Mock<IClientProxy> mockClientProxy1 = new Mock<IClientProxy>();
             var observer1 = new Observer(mockClientProxy1.Object);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             gameDataService.AddObserver("connection_id_1", observer1);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             Dictionary<string, Observer> observers = gameDataService.GetObservers();
             int observerscountfirst = observers.Count();
 
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Exception testException = null;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             await gameHub.OnDisconnectedAsync(testException);
             int observerscountsecond = gameDataService.GetObservers().Count();
             Assert.NotEqual(observerscountfirst, observerscountsecond);
@@ -110,11 +128,21 @@ namespace Server_tests
             GameHub gameHub = fixture.gameHub;
             await gameHub.OnConnectedAsync();
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             Player expectedPlayer = new Player(1, "TestPlayer", "TestColor", "TestShotColor", "TestShotShape");
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8604 // Possible null reference argument.
             await gameHub.SendColor(expectedPlayer.GetColor(), expectedPlayer.GetName(), expectedPlayer.GetShotColor(), expectedPlayer.GetShotShape());
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8604 // Possible null reference argument.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             string resultPlayerString = gameDataService.GetPlayerList()[0].ToString();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             int indexOfFirstColon = resultPlayerString.IndexOf(':');
             Assert.Equal(expectedPlayer.ToString().Substring(2), resultPlayerString.Substring(indexOfFirstColon + 1));
 
@@ -127,8 +155,14 @@ namespace Server_tests
             await gameHub.OnConnectedAsync();
             await gameHub.SendColor("TestColor", "TestPlayer", "TestShotColor", "TestShotShape");
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             gameDataService.SetGameTime(DateTime.Now.AddSeconds(-10));
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             await gameHub.SendEnemies();
             Assert.NotEmpty(gameDataService.GetEnemies());
             Assert.NotEmpty(gameDataService.GetCoins());
@@ -142,9 +176,15 @@ namespace Server_tests
         {
             GameHub gameHub = fixture.gameHub;
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Coin coin = gameDataService.AddCoin(2);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             coin.Image = "";
 
             string coinString = coin.ToXML();
@@ -163,9 +203,15 @@ namespace Server_tests
         {
             GameHub gameHub = fixture.gameHub;
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Shield shield = gameDataService.AddShield(5);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             Mock<IClientProxy> mockClientProxy = new Mock<IClientProxy>();
             var observer = new Observer(mockClientProxy.Object);
@@ -185,9 +231,15 @@ namespace Server_tests
         {
             GameHub gameHub = fixture.gameHub;
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             HealthBoost hb = gameDataService.AddHealthBoost(42);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             Mock<IClientProxy> mockClientProxy = new Mock<IClientProxy>();
             var observer = new Observer(mockClientProxy.Object);
@@ -208,9 +260,15 @@ namespace Server_tests
         {
             GameHub gameHub = fixture.gameHub;
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             SpeedBoost sb = gameDataService.AddSpeedBoost(1);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             Mock<IClientProxy> mockClientProxy = new Mock<IClientProxy>();
             var observer = new Observer(mockClientProxy.Object);
@@ -226,9 +284,15 @@ namespace Server_tests
         {
             GameHub gameHub = fixture.gameHub;
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Player player1 = gameDataService.AddPlayer("name", "color", "mock_connection_id", "shotcolor", "shotshape");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             Player player2 = gameDataService.AddPlayer("name", "color", "mock_connection_id", "shotcolor", "shotshape");
 
 
@@ -250,9 +314,15 @@ namespace Server_tests
         {
             GameHub gameHub = fixture.gameHub;
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Player player1 = gameDataService.AddPlayer("name", "color", "connectionid", "shotcolor", "shotshape");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             double newX = 100.0;
             double newY = 200.0;
@@ -272,11 +342,17 @@ namespace Server_tests
         {
             GameHub gameHub = fixture.gameHub;
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
             Mock<IClientProxy> mockClientProxy1 = new Mock<IClientProxy>();
             var observer1 = new Observer(mockClientProxy1.Object);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             gameDataService.AddObserver("connection_id_1", observer1);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             Enemy enemy = gameDataService.AddEnemies();
             await gameHub.SendDeadEnemy(enemy.ToString());
@@ -288,9 +364,15 @@ namespace Server_tests
         {
             GameHub gameHub = fixture.gameHub;
             var gameDataServiceField = typeof(GameHub).GetField("_gameDataService", BindingFlags.Instance | BindingFlags.NonPublic);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             var gameDataService = (IGameDataService)gameDataServiceField.GetValue(gameHub);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             Enemy enemy = gameDataService.AddEnemies();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             Enemy changedEnemy = new Enemy(enemy.GetId(), enemy.GetColor());
             changedEnemy.SetHealth(1);
             int beforeChange = enemy.GetHealth();

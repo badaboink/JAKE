@@ -14,10 +14,5 @@ namespace JAKE.classlibrary.Patterns.AbstractFactory
         {
         }
 
-        public override Enemy ShallowClone()
-        {
-            return base.ShallowClone();
-        }
-
     }
 }
