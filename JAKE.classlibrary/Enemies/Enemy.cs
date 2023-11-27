@@ -15,7 +15,7 @@ namespace JAKE.classlibrary.Enemies
         private double _speed;
         private readonly string _color;
         private readonly Coordinates coordinates;
-        private readonly Trigger trigger = new Trigger();
+        private readonly Trigger trigger = new();
         private int _health;
         private int _size;
 #pragma warning disable S2933 // Fields that are only assigned in the constructor should be "readonly"

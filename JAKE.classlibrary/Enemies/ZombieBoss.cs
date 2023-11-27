@@ -11,7 +11,7 @@ namespace JAKE.classlibrary.Enemies
 {
     public class ZombieBoss : Boss
     {
-        private readonly List<ZombieMinion> minions = new List<ZombieMinion>();
+        private readonly List<ZombieMinion> minions = new();
         private readonly int maxMinions;
         public ZombieBoss(int id, string color, double speed = 2, int health = 20, int size = 20) : base(id, color, speed, health, size)
         {
@@ -25,14 +25,14 @@ namespace JAKE.classlibrary.Enemies
                 return;
             }
             double radius = 40;
-            Random rand = new Random();
+            Random rand = new();
             double angle = rand.NextDouble() * Math.PI * 2;
             double xx = (GetCurrentX() + radius * Math.Cos(angle));
             double yy = (GetCurrentY() + radius * Math.Sin(angle));
             if (minions.Count < 1)
             {
               
-                ZombieMinion zombieMinion = new ZombieMinion(id, "green", 10);
+                ZombieMinion zombieMinion = new(id, "green", 10);
                 zombieMinion.SetCurrentPosition(xx, yy);
                 zombieMinion.SetMovementStrategy(new CircleStrategy(radius, angle, this, obstacles));
                 minions.Add(zombieMinion);
