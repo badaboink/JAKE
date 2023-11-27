@@ -86,6 +86,13 @@ namespace Server.GameData
                 await clientProxy.SendAsync("SendingPickedCorona", id);
             }
         }
+        public async Task HandleSpreadCorona(int id) //player id
+        {
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingSpreadCorona", id);
+            }
+        }
         public async Task HandleCoins(List<string> coins)
         {
             if (clientProxy != null)

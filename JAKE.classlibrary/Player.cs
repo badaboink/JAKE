@@ -25,6 +25,8 @@ namespace JAKE.classlibrary
         private bool _isShooting = false;
         private double _attackSpeed;
         private string _lastObjectPicked;
+        public string state { get; set; }
+
         public string? Ability { get; set; }
         
 

@@ -163,11 +163,7 @@ namespace Server.Hubs
             if (parts.Length == 5)
             {
                 int id = int.Parse(parts[0]);
-
-                Console.WriteLine("coronas pries remove: " + _gameDataService.GetCoronas().Count);
                 _gameDataService.RemoveCorona(id);
-                Console.WriteLine("coronas po remove: " + _gameDataService.GetCoronas().Count);
-                Console.WriteLine("remeovino corona");
 
 
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
@@ -179,6 +175,25 @@ namespace Server.Hubs
 
             }
         }
+        public async Task SendSpreadCorona(string player)
+        {
+            string[] parts = player.Split(':');
+          
+                int id = int.Parse(parts[0]);
+                int x = int.Parse(parts[3]);
+                int y = int.Parse(parts[4]);
+                _gameDataService.InfectCorona(id, x, y);
+
+
+                //Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                //foreach (var observerEntry in observers)
+                //{
+                //    var observer = observerEntry.Value;
+                //    await observer.HandleSpreadCorona(toInfectId); //player id kuri reikia infectint
+                //}
+
+        }
+
         public async Task SendPickedShield(string shield)
         {
             string[] parts = shield.Split(':');

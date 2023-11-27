@@ -52,5 +52,7 @@ namespace Server.GameData
         Coin returnCoin(int id);
         Enemy AddZombieBoss();
         bool IsBossAlive();
+
+        Task InfectCorona(int id, double x, double y);
     }
 }

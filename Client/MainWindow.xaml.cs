@@ -61,6 +61,7 @@ namespace JAKE.client
         private readonly object enemyListLock = new object();
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         Controller controller = new Controller();
+        private GameMediator _gameMediator;
 
 
         private bool isCollidingWithHealthBoost = false;
@@ -82,6 +83,7 @@ namespace JAKE.client
             {
                 collisionCheckedEnemies[enemy] = false;
             }
+           // _gameMediator = new GameMediator(this);
         }
 
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -382,6 +384,7 @@ namespace JAKE.client
                                 CoinContainer.Children.Add(coinVisual);
 
                                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                               // _gameMediator.NotifyCoinsCollision(playerVisuals[currentPlayer], coin);
                             });
                         }
                     }
@@ -472,6 +475,26 @@ namespace JAKE.client
                     }
 
                 });
+            });
+
+            connection.On<int>("SendingSpreadCorona", (playerID) =>
+            {
+                Debug.WriteLine("sending corona ieina is serverio grizta");
+               if(currentPlayer.GetId() == playerID)
+                {
+                    GameStats gameStat = GameStats.Instance;
+                   
+                    gameStat.PlayerHealth -= 10;
+                    Debug.WriteLine("minusuoja health");
+                    Debug.WriteLine("health: " + gameStat.PlayerHealth);
+                    //healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+
+                    //Player health = new HealthBoostDecorator(currentPlayer);
+                    //testLabel.Text = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                    //HideDisplay();
+                    //health = new HealthDecorator(currentPlayer);
+                    //healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
+                }
             });
 
             connection.On<List<string>>("SendingShields", (shieldsdata) =>
@@ -890,6 +913,11 @@ namespace JAKE.client
 
         private async void HandleCoinsCollisions(PlayerVisual playerVisual)
         {
+            //Player player = 
+            //foreach (Coin coin in coins)
+            //{
+            //    coin.Accept(new GameEntityVisitor(), playerVisual);
+            //}
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<Coin> coinsCopy = new List<Coin>(coins);
@@ -901,7 +929,7 @@ namespace JAKE.client
                     CoinVisual coinRect = coinVisuals[coin];
                     double coinX = Canvas.GetLeft(coinRect);
                     double coinY = Canvas.GetTop(coinRect);
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height)) 
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height))
                     {
                         GameStats gameStat = GameStats.Instance;
                         coin.Interact(gameStat);
@@ -918,11 +946,23 @@ namespace JAKE.client
                 }
             }
         }
-
+        private Player getPlayer(PlayerVisual playerVisual)
+        {
+            Player player = new Player();
+            foreach (var pair in playerVisuals)
+            {
+                if (pair.Value == playerVisual)
+                {
+                    player = pair.Key;
+                }
+            }
+            return player;
+        }
         private async void HandleCoronaCollisions(PlayerVisual playerVisual)
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
+            Player player = getPlayer(playerVisual);
             List<Corona> coronasCopy = new List<Corona>(coronas);
 
             foreach (Corona corona in coronasCopy)
@@ -944,6 +984,7 @@ namespace JAKE.client
                         //-----------
                         Debug.WriteLine("tostring: " + corona.ToString());
                         await connection.SendAsync("SendPickedCorona", corona.ToString());
+                        await connection.SendAsync("SendSpreadCorona", player.ToString());
                     }
                 }
             }
