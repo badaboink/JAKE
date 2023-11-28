@@ -9,7 +9,6 @@ using System.Dynamic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.SignalR;
 using System.Reflection;
 using JAKE.classlibrary;
 using Microsoft.AspNetCore.Hosting.Server;

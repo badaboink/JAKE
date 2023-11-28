@@ -3,7 +3,7 @@ using JAKE.classlibrary.Enemies;
 
 namespace Server.GameData
 {
-    public class GameFunctions
+    public static class GameFunctions
     {
      
         public static List<Obstacle> GenerateObstacles()

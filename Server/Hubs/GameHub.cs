@@ -21,7 +21,9 @@ namespace Server.Hubs
     public class GameHub : Hub
     {
         private readonly IGameDataService _gameDataService;
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public override async Task OnConnectedAsync()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             string connectionId = Context.ConnectionId;
             Observer observer = new(clientProxy: Clients.Client(connectionId));

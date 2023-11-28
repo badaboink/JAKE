@@ -14,7 +14,7 @@ namespace JAKE.classlibrary.Shots
     {
        public RoundShot(Shot shot) : base(shot)
         {
-            base.setShape("round");
+            base.SetShape("round");
         }
     }
 }

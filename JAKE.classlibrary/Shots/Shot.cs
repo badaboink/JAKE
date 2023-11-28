@@ -22,80 +22,84 @@ namespace JAKE.classlibrary.Shots
         private string _shape;
 
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Shot(IColor color, double speed, int size, double points)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {         
             _color = color;
             _speed = speed;
             _size = size;
             _points = points;
-            _previousUpdate = DateTime.Now;
+            _previousUpdate = DateTime.UtcNow;
         }
 
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Shot(Shot shot)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
-            _color = shot.getColor();
-            _speed = shot.getSpeed();
-            _size = shot.getSize();
-            _points = shot.getPoints();
-            _previousUpdate = DateTime.Now;
+            _color = shot.GetColor();
+            _speed = shot.GetSpeed();
+            _size = shot.GetSize();
+            _points = shot.GetPoints();
+            _previousUpdate = DateTime.UtcNow;
         }
 
-        public string getShape()
+        public string GetShape()
         {
             return _shape;
         }
-        public IColor getColor()
+        public IColor GetColor()
         {
             return _color;
         }
-        public double getSpeed()
+        public double GetSpeed()
         {
             return _speed;
         }
-        public int getSize()
+        public int GetSize()
         { 
             return _size;
         }
-        public double getPoints() 
+        public double GetPoints() 
         { 
             return _points;
         }
 
-        public double getX() 
+        public double GetX() 
         { 
             return _x;
         }
-        public double getY() 
+        public double GetY() 
         {
             return _y;
         }
         [ExcludeFromCodeCoverage]
-        public void setSpeed(double speed)
+        public void SetSpeed(double speed)
         { 
             _speed = speed; 
         }
         [ExcludeFromCodeCoverage]
-        public void setColor(IColor color) 
+        public void SetColor(IColor color) 
         {
             _color = color;
         }
         [ExcludeFromCodeCoverage]
-        public void setShape(string shape)
+        public void SetShape(string shape)
         {
             _shape = shape;
         }
         [ExcludeFromCodeCoverage]
-        public void setSize(int size) 
+        public void SetSize(int size) 
         {
             _size = size;
         }
         [ExcludeFromCodeCoverage]
-        public void setPoints(double points) 
+        public void SetPoints(double points) 
         {
             _points = points;
         }
         [ExcludeFromCodeCoverage]
-        public void setPosition(double x, double y) 
+        public void SetPosition(double x, double y) 
         { 
             _x = x;
             _y = y;
@@ -103,7 +107,7 @@ namespace JAKE.classlibrary.Shots
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            return $"{getX()}:{getY()}";
+            return $"{GetX()}:{GetY()}";
         }
         [ExcludeFromCodeCoverage]
         public void SetPreviousUpdate(DateTime time)
@@ -115,8 +119,8 @@ namespace JAKE.classlibrary.Shots
         {
             get
             {
-                double delta = DateTime.Now.Subtract(_previousUpdate).TotalMilliseconds;
-                _previousUpdate = DateTime.Now;
+                double delta = DateTime.UtcNow.Subtract(_previousUpdate).TotalMilliseconds;
+                _previousUpdate = DateTime.UtcNow;
                 return delta/10f;
             }
         }

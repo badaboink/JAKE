@@ -17,8 +17,8 @@ namespace JAKE.classlibrary
         private int _id;
         private string _name;
         private string _color;
-        private Coordinates _currentDirection = new(0, 1);
-        private Coordinates _currentCoords = new(0, 0);
+        private readonly Coordinates _currentDirection = new(0, 1);
+        private readonly Coordinates _currentCoords = new(0, 0);
         private int _speed;
         private string? _shotColor;
         private string? _shotShape;
@@ -99,6 +99,10 @@ namespace JAKE.classlibrary
         }
         public string GetLastObjectPicked()
         {
+            if(_lastObjectPicked == null)
+            {
+                return "";
+            }
             return _lastObjectPicked;
         }
         public void SetLastObjectPicked(string obj)

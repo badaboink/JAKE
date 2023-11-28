@@ -9,23 +9,19 @@ namespace JAKE.classlibrary.Patterns
 {
     public class MapObjectFactory
     {
+#pragma warning disable CA1822 // Mark members as static
         public IMapObject CreateMapObject(string objectType, int value, int weapsp = 0, int weapstr = 0)
+#pragma warning restore CA1822 // Mark members as static
         {
-            switch (objectType.ToLower())
+            return objectType.ToLower() switch
             {
-                case "healthboost":
-                    return new HealthBoost(value);
-                case "coin":
-                    return new Coin(value);
-                case "weapon":
-                    return new Weapon(value, weapsp, weapstr);
-                case "shield":
-                    return new Shield(value);
-                case "speedboost":
-                    return new SpeedBoost(value);
-                default:
-                    throw new ArgumentException("Invalid object type");
-            }
+                "healthboost" => new HealthBoost(value),
+                "coin" => new Coin(value),
+                "weapon" => new Weapon(value, weapsp, weapstr),
+                "shield" => new Shield(value),
+                "speedboost" => new SpeedBoost(value),
+                _ => throw new ArgumentException("Invalid object type"),
+            };
         }
     }
 }

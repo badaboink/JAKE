@@ -28,7 +28,9 @@ namespace JAKE.classlibrary.Collectibles
             this.Y = y;
             Image = image;
         }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Shield(int time)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             Time = time;
         }

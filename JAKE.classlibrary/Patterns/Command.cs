@@ -21,6 +21,7 @@ namespace JAKE.classlibrary.Patterns
             bool overlap = false;
             GameStats gameStat = GameStats.Instance;
             double minDistance = double.MaxValue;
+#pragma warning disable S3267 // Loops should be simplified with "LINQ" expressions
             foreach (Obstacle obstacle in obstacles)
             {
                 if (obstacle.WouldOverlap(newX, newY, 50, 50))
@@ -55,6 +56,7 @@ namespace JAKE.classlibrary.Patterns
                     }
                 }
             }
+#pragma warning restore S3267 // Loops should be simplified with "LINQ" expressions
             double minX = 0; // Minimum X-coordinate
             double minY = 0; // Minimum Y-coordinate
             double maxX = windowWidth - 60; // Maximum X-coordinate

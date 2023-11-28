@@ -9,7 +9,7 @@ namespace JAKE.classlibrary.Patterns
     public class GameStats
     {
         private static GameStats? instance = null;
-        private static readonly object lockObject = new object();
+        private static readonly object lockObject = new();
 
         public double WindowWidth { get; set; }
         public double WindowHeight { get; set; }

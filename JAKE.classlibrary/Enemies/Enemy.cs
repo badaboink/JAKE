@@ -15,13 +15,21 @@ namespace JAKE.classlibrary.Enemies
         private double _speed;
         private readonly string _color;
         private readonly Coordinates coordinates;
-        private readonly Trigger trigger = new Trigger();
+        private readonly Trigger trigger = new();
         private int _health;
         private int _size;
+#pragma warning disable S2933 // Fields that are only assigned in the constructor should be "readonly"
+#pragma warning disable S4487 // Unread "private" fields should be removed
+#pragma warning disable IDE0044 // Add readonly modifier
+#pragma warning disable IDE0052 // Remove unread private members
         private int _points;
+#pragma warning restore IDE0052 // Remove unread private members
+#pragma warning restore IDE0044 // Add readonly modifier
+#pragma warning restore S4487 // Unread "private" fields should be removed
+#pragma warning restore S2933 // Fields that are only assigned in the constructor should be "readonly"
         protected IMoveStrategy? movementStrategy;
 
-        public virtual Enemy ShallowClone()
+        public virtual Enemy? ShallowClone()
         {
             return MemberwiseClone() as Enemy;
         }

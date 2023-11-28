@@ -23,7 +23,7 @@ namespace JAKE.classlibrary
             {
                 _adapter = new XmlAdapter();
             }
-            else if (inputString.Contains(":") && inputString.Contains(","))
+            else if (inputString.Contains(':') && inputString.Contains(','))
             {
                 _adapter = new ConsoleAdapter();
             }
