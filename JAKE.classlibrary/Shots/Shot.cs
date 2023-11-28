@@ -30,7 +30,7 @@ namespace JAKE.classlibrary.Shots
             _speed = speed;
             _size = size;
             _points = points;
-            _previousUpdate = DateTime.Now;
+            _previousUpdate = DateTime.UtcNow;
         }
 
 #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
@@ -41,7 +41,7 @@ namespace JAKE.classlibrary.Shots
             _speed = shot.getSpeed();
             _size = shot.getSize();
             _points = shot.getPoints();
-            _previousUpdate = DateTime.Now;
+            _previousUpdate = DateTime.UtcNow;
         }
 
         public string getShape()
@@ -119,8 +119,8 @@ namespace JAKE.classlibrary.Shots
         {
             get
             {
-                double delta = DateTime.Now.Subtract(_previousUpdate).TotalMilliseconds;
-                _previousUpdate = DateTime.Now;
+                double delta = DateTime.UtcNow.Subtract(_previousUpdate).TotalMilliseconds;
+                _previousUpdate = DateTime.UtcNow;
                 return delta/10f;
             }
         }

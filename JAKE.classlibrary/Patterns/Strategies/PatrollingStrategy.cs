@@ -35,37 +35,37 @@ namespace JAKE.classlibrary.Patterns.Strategies
         {
             if (directionX == 2 && directionY == 2)
             {
-                if (random.Next(1, 3) == 1)
+                switch (random.Next(1, 3))
                 {
-                    directionX = random.Next(0, 2) == 0 ? -1 : 1;
-                    directionY = 0;
-                }
-                else
-                {
-                    directionY = random.Next(0, 2) == 0 ? -1 : 1;
-                    directionX = 0;
+                    case 1:
+                        directionX = random.Next(0, 2) == 0 ? -1 : 1;
+                        directionY = 0;
+                        break;
+                    default:
+                        directionY = random.Next(0, 2) == 0 ? -1 : 1;
+                        directionX = 0;
+                        break;
                 }
             }
             else
             {
-                if (random.Next(0, 2) == 0)
-                {
-                    directionX = directionX == 1 || directionX == -1 ? 0 : -1;
-                }
-                else
-                {
-                    directionX = directionX == 1 || directionX == -1 ? 0 : 1;
-                }
-                if (random.Next(0, 2) == 0)
-                {
-                    directionY = directionY == 1 || directionY == -1 ? 0 : -1;
-                }
-                else
-                {
-                    directionY = directionY == 1 || directionY == -1 ? 0 : 1;
-                }
+                HandleOtherDirection();
             }
 
+        }
+
+        private void HandleOtherDirection()
+        {
+            directionX = random.Next(0, 2) switch
+            {
+                0 => directionX == 1 || directionX == -1 ? 0 : -1,
+                _ => directionX == 1 || directionX == -1 ? 0 : 1,
+            };
+            directionY = random.Next(0, 2) switch
+            {
+                0 => directionY == 1 || directionY == -1 ? 0 : -1,
+                _ => directionY == 1 || directionY == -1 ? 0 : 1,
+            };
         }
 
         public void Move(Enemy enemy, List<Player> players)
@@ -81,27 +81,27 @@ namespace JAKE.classlibrary.Patterns.Strategies
             }
             else
             {
-                foreach (var distance in from Obstacle obstacle in obstacles
-                                         where obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize())
-                                         let distance = obstacle.DistanceFromObstacle(directionX, directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize())
-                                         select distance)
+                var obstacle = obstacles.Select(ob => ob).FirstOrDefault(ob => ob.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()));
+                if (obstacle != null)
                 {
-                    if (distance != 0)
-                    {
-                        newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
-                        newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentY() + distance;
-
-                        enemy.SetCurrentPosition(newX, newY);
-                    }
-
-                    GenerateRandomDirection();
-                    break;
+                    HandleObstacle(enemy, ref newX, ref newY, obstacle);
                 }
-
                 enemy.SetCurrentPosition(newX, newY);
             }
 
         }
+
+        private void HandleObstacle(Enemy enemy, ref double newX, ref double newY, Obstacle obstacle)
+        {
+            double distance = obstacle.DistanceFromObstacle(directionX, directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
+            if (distance != 0)
+            {
+                newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
+                newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentY() + distance;
+            }
+            GenerateRandomDirection();
+        }
+
         public int GetCurrentX()
         {
             return directionX;

@@ -89,89 +89,114 @@ namespace JAKE.classlibrary
             
             if (WouldOverlap(center.x, center.y))
             {
-                double distanceTop = Math.Abs(this.PositionY - center.y);
-                double distanceRight = Math.Abs(this.PositionX + this.Width - center.x);
-                double distanceBottom = Math.Abs(this.PositionY + this.Height - center.y);
-                double distanceLeft = Math.Abs(this.PositionX - center.x);
-                double minDistance = Math.Min(Math.Min(distanceTop, distanceBottom), Math.Min(distanceLeft, distanceRight));
-                if(distanceTop <= minDistance)
-                {
-                    return new Coordinates(position.x, this.PositionY - size.y);
-                }
-                else if(distanceBottom <= minDistance)
-                {
-                    return new Coordinates(position.x, this.PositionY + this.Height);
-                }
-                else if(distanceLeft <= minDistance)
-                {
-                    return new Coordinates(this.PositionX - size.x, position.y);
-                }
-                else if(distanceRight <= minDistance)
-                {
-                    return new Coordinates(this.PositionX + this.Width, position.y);
-                }
-                else
-                {
-                    return position;
-                }
+                return HandleInsideObstacle(position, size, center);
             }
             else
             {
-                int topLeft = WouldOverlap(position.x, position.y) ? 1 : 0;
-                int topRight = WouldOverlap(position.x + size.x, position.y) ? 1 : 0;
-                int bottomRight = WouldOverlap(position.x + size.x, position.y + size.y) ? 1 : 0;
-                int bottomLeft = WouldOverlap(position.x, position.y + size.y) ? 1 : 0;
-                double distanceTop = Math.Abs(this.PositionY - (position.y + size.y));
-                double distanceRight = Math.Abs(this.PositionX + this.Width - position.x);
-                double distanceBottom = Math.Abs(this.PositionY + this.Height - position.y);
-                double distanceLeft = Math.Abs(this.PositionX - (position.x + size.x));
-                _ = Math.Min(Math.Min(distanceTop, distanceBottom), Math.Min(distanceLeft, distanceRight));
-                int cornerCount = topLeft + topRight + bottomRight + bottomLeft;
-                if(cornerCount == 2)
-                {
-                    int top = topLeft + topRight;
-                    int bottom = bottomLeft + bottomRight;
-                    int right = topRight + bottomRight;
-                    int left = topLeft + bottomLeft;
-                    if(top == 2)
-                    {
-                        return new Coordinates(position.x, position.y + distanceBottom);
-                    }
-                    if(bottom == 2)
-                    {
-                        return new Coordinates(position.x, position.y - distanceTop);
-                    }
-                    if(left == 2)
-                    {
-                        return new Coordinates(position.x + distanceRight, position.y);
-                    }
-                    if(right == 2)
-                    {
-                        return new Coordinates(position.x - distanceLeft, position.y);
-                    }
-                    return position;
-                }
-                if(cornerCount == 1)
-                {
-                    if(topLeft == 1)
-                    {
-                        return distanceBottom < distanceRight ? new Coordinates(position.x, position.y + distanceBottom) : new Coordinates(position.x + distanceRight, position.y);
-                    }
-                    if(topRight == 1)
-                    {
-                        return distanceBottom < distanceLeft ? new Coordinates(position.x, position.y + distanceBottom) : new Coordinates(position.x - distanceLeft, position.y);
-                    }
-                    if(bottomLeft == 1)
-                    {
-                        return distanceTop < distanceRight ? new Coordinates(position.x, position.y - distanceTop) : new Coordinates(position.x + distanceRight, position.y);
-                    }
-                    if(bottomRight == 1)
-                    {
-                        return distanceTop < distanceLeft ? new Coordinates(position.x, position.y - distanceTop) : new Coordinates(position.x - distanceLeft, position.y);
-                    }
-                }
+                return HandlePartiallInObstacle(position, size);
+            }
+        }
+
+        private Coordinates HandlePartiallInObstacle(Coordinates position, Coordinates size)
+        {
+            CalculateCornersCollisionsAndDistances(position, size, out int[] cornerCollisions, out double[] distances);
+            _ = Math.Min(Math.Min(distances[0], distances[2]), Math.Min(distances[3], distances[1]));
+            int cornerCount = cornerCollisions.Sum();
+            if (cornerCount == 2)
+            {
+                return HandleSideCollision(position, cornerCollisions, distances);
+            }
+            if (cornerCount != 1)
+            {
                 return position;
             }
+            if (cornerCollisions[0] == 1)
+            {
+                return distances[2] < distances[1] ? new Coordinates(position.x, position.y + distances[2]) : new Coordinates(position.x + distances[1], position.y);
+            }
+            if (cornerCollisions[1] == 1)
+            {
+                return distances[2] < distances[3] ? new Coordinates(position.x, position.y + distances[2]) : new Coordinates(position.x - distances[3], position.y);
+            }
+            if (cornerCollisions[3] == 1)
+            {
+                return distances[0] < distances[1] ? new Coordinates(position.x, position.y - distances[0]) : new Coordinates(position.x + distances[1], position.y);
+            }
+            if (cornerCollisions[2] == 1)
+            {
+                return distances[0] < distances[3] ? new Coordinates(position.x, position.y - distances[0]) : new Coordinates(position.x - distances[3], position.y);
+            }
+            return position;
+        }
+
+        private void CalculateCornersCollisionsAndDistances(Coordinates position, Coordinates size, out int[] corners, out double[] distances)
+        {
+            int topLeft, topRight, bottomRight, bottomLeft;
+            double distanceTop, distanceRight, distanceBottom, distanceLeft;
+            topLeft = WouldOverlap(position.x, position.y) ? 1 : 0;
+            topRight = WouldOverlap(position.x + size.x, position.y) ? 1 : 0;
+            bottomRight = WouldOverlap(position.x + size.x, position.y + size.y) ? 1 : 0;
+            bottomLeft = WouldOverlap(position.x, position.y + size.y) ? 1 : 0;
+            distanceTop = Math.Abs(this.PositionY - (position.y + size.y));
+            distanceRight = Math.Abs(this.PositionX + this.Width - position.x);
+            distanceBottom = Math.Abs(this.PositionY + this.Height - position.y);
+            distanceLeft = Math.Abs(this.PositionX - (position.x + size.x));
+            distances = new double[] { distanceTop, distanceRight, distanceBottom, distanceLeft };
+            corners = new int[] { topLeft, topRight, bottomRight, bottomLeft };
+        }
+
+        private Coordinates HandleInsideObstacle(Coordinates position, Coordinates size, Coordinates center)
+        {
+            double distanceTop = Math.Abs(this.PositionY - center.y);
+            double distanceRight = Math.Abs(this.PositionX + this.Width - center.x);
+            double distanceBottom = Math.Abs(this.PositionY + this.Height - center.y);
+            double distanceLeft = Math.Abs(this.PositionX - center.x);
+            double minDistance = Math.Min(Math.Min(distanceTop, distanceBottom), Math.Min(distanceLeft, distanceRight));
+            if (distanceTop <= minDistance)
+            {
+                return new Coordinates(position.x, this.PositionY - size.y);
+            }
+            else if (distanceBottom <= minDistance)
+            {
+                return new Coordinates(position.x, this.PositionY + this.Height);
+            }
+            else if (distanceLeft <= minDistance)
+            {
+                return new Coordinates(this.PositionX - size.x, position.y);
+            }
+            else if (distanceRight <= minDistance)
+            {
+                return new Coordinates(this.PositionX + this.Width, position.y);
+            }
+            else
+            {
+                return position;
+            }
+        }
+
+        private static Coordinates HandleSideCollision(Coordinates position, int[] corners, double[] distances)
+        {
+            int top = corners[0] + corners[1];
+            int bottom = corners[3] + corners[2];
+            int right = corners[1] + corners[2];
+            int left = corners[0] + corners[3];
+            if (top == 2)
+            {
+                return new Coordinates(position.x, position.y + distances[2]);
+            }
+            if (bottom == 2)
+            {
+                return new Coordinates(position.x, position.y - distances[0]);
+            }
+            if (left == 2)
+            {
+                return new Coordinates(position.x + distances[1], position.y);
+            }
+            if (right == 2)
+            {
+                return new Coordinates(position.x - distances[3], position.y);
+            }
+            return position;
         }
 
         public double DistanceFromObstacleX(double speed, double playerDirectionX, double playerCurrentX, double playerWidth)

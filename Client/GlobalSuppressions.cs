@@ -12,3 +12,4 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: SuppressMessage("Major Bug", "S3168:\"async\" methods should not return \"void\"", Justification = "<Pending>", Scope = "member", Target = "~M:JAKE.client.MainWindow.HandleShieldsCollisions(JAKE.Client.PlayerVisual)")]
 [assembly: SuppressMessage("Major Bug", "S3168:\"async\" methods should not return \"void\"", Justification = "<Pending>", Scope = "member", Target = "~M:JAKE.client.MainWindow.HandleSpeedBoostsCollisions(JAKE.Client.PlayerVisual)")]
 [assembly: SuppressMessage("Major Bug", "S3168:\"async\" methods should not return \"void\"", Justification = "<Pending>", Scope = "member", Target = "~M:JAKE.client.MainWindow.Move(System.Double,System.Double)")]
+[assembly: SuppressMessage("Minor Code Smell", "S1075:URIs should not be hardcoded", Justification = "URI doesnt change", Scope = "member", Target = "~F:JAKE.client.MainWindow.UrlToGameHub")]

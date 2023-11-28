@@ -93,7 +93,7 @@ namespace JAKE.classlibrary.Collectibles
 
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return this.id.GetHashCode();
         }
     }
 }

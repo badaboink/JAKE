@@ -27,26 +27,14 @@ namespace JAKE.classlibrary
         }
         public bool IsPointOverlapping(double x, double y)
         {
-            foreach (var _ in from Obstacle obstacle in obstacles
-                              where obstacle.WouldOverlap(x, y)
-                              select new { })
-            {
-                return true;
-            }
-
-            return false;
+            var item = obstacles.Select(g => g).FirstOrDefault(g => g.WouldOverlap(x, y));
+            return item != null;
         }
 
         public bool IsRectangleOverlapping(double xStart, double yStart, double xWidth, double yWidth)
         {
-            foreach (var _ in from Obstacle obstacle in obstacles
-                              where obstacle.WouldOverlap(xStart, yStart, xWidth, yWidth)
-                              select new { })
-            {
-                return true;
-            }
-
-            return false;
+            var item = obstacles.Select(g => g).FirstOrDefault(g => g.WouldOverlap(xStart, yStart, xWidth, yWidth));
+            return item != null;
         }
 
         public bool PositionNextToObstacle(Coordinates current, Coordinates direction, ref Coordinates next)

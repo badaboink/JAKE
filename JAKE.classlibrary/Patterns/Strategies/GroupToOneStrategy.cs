@@ -42,44 +42,10 @@ namespace JAKE.classlibrary.Patterns.Strategies
                 double newY = enemy.GetCurrentY() + directionY * enemySpeed;
 
                 bool CantMove = false;
-                foreach (var obstacle in from Obstacle obstacle in obstacles
-                                         where obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize())
-                                         select obstacle)
+                var obstacle = obstacles.Select(ob => ob).FirstOrDefault(ob => ob.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()));
+                if (obstacle != null)
                 {
-                    CantMove = true;
-                    // Stops at the wall of the direction that it's moving towards most
-                    if (directionX < 0)
-                    {
-
-                        // Stops at the wall of the direction that it's moving towards most
-                        directionX = Math.Abs(directionX) > Math.Abs(directionY) ? -1 : 0;
-                    }
-                    else
-                    {
-
-                        // Stops at the wall of the direction that it's moving towards most
-                        directionX = Math.Abs(directionX) > Math.Abs(directionY) ? 1 : 0;
-                    }
-
-                    if (directionY < 0)
-                    {
-                        directionY = Math.Abs(directionY) > Math.Abs(directionX) ? -1 : 0;
-                    }
-                    else
-                    {
-                        directionY = Math.Abs(directionY) > Math.Abs(directionX) ? 1 : 0;
-                    }
-
-                    double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
-                    if (distance != 0)
-                    {
-                        newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
-                        newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentY() + distance;
-
-                        enemy.SetCurrentPosition(newX, newY);
-                    }
-
-                    break;
+                    CantMove = HandleObstacle(enemy, ref directionX, ref directionY, ref newX, ref newY, obstacle);
                 }
                 // Update enemy position based on direction and speed
                 if (!CantMove)
@@ -89,5 +55,29 @@ namespace JAKE.classlibrary.Patterns.Strategies
             }
         }
 
+        private static bool HandleObstacle(Enemy enemy, ref double directionX, ref double directionY, ref double newX, ref double newY, Obstacle obstacle)
+        {
+            bool CantMove = true;
+            // Stops at the wall of the direction that it's moving towards most
+            directionX = directionX switch
+            {
+                < 0 => Math.Abs(directionX) > Math.Abs(directionY) ? -1 : 0,// Stops at the wall of the direction that it's moving towards most
+                _ => Math.Abs(directionX) > Math.Abs(directionY) ? 1 : 0,// Stops at the wall of the direction that it's moving towards most
+            };
+            directionY = directionY switch
+            {
+                < 0 => Math.Abs(directionY) > Math.Abs(directionX) ? -1 : 0,
+                _ => Math.Abs(directionY) > Math.Abs(directionX) ? 1 : 0,
+            };
+            double distance = obstacle.DistanceFromObstacle((int)directionX, (int)directionY, enemy.GetCurrentX(), enemy.GetCurrentY(), enemy.GetSize(), enemy.GetSize());
+            if (distance != 0)
+            {
+                newX = directionX == 0 ? enemy.GetCurrentX() : enemy.GetCurrentX() + distance;
+                newY = directionY == 0 ? enemy.GetCurrentY() : enemy.GetCurrentY() + distance;
+                enemy.SetCurrentPosition(newX, newY);
+            }
+
+            return CantMove;
+        }
     }
 }

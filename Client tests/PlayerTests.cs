@@ -20,7 +20,7 @@ namespace Client_tests
             double x2 = 5, y2 = 5, width2 = 10, height2 = 10;
 
             // Act
-            bool result = MainWindow.CheckCollision(x1, y1, width1, height1, x2, y2, width2, height2);
+            bool result = MainWindow.CheckCollision(new Coordinates(x1, y1), width1, height1, new Coordinates(x2, y2), width2, height2);
 
             // Assert
             Assert.True(result);
@@ -34,7 +34,7 @@ namespace Client_tests
             double x2 = 15, y2 = 15, width2 = 10, height2 = 10;
 
             // Act
-            bool result = MainWindow.CheckCollision(x1, y1, width1, height1, x2, y2, width2, height2);
+            bool result = MainWindow.CheckCollision(new Coordinates(x1, y1), width1, height1, new Coordinates(x2, y2), width2, height2);
 
             // Assert
             Assert.False(result);

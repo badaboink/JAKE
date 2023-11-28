@@ -14,7 +14,9 @@ namespace JAKE.classlibrary
 {
     public class Spawner
     {
+#pragma warning disable S4487 // Unread "private" fields should be removed
         private readonly MapObjectFactory _mapObjectFactory;
+#pragma warning restore S4487 // Unread "private" fields should be removed
         private readonly ZombieFactory _zombieFactory;
         private readonly ObstacleChecker _obstacleChecker;
         readonly int maxAttempts = 1000;
@@ -44,7 +46,6 @@ namespace JAKE.classlibrary
             _usedIdsEnemies.Add(enemyId);
             Random random = new Random();
             Enemy enemy = new Enemy(enemyId, "Blue", 10);
-            int maxAttempts = 100;
             for (int attempt = 0; attempt < maxAttempts; attempt++)
             {
                 double spawnX = random.Next(enemy.GetSize(), 1920 - 60 - enemy.GetSize());

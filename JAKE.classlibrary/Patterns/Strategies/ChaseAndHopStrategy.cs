@@ -43,25 +43,18 @@ namespace JAKE.classlibrary.Patterns.Strategies
                 double jumpDistance = 60.0;
 
                 bool needToJump = false;
-                foreach (var obstacle in from Obstacle obstacle in obstacles
-                                         where obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize())
-                                         select obstacle)
+                double jumpX = newX + directionX * jumpDistance;
+                double jumpY = newY + directionY * jumpDistance - jumpHeight;
+                var obstacle = obstacles.Select(ob => ob).FirstOrDefault(ob => ob.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()));
+                if (obstacle != null)
                 {
                     needToJump = true;
-                    bool canJump = true;
-                    double jumpX = newX + directionX * jumpDistance;
-                    double jumpY = newY + directionY * jumpDistance - jumpHeight;
-                    if (obstacle.WouldOverlap(jumpX, jumpY, enemy.GetSize(), enemy.GetSize()))
-                    {
-                        canJump = false;
-                        break;
-                    }
-                    if (canJump)
+                    if (!obstacle.WouldOverlap(jumpX, jumpY, enemy.GetSize(), enemy.GetSize()))
                     {
                         enemy.SetMovementStrategy(new HoppingStrategy(directionX, directionY, obstacle, obstacles));
                     }
-                    break;
                 }
+                
 
                 if (!needToJump && enemy.GetCurrentMovementStrategy() is ChaseAndHopStrategy)
                 {

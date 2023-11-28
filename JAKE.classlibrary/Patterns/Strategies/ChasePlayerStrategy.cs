@@ -11,11 +11,9 @@ namespace JAKE.classlibrary.Patterns.Strategies
     public class ChasePlayerStrategy : IMoveStrategy
     {
         private readonly List<Obstacle> obstacles;
-        private readonly ObstacleChecker checker;
         public ChasePlayerStrategy(List<Obstacle> obstacles)
         {
             this.obstacles = obstacles;
-            this.checker = new ObstacleChecker(obstacles);
 
         }
         public void Move(Enemy enemy, List<Player> players)

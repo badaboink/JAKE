@@ -39,7 +39,7 @@ namespace JAKE.classlibrary.Enemies
             }
             else
             {
-                ZombieMinion copyZombieMinion = minions[0].DeepClone() as ZombieMinion;
+                ZombieMinion? copyZombieMinion = minions[0].DeepClone() as ZombieMinion;
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 copyZombieMinion.SetId(id);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.

@@ -213,185 +213,76 @@ namespace JAKE.client
         private async Task ListenForGameUpdates()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
-            connection.On("UpdateUsers", (Action<string>)((player) =>
-            {
-                string[] parts = player.Split(':');
+            UpdateUsers();
 
-                if (parts.Length == 7)
-                {
-                    int playerId = int.Parse(parts[0]);
-                    string playerName = parts[1];
-                    int x = int.Parse(parts[3]);
-                    int y = int.Parse(parts[4]);
-                    Player? playerInfo = playerInfoList.Find(p => p.GetId() == playerId);
-                    if (playerInfo == null)
-                    {
-                        Exception exception = new("PlayerInfo is null");
-                        throw exception;
-                    }
-                    playerInfo.SetCurrentPosition(x, y);
-
-                    Dispatcher.Invoke(() =>
-                    {
-                        PlayerVisual playerVisual = playerVisuals[playerInfo];
-
-                        Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
-                        Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
-
-                        if(playerName == "DEAD")
-                        {
-                            HandlePlayerDeath(playerInfo);
-                        }
-                    });
-                }
-            }));
-        
 #pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
-           timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
+            timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
 #pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
 
-            connection.On<List<string>>("SendingEnemies", (enemydata) =>
+            SendingEnemies();
+            UpdateShotsFired();
+            UpdateDeadEnemy();
+            UpdateEnemyHealth();
+            DisconnectedPlayer();
+            SendingCoins();
+            SendingPickedCoin();
+            SendingShield();
+            SendingPickedShield();
+            SendingHealthBoosts();
+            SendingPickedHealthBoost();
+            SendingSpeedBoosts();
+            SendingPickedSpeedBoost();
+        }
+
+        private void SendingPickedSpeedBoost()
+        {
+            connection.On<int>("SendingPickedSpeedBoost", (speedid) =>
             {
-                foreach(string enemystring in enemydata)
+                Dispatcher.Invoke(() =>
                 {
-                    string[] parts = enemystring.Split(':');
-                    if (parts.Length == 6)
+                    foreach (var pair in speedBoostsVisuals)
                     {
-                        int enemyId = int.Parse(parts[0]);
-                        string enemyColor = parts[1];
-                        double enemyX = double.Parse(parts[2]);
-                        double enemyY = double.Parse(parts[3]);
-                        int health = int.Parse(parts[4]);
-                        int size = int.Parse(parts[5]);
-                        Enemy enemy = new Enemy(enemyId, enemyColor);
-                        enemy.SetHealth(health); enemy.SetSize(size);
-                        if (!enemies.Contains(enemy))
+                        SpeedBoost speedBoost = pair.Key;
+                        SpeedBoostVisual speedBoostVisual = pair.Value;
+                        if (speedBoost.id == speedid)
                         {
-                            enemy.SetCurrentPosition(enemyX, enemyY);
-                            enemies.Add(enemy);
-                            lock(enemyListLock)
-                            {
-                                Dispatcher.Invoke(() =>
-                                {
-                                    
-                                    EnemyVisual enemyVisual = enemyVisualBuilder.New()
-                                    .SetColor(enemyColor)
-                                    .SetSize(size)
-                                    .SetPosition(enemyX, enemyY)
-                                    .Build();
-
-                                    enemyVisuals[enemy] = enemyVisual;
-                                    EnemyContainer.Children.Add(enemyVisual);
-#pragma warning disable CS8604 // Possible null reference argument.
-                                    HandleEnemyCollisions(playerVisuals[currentPlayer]);
-#pragma warning restore CS8604 // Possible null reference argument.
-                        
-                                });
-                            }
-                        }
-                        else
-                        {
-                            lock(enemyListLock)
-                            {
-                                Dispatcher.Invoke(() =>
-                                {
-                                    EnemyVisual enemyVisual = enemyVisuals[enemy];
-                                    enemy.SetHealth(health);
-                                    enemy.SetCurrentPosition(enemyX, enemyY);
-                                    Canvas.SetLeft(enemyVisual, enemyX);
-                                    Canvas.SetTop(enemyVisual, enemyY);
-
-#pragma warning disable CS8604 // Possible null reference argument.
-                                    HandleEnemyCollisions(playerVisuals[currentPlayer]);
-#pragma warning restore CS8604 // Possible null reference argument.
-                                });
-                            }
+                            speedBoosts.Remove(speedBoost);
+                            speedBoostsVisuals.Remove(speedBoost);
+                            SpeedBoostContainer.Children.Remove(speedBoostVisual);
                         }
                     }
-                }
-                foreach (Enemy enemy in enemies)
-                {
-                    collisionCheckedEnemies[enemy] = false;
-                }
+                });
             });
-            connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
+        }
+
+        private void SendingSpeedBoosts()
+        {
+            connection.On<List<string>>("SendingSpeedBoosts", (speeddata) =>
             {
-                Player? playerToUpdate = playerInfoList.Find(player => player.MatchesId(playerid));
-                if (playerToUpdate != null)
+
+                foreach (string speedstring in speeddata)
                 {
-#pragma warning disable CS8604 // Possible null reference argument.
-#pragma warning disable CS8604 // Possible null reference argument.
-                    CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
-#pragma warning restore CS8604 // Possible null reference argument.
-#pragma warning restore CS8604 // Possible null reference argument.
-                }
-            });
-            connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
-            {
-                Dispatcher.Invoke((Action)(() =>
-                {
-                    Enemy enemy = new Enemy(enemyid, enemycolor);
-                    EnemyVisual enemyRect = enemyVisuals[enemy];
-                    enemies.Remove(enemy);
-                    enemyVisuals.Remove(enemy);
-                    EnemyContainer.Children.Remove(enemyRect);
-                }));
-            });
-            connection.On<int, string, int>("UpdateEnemyHealth", (enemyid, enemycolor, enemyhealth) =>
-            {
-                Enemy? enemyToUpdate = enemies.Find(enemy => enemy.MatchesId(enemyid));
-                if (enemyToUpdate != null)
-                {
-                    enemyToUpdate.SetHealth(enemyhealth);
-                }
-            });
-            connection.On<string>("DisconnectedPlayer", (player) =>
-            {
-                string[] parts = player.Split(':');
-                if (parts.Length == 7)
-                {
-                    int playerId = int.Parse(parts[0]);
-                    string playerName = parts[1];
-                    string playerColor = parts[2];
-                    string shotColor = parts[5];
-                    string shotShape = parts[6];
-                    Player playerToDelete = new Player(playerId, playerName, playerColor , shotColor, shotShape);
-                    Dispatcher.Invoke(() =>
+                    string image = "speedboost.png";
+                    string[] parts = speedstring.Split(':');
+                    if (parts.Length == 7)
                     {
-                        PlayerVisual playerVisual = playerVisuals[playerToDelete];
-                        playerVisuals.Remove(playerToDelete);
-                        playerInfoList.Remove(playerToDelete);
-                        playersContainer.Items.Remove(playerVisual);
-                    });
-                }
-            });
-            connection.On<List<string>>("SendingCoins", (coinsdata) =>
-            {
-                string image = "coin.png";
-                foreach (string coinstring in coinsdata)
-                {
-                    string[] parts = coinstring.Split(':');
-                    if (parts.Length == 6)
-                    {
-                        int coinId = int.Parse(parts[0]);
-                        double coinX = double.Parse(parts[1]);
-                        double coinY = double.Parse(parts[2]);
-                        int points = int.Parse(parts[5]);
-                        Coin coin = new Coin(coinId, coinX, coinY, points, image);
-                        if (!coins.Contains(coin))
-                        {                         
-                            coins.Add(coin);
+                        int speedId = int.Parse(parts[0]);
+                        double speedX = double.Parse(parts[1]);
+                        double speedY = double.Parse(parts[2]);
+                        int speedVal = int.Parse(parts[5]);
+                        SpeedBoost speed = new SpeedBoost(speedId, speedX, speedY, speedVal, image);
+                        if (!speedBoosts.Contains(speed))
+                        {
+                            speedBoosts.Add(speed);
                             Dispatcher.Invoke(() =>
                             {
-                              
-                                CoinVisual coinVisual = new CoinVisual();
-                                Canvas.SetLeft(coinVisual, coinX);
-                                Canvas.SetTop(coinVisual, coinY);
-                                coinVisuals[coin] = coinVisual;
-                                CoinContainer.Children.Add(coinVisual);
-
+                                SpeedBoostVisual speedVisual = new SpeedBoostVisual();
+                                speedBoostsVisuals[speed] = speedVisual;
+                                Canvas.SetLeft(speedVisual, speedX);
+                                Canvas.SetTop(speedVisual, speedY);
+                                SpeedBoostContainer.Children.Add(speedVisual);
 #pragma warning disable CS8604 // Possible null reference argument.
-                                HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
 #pragma warning restore CS8604 // Possible null reference argument.
                             });
                         }
@@ -399,86 +290,31 @@ namespace JAKE.client
                 }
 
             });
+        }
 
-            connection.On<string>("SendingPickedCoin", (coinObj) =>
-            {
-                string coinString = new ServerString(coinObj).ConvertedString;
-                string[] parts = coinString.Split(':');
-                int id = int.Parse(parts[1]);
-                Dispatcher.Invoke(() =>
-                {
-                    foreach (var pair in coinVisuals)
-                    {
-                        Coin coin = pair.Key;
-                        CoinVisual coinVisual = pair.Value;
-
-                        if (coin.id == id)
-                        {
-                            coins.Remove(coin);
-                            coinVisuals.Remove(coin);
-                            CoinContainer.Children.Remove(coinVisual);
-                            break;
-                        }
-                    }
-                       
-                });
-            });
-          
-            connection.On<List<string>>("SendingShields", (shieldsdata) =>
-            {
-                string image = "shield.png";
-                foreach (string shieldstring in shieldsdata)
-                {
-                    string[] parts = shieldstring.Split(':');
-                    if (parts.Length == 6)
-                    {
-                        int shieldId = int.Parse(parts[0]);
-                        double shieldX = double.Parse(parts[1]);
-                        double shieldY = double.Parse(parts[2]);
-                        int time = int.Parse(parts[5]);
-                        Shield shield = new Shield(shieldId, shieldX, shieldY, time, image);
-                        
-                        if (!shields.Contains(shield))
-                        {
-                            shields.Add(shield);
-                            Dispatcher.Invoke(() =>
-                            {
-
-                                ShieldVisual shieldVisual = new ShieldVisual();
-                                Canvas.SetLeft(shieldVisual, shieldX);
-                                Canvas.SetTop(shieldVisual, shieldY);
-                                shieldVisuals[shield] = shieldVisual;
-                                ShieldContainer.Children.Add(shieldVisual);
-#pragma warning disable CS8604 // Possible null reference argument.
-                                HandleShieldsCollisions(playerVisuals[currentPlayer]);
-#pragma warning restore CS8604 // Possible null reference argument.
-                            });
-                        }
-                        
-                    }
-                }
-
-            });
-            connection.On<int>("SendingPickedShield", (shieldid) =>
+        private void SendingPickedHealthBoost()
+        {
+            connection.On<int>("SendingPickedHealthBoost", (healthid) =>
             {
                 Dispatcher.Invoke(() =>
                 {
-                    foreach (var pair in shieldVisuals)
+                    foreach (var pair in healthBoostsVisuals)
                     {
-                        Shield shield = pair.Key;
-                        ShieldVisual shieldVisual = pair.Value;
-
-                        if (shield.id == shieldid)
+                        HealthBoost healthBoost = pair.Key;
+                        HealthBoostVisual healthBoostVisual = pair.Value;
+                        if (healthBoost.id == healthid)
                         {
-                            shields.Remove(shield);
-                            shieldVisuals.Remove(shield);
-                            ShieldContainer.Children.Remove(shieldVisual);
-                            break;
+                            healthBoosts.Remove(healthBoost);
+                            healthBoostsVisuals.Remove(healthBoost);
+                            HealthBoostContainer.Children.Remove(healthBoostVisual);
                         }
                     }
-
                 });
             });
+        }
+
+        private void SendingHealthBoosts()
+        {
             connection.On<List<string>>("SendingHealthBoosts", (healthdata) =>
             {
                 string image = "healthBoost.png";
@@ -506,78 +342,310 @@ namespace JAKE.client
                                 HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
 #pragma warning restore CS8604 // Possible null reference argument.
                             });
-                        }     
+                        }
                     }
                 }
 
             });
-            connection.On<int>("SendingPickedHealthBoost", (healthid) =>
+        }
+
+        private void SendingPickedShield()
+        {
+            connection.On<int>("SendingPickedShield", (shieldid) =>
             {
                 Dispatcher.Invoke(() =>
                 {
-                    foreach (var pair in healthBoostsVisuals)
+                    foreach (var pair in shieldVisuals)
                     {
-                        HealthBoost healthBoost = pair.Key;
-                        HealthBoostVisual healthBoostVisual = pair.Value;
-                        if (healthBoost.id == healthid)
+                        Shield shield = pair.Key;
+                        ShieldVisual shieldVisual = pair.Value;
+
+                        if (shield.id == shieldid)
                         {
-                            healthBoosts.Remove(healthBoost);
-                            healthBoostsVisuals.Remove(healthBoost);
-                            HealthBoostContainer.Children.Remove(healthBoostVisual);
+                            shields.Remove(shield);
+                            shieldVisuals.Remove(shield);
+                            ShieldContainer.Children.Remove(shieldVisual);
+                            break;
                         }
                     }
+
                 });
             });
-            connection.On<List<string>>("SendingSpeedBoosts", (speeddata) =>
+        }
+
+        private void SendingShield()
+        {
+            connection.On<List<string>>("SendingShields", (shieldsdata) =>
             {
-              
-                foreach (string speedstring in speeddata)
+                string image = "shield.png";
+                foreach (string shieldstring in shieldsdata)
                 {
-                    string image = "speedboost.png";
-                    string[] parts = speedstring.Split(':');
-                    if (parts.Length == 7)
+                    string[] parts = shieldstring.Split(':');
+                    if (parts.Length == 6)
                     {
-                        int speedId = int.Parse(parts[0]);
-                        double speedX = double.Parse(parts[1]);
-                        double speedY = double.Parse(parts[2]);
-                        int speedVal = int.Parse(parts[5]);
-                        SpeedBoost speed = new SpeedBoost(speedId, speedX, speedY, speedVal, image);
-                        if (!speedBoosts.Contains(speed))
+                        int shieldId = int.Parse(parts[0]);
+                        double shieldX = double.Parse(parts[1]);
+                        double shieldY = double.Parse(parts[2]);
+                        int time = int.Parse(parts[5]);
+                        Shield shield = new Shield(shieldId, shieldX, shieldY, time, image);
+
+                        if (!shields.Contains(shield))
                         {
-                            speedBoosts.Add(speed);
+                            shields.Add(shield);
                             Dispatcher.Invoke(() =>
                             {
-                                SpeedBoostVisual speedVisual = new SpeedBoostVisual();
-                                speedBoostsVisuals[speed] = speedVisual;
-                                Canvas.SetLeft(speedVisual, speedX);
-                                Canvas.SetTop(speedVisual, speedY);
-                                SpeedBoostContainer.Children.Add(speedVisual);
+
+                                ShieldVisual shieldVisual = new ShieldVisual();
+                                Canvas.SetLeft(shieldVisual, shieldX);
+                                Canvas.SetTop(shieldVisual, shieldY);
+                                shieldVisuals[shield] = shieldVisual;
+                                ShieldContainer.Children.Add(shieldVisual);
 #pragma warning disable CS8604 // Possible null reference argument.
-                                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
+                                HandleShieldsCollisions(playerVisuals[currentPlayer]);
 #pragma warning restore CS8604 // Possible null reference argument.
                             });
-                        }                      
+                        }
+
                     }
                 }
 
             });
-            connection.On<int>("SendingPickedSpeedBoost", (speedid) =>
+        }
+
+        private void SendingPickedCoin()
+        {
+            connection.On<string>("SendingPickedCoin", (coinObj) =>
             {
+                string coinString = new ServerString(coinObj).ConvertedString;
+                string[] parts = coinString.Split(':');
+                int id = int.Parse(parts[1]);
                 Dispatcher.Invoke(() =>
                 {
-                    foreach (var pair in speedBoostsVisuals)
+                    foreach (var pair in coinVisuals)
                     {
-                        SpeedBoost speedBoost = pair.Key;
-                        SpeedBoostVisual speedBoostVisual = pair.Value;
-                        if (speedBoost.id == speedid)
+                        Coin coin = pair.Key;
+                        CoinVisual coinVisual = pair.Value;
+
+                        if (coin.id == id)
                         {
-                            speedBoosts.Remove(speedBoost);
-                            speedBoostsVisuals.Remove(speedBoost);
-                            SpeedBoostContainer.Children.Remove(speedBoostVisual);
+                            coins.Remove(coin);
+                            coinVisuals.Remove(coin);
+                            CoinContainer.Children.Remove(coinVisual);
+                            break;
                         }
-                    }      
+                    }
+
                 });
             });
+        }
+
+        private void SendingCoins()
+        {
+            connection.On<List<string>>("SendingCoins", (coinsdata) =>
+            {
+                string image = "coin.png";
+                foreach (string coinstring in coinsdata)
+                {
+                    string[] parts = coinstring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int coinId = int.Parse(parts[0]);
+                        double coinX = double.Parse(parts[1]);
+                        double coinY = double.Parse(parts[2]);
+                        int points = int.Parse(parts[5]);
+                        Coin coin = new Coin(coinId, coinX, coinY, points, image);
+                        if (!coins.Contains(coin))
+                        {
+                            coins.Add(coin);
+                            Dispatcher.Invoke(() =>
+                            {
+
+                                CoinVisual coinVisual = new CoinVisual();
+                                Canvas.SetLeft(coinVisual, coinX);
+                                Canvas.SetTop(coinVisual, coinY);
+                                coinVisuals[coin] = coinVisual;
+                                CoinContainer.Children.Add(coinVisual);
+
+#pragma warning disable CS8604 // Possible null reference argument.
+                                HandleCoinsCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
+                            });
+                        }
+                    }
+                }
+
+            });
+        }
+
+        private void DisconnectedPlayer()
+        {
+            connection.On<string>("DisconnectedPlayer", (player) =>
+            {
+                string[] parts = player.Split(':');
+                if (parts.Length == 7)
+                {
+                    int playerId = int.Parse(parts[0]);
+                    string playerName = parts[1];
+                    string playerColor = parts[2];
+                    string shotColor = parts[5];
+                    string shotShape = parts[6];
+                    Player playerToDelete = new Player(playerId, playerName, playerColor, shotColor, shotShape);
+                    Dispatcher.Invoke(() =>
+                    {
+                        PlayerVisual playerVisual = playerVisuals[playerToDelete];
+                        playerVisuals.Remove(playerToDelete);
+                        playerInfoList.Remove(playerToDelete);
+                        playersContainer.Items.Remove(playerVisual);
+                    });
+                }
+            });
+        }
+
+        private void UpdateEnemyHealth()
+        {
+            connection.On<int, string, int>("UpdateEnemyHealth", (enemyid, enemycolor, enemyhealth) =>
+            {
+                Enemy? enemyToUpdate = enemies.Find(enemy => enemy.MatchesId(enemyid));
+                if (enemyToUpdate != null)
+                {
+                    enemyToUpdate.SetHealth(enemyhealth);
+                }
+            });
+        }
+
+        private void UpdateDeadEnemy()
+        {
+            connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
+            {
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    Enemy enemy = new Enemy(enemyid, enemycolor);
+                    EnemyVisual enemyRect = enemyVisuals[enemy];
+                    enemies.Remove(enemy);
+                    enemyVisuals.Remove(enemy);
+                    EnemyContainer.Children.Remove(enemyRect);
+                }));
+            });
+        }
+
+        private void UpdateShotsFired()
+        {
+            connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
+            {
+                Player? playerToUpdate = playerInfoList.Find(player => player.MatchesId(playerid));
+                if (playerToUpdate != null)
+                {
+#pragma warning disable CS8604 // Possible null reference argument.
+#pragma warning disable CS8604 // Possible null reference argument.
+                    CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
+#pragma warning restore CS8604 // Possible null reference argument.
+#pragma warning restore CS8604 // Possible null reference argument.
+                }
+            });
+        }
+
+        private void SendingEnemies()
+        {
+            connection.On<List<string>>("SendingEnemies", (enemydata) =>
+            {
+                foreach (string enemystring in enemydata)
+                {
+                    string[] parts = enemystring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int enemyId = int.Parse(parts[0]);
+                        string enemyColor = parts[1];
+                        double enemyX = double.Parse(parts[2]);
+                        double enemyY = double.Parse(parts[3]);
+                        int health = int.Parse(parts[4]);
+                        int size = int.Parse(parts[5]);
+                        Enemy enemy = new Enemy(enemyId, enemyColor);
+                        enemy.SetHealth(health); enemy.SetSize(size);
+                        if (!enemies.Contains(enemy))
+                        {
+                            enemy.SetCurrentPosition(enemyX, enemyY);
+                            enemies.Add(enemy);
+                            lock (enemyListLock)
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+
+                                    EnemyVisual enemyVisual = enemyVisualBuilder.New()
+                                    .SetColor(enemyColor)
+                                    .SetSize(size)
+                                    .SetPosition(enemyX, enemyY)
+                                    .Build();
+
+                                    enemyVisuals[enemy] = enemyVisual;
+                                    EnemyContainer.Children.Add(enemyVisual);
+#pragma warning disable CS8604 // Possible null reference argument.
+                                    HandleEnemyCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
+
+                                });
+                            }
+                        }
+                        else
+                        {
+                            lock (enemyListLock)
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+                                    EnemyVisual enemyVisual = enemyVisuals[enemy];
+                                    enemy.SetHealth(health);
+                                    enemy.SetCurrentPosition(enemyX, enemyY);
+                                    Canvas.SetLeft(enemyVisual, enemyX);
+                                    Canvas.SetTop(enemyVisual, enemyY);
+
+#pragma warning disable CS8604 // Possible null reference argument.
+                                    HandleEnemyCollisions(playerVisuals[currentPlayer]);
+#pragma warning restore CS8604 // Possible null reference argument.
+                                });
+                            }
+                        }
+                    }
+                }
+                foreach (Enemy enemy in enemies)
+                {
+                    collisionCheckedEnemies[enemy] = false;
+                }
+            });
+        }
+
+        private void UpdateUsers()
+        {
+            connection.On("UpdateUsers", (Action<string>)((player) =>
+            {
+                string[] parts = player.Split(':');
+
+                if (parts.Length == 7)
+                {
+                    int playerId = int.Parse(parts[0]);
+                    string playerName = parts[1];
+                    int x = int.Parse(parts[3]);
+                    int y = int.Parse(parts[4]);
+                    Player? playerInfo = playerInfoList.Find(p => p.GetId() == playerId);
+                    if (playerInfo == null)
+                    {
+                        Exception exception = new("PlayerInfo is null");
+                        throw exception;
+                    }
+                    playerInfo.SetCurrentPosition(x, y);
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        PlayerVisual playerVisual = playerVisuals[playerInfo];
+
+                        Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
+                        Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
+
+                        if (playerName == "DEAD")
+                        {
+                            HandlePlayerDeath(playerInfo);
+                        }
+                    });
+                }
+            }));
         }
 
         private async void CheckElapsedTimeMove(object state)
@@ -671,7 +739,7 @@ namespace JAKE.client
             }
         }
 
-        private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
+        private static void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
         {
             Canvas.SetLeft(playerVisual, moveX);
             Canvas.SetTop(playerVisual, moveY);
@@ -757,7 +825,7 @@ namespace JAKE.client
 
             timerT.Start();
         }
-        private void StopSpeed()
+        private static void StopSpeed()
         {
             // tekstas dingsta po puse sekundes
             var timerT = new DispatcherTimer();
@@ -790,9 +858,9 @@ namespace JAKE.client
             timerT.Start();
         }
 
-        public static bool CheckCollision(double x1, double y1, double width1, double height1, double x2, double y2, double width2, double height2)
+        public static bool CheckCollision(Coordinates coords1, double width1, double height1, Coordinates coords2, double width2, double height2)
         {
-            return x1 + width1 >= x2 && x1 <= x2 + width2 && y1 + height1 >= y2 && y1 <= y2 + height2;
+            return coords1.x + width1 >= coords2.x && coords1.x <= coords2.x + width2 && coords1.y + height1 >= coords2.y && coords1.y <= coords2.y + height2;
         }
 
         private async void HandleEnemyCollisions(PlayerVisual playerVisual)
@@ -804,8 +872,8 @@ namespace JAKE.client
                                   let enemyRect = enemyVisuals[enemy]
                                   let enemyX = Canvas.GetLeft(enemyRect)
                                   let enemyY = Canvas.GetTop(enemyRect)
-                                  where CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
-                                                                   enemyX, enemyY, enemyRect.Width, enemyRect.Height)
+                                  where CheckCollision(new Coordinates(playerX, playerY), playerVisual.Width, playerVisual.Height,
+                                                                   new Coordinates(enemyX, enemyY), enemyRect.Width, enemyRect.Height)
                                   select enemy)
             {
                 await HandleCollision(playerVisual, enemy);
@@ -1056,21 +1124,7 @@ namespace JAKE.client
                                                             newY <= enemyY + enemyRect.Height
                                                            select (enemy, enemyRect))
                         {
-                            if (CountKills)
-                            {
-                                GameStats gameStat = GameStats.Instance;
-                                enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
-                                gameStat.PlayerScore += 5;
-                                scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-                                await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
-                                if (enemy.GetHealth() <= 0)
-                                {
-                                    enemiesToRemove.Add(enemy); // Add the enemy to the removal list
-                                    enemyVisuals.Remove(enemy);
-                                    EnemyContainer.Children.Remove(enemyRect);
-                                    await connection.SendAsync("SendDeadEnemy", enemy.ToString());
-                                }
-                            }
+                            await HandleCountKill(CountKills, shot, enemiesToRemove, enemy, enemyRect);
 
                             ShotContainer.Children.Remove(shotVisual);
                             shotHitEnemy = true;
@@ -1078,28 +1132,61 @@ namespace JAKE.client
                             break;
                         }
 
-                        foreach (Enemy enemyToRemove in enemiesToRemove)
-                        {
-                            enemies.Remove(enemyToRemove);
-                        }
-
-                        // Update the shot's position
-                        if (!shotHitEnemy)
-                        {
-                            Canvas.SetLeft(shotVisual, newX);
-                            Canvas.SetTop(shotVisual, newY);
-
-                            // Remove the shot if it goes out of bounds
-                            if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
-                            {
-                                ShotContainer.Children.Remove(shotVisual);
-                                shouldRender = false;
-                            }
-                        }
+                        shouldRender = HandleEnemyHits(shotVisual, shouldRender, newX, newY, enemiesToRemove, shotHitEnemy);
                     };
 
                 });
             }
+        }
+
+        private bool HandleEnemyHits(ShotVisual shotVisual, bool shouldRender, double newX, double newY, List<Enemy> enemiesToRemove, bool shotHitEnemy)
+        {
+            foreach (Enemy enemyToRemove in enemiesToRemove)
+            {
+                enemies.Remove(enemyToRemove);
+            }
+
+            // Update the shot's position
+            if (!shotHitEnemy)
+            {
+                shouldRender = UpdateShotPosition(shotVisual, shouldRender, newX, newY);
+            }
+
+            return shouldRender;
+        }
+
+        private async Task HandleCountKill(bool CountKills, Shot shot, List<Enemy> enemiesToRemove, Enemy enemy, EnemyVisual? enemyRect)
+        {
+            if (CountKills)
+            {
+                GameStats gameStat = GameStats.Instance;
+                enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
+                gameStat.PlayerScore += 5;
+                scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
+                await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
+                if (enemy.GetHealth() <= 0)
+                {
+                    enemiesToRemove.Add(enemy); // Add the enemy to the removal list
+                    enemyVisuals.Remove(enemy);
+                    EnemyContainer.Children.Remove(enemyRect);
+                    await connection.SendAsync("SendDeadEnemy", enemy.ToString());
+                }
+            }
+        }
+
+        private bool UpdateShotPosition(ShotVisual shotVisual, bool shouldRender, double newX, double newY)
+        {
+            Canvas.SetLeft(shotVisual, newX);
+            Canvas.SetTop(shotVisual, newY);
+
+            // Remove the shot if it goes out of bounds
+            if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
+            {
+                ShotContainer.Children.Remove(shotVisual);
+                shouldRender = false;
+            }
+
+            return shouldRender;
         }
 
         public static Shot RemoveShot(Shot shot, double newX, double newY, Obstacle obstacle, double elipse)

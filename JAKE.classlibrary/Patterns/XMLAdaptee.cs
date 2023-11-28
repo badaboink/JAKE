@@ -10,13 +10,15 @@ namespace JAKE.classlibrary.Patterns
 {
     public class XmlAdaptee
     {
+#pragma warning disable CA1822 // Mark members as static
         public string ConvertFromXML(string xmlString)
+#pragma warning restore CA1822 // Mark members as static
         {
-            XmlDocument xmlDoc = new XmlDocument();
+            XmlDocument xmlDoc = new();
             xmlDoc.LoadXml(xmlString);
 
             // Extract values from XML
-            List<string> values = new List<string>();
+            List<string> values = new();
             if(xmlDoc.DocumentElement == null)
             {
                 return "";
