@@ -175,24 +175,6 @@ namespace Server.Hubs
 
             }
         }
-        public async Task SendSpreadCorona(string player)
-        {
-            string[] parts = player.Split(':');
-          
-                int id = int.Parse(parts[0]);
-                int x = int.Parse(parts[3]);
-                int y = int.Parse(parts[4]);
-                _gameDataService.InfectCorona(id, x, y);
-
-
-                //Dictionary<string, Observer> observers = _gameDataService.GetObservers();
-                //foreach (var observerEntry in observers)
-                //{
-                //    var observer = observerEntry.Value;
-                //    await observer.HandleSpreadCorona(toInfectId); //player id kuri reikia infectint
-                //}
-
-        }
 
         public async Task SendPickedShield(string shield)
         {
@@ -262,10 +244,13 @@ namespace Server.Hubs
                 }
             }
         }
-        public async Task SendMove(int id, double x, double y)
+        public async Task SendMove(int id, double x, double y, string state)
         {
+            
+            bool corona = state == "corona";
             _gameDataService.EditPlayerPosition(id, x, y);
-            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();           
             foreach (var observerEntry in observers)
             {
                 var connectionId = observerEntry.Key;
@@ -274,8 +259,26 @@ namespace Server.Hubs
                 if (connectionId != Context.ConnectionId)
                 {
                     await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id));
+                    //eina per visus rastus artimus zaidejus ir siuncia ju id i client, ten paima id, patikrina ar to kuris prisijunges
+                    //ir tada jei jo, tuomet numazinan jam health
+                    if (corona)
+                    {
+                        Console.WriteLine("sendmove corona");
+                        List<Player> players = _gameDataService.InfectCorona(id, x, y);
+                        Console.WriteLine("to infect players count: " + players.Count);
+                        for (int i = 0; i < players.Count; i++)
+                        {
+                            await observer.HandleCoronaUpdate(_gameDataService.GetPlayerData(players[i].GetId()));
+                        }
+                    }                  
+
                 }
             }
+        }
+        public async Task StopCorona(int id, string color)
+        {
+            _gameDataService.EditPlayerState(id, "corona", color);
+
         }
 
         public async Task SendEnemyUpdate(string enemy)

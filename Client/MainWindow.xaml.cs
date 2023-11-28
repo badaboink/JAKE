@@ -62,7 +62,7 @@ namespace JAKE.client
         //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
         Controller controller = new Controller();
         private GameMediator _gameMediator;
-
+        private string primaryColor = "";
 
         private bool isCollidingWithHealthBoost = false;
 
@@ -111,6 +111,7 @@ namespace JAKE.client
             ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
             colorChoiceForm.ShowDialog();
             string selectedColor = colorChoiceForm.SelectedColor;
+            primaryColor = selectedColor;
             string name = colorChoiceForm.Name;
             string shotColor = colorChoiceForm.ShotColor;
             string shotShape = colorChoiceForm.ShotShape;
@@ -219,8 +220,8 @@ namespace JAKE.client
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
                     string playerColor = parts[2];
-                    int x = int.Parse(parts[3]);
-                    int y = int.Parse(parts[4]);
+                    double x = double.Parse(parts[3]);
+                    double y = double.Parse(parts[4]);
                     string shotColor = parts[5];
                     string shotShape = parts[6];
                     Player? playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
@@ -244,8 +245,47 @@ namespace JAKE.client
                     });
                 }
             });
-        
-           timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
+
+            connection.On<string>("UpdateCorona", (player) =>
+            {
+                string[] parts = player.Split(':');
+
+                if (parts.Length == 7)
+                {
+                    int playerId = int.Parse(parts[0]);
+                    string playerName = parts[1];
+                    string playerColor = parts[2];
+                    int x = int.Parse(parts[3]);
+                    int y = int.Parse(parts[4]);
+                    string shotColor = parts[5];
+                    string shotShape = parts[6];
+                    Player? playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
+                    if (playerInfo == null)
+                    {
+                        throw new Exception("PlayerInfo is null");
+                    }
+                    GameStats gameStat = GameStats.Instance;
+                    if (gameStat.PlayerHealth > 0)
+                    {
+                        gameStat.PlayerHealth -= 1;
+                        Debug.WriteLine("playercolor: " + currentPlayer.GetColor());
+                        Debug.WriteLine("playerhealth: " + gameStat.PlayerHealth);
+                    }
+                    else
+                    {
+                        HandlePlayerDeath(currentPlayer);
+                        UpdateDeadPlayer();
+                       
+                    }
+                    
+                    //TODO UZDET DECORATOR??
+                    //healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                   // ChangeHealth();
+
+
+                }
+            });
+            timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
 
             connection.On<List<string>>("SendingEnemies", (enemydata) =>
             {
@@ -477,25 +517,6 @@ namespace JAKE.client
                 });
             });
 
-            connection.On<int>("SendingSpreadCorona", (playerID) =>
-            {
-                Debug.WriteLine("sending corona ieina is serverio grizta");
-               if(currentPlayer.GetId() == playerID)
-                {
-                    GameStats gameStat = GameStats.Instance;
-                   
-                    gameStat.PlayerHealth -= 10;
-                    Debug.WriteLine("minusuoja health");
-                    Debug.WriteLine("health: " + gameStat.PlayerHealth);
-                    //healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-
-                    //Player health = new HealthBoostDecorator(currentPlayer);
-                    //testLabel.Text = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                    //HideDisplay();
-                    //health = new HealthDecorator(currentPlayer);
-                    //healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
-                }
-            });
 
             connection.On<List<string>>("SendingShields", (shieldsdata) =>
             {
@@ -742,8 +763,10 @@ namespace JAKE.client
 
         private async void Move(double newX, double newY)
         {
+            GameStats gameStats = GameStats.Instance;
             UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
-            await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
+            Debug.WriteLine("sendmove Move state: " + gameStats.state + "id: " + currentPlayer.GetId());
+            await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY, gameStats.state);
         }
 
         private class ShootCommand : Command
@@ -824,6 +847,32 @@ namespace JAKE.client
 
             timer.Start();
         }
+
+        private void StopCorona()
+        {
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Tick += (sender, args) =>
+            {
+                GameStats gameStat = GameStats.Instance;
+                gameStat.state = "alive";
+                Debug.WriteLine("YEYYYY VEL ALIVE");
+                timer.Stop();
+                //NUSIUST I SERVERI KAD PAKEISTU STATE I ALIVE
+                ChangeServerState();               
+                Debug.WriteLine("pakeite state servery i alive");
+                currentPlayer.SetColor(primaryColor);
+
+            };
+
+            timer.Start();
+        }
+
+        private async Task ChangeServerState()
+        {
+            await connection.SendAsync("StopCorona", currentPlayer.GetId(), primaryColor);
+        }
+
         private void HideShieldDisplay()
         {
             // tekstas dingsta po 10 sekundziu
@@ -871,6 +920,15 @@ namespace JAKE.client
                 }
             }
         }
+        public void ChangeHealth()
+        {
+            GameStats gameStat = GameStats.Instance;
+
+            gameStat.PlayerHealth -= 10;
+            //healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+            //TODO: different thread owns it
+        }
+            
         public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             GameStats gameStat = GameStats.Instance;
@@ -910,7 +968,10 @@ namespace JAKE.client
             playerVisuals[player].UpdateColor(solidColorBrush);
         }
 
-
+        public async void UpdateDeadPlayer()
+        {
+            await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
+        }
         private async void HandleCoinsCollisions(PlayerVisual playerVisual)
         {
             //Player player = 
@@ -976,15 +1037,19 @@ namespace JAKE.client
                     {
                         GameStats gameStat = GameStats.Instance;
                         corona.Interact(gameStat);
+                        //TODO: PRASIDEDA TIMERIS
                         Debug.WriteLine("AJAJAJAJ CORONA");
-                        Debug.WriteLine("state: " + gameStat.state);
+                        Debug.WriteLine("gamestats state: " + gameStat.state);
+                        //player.state = "corona";
+                        //Debug.WriteLine("gplayer state: " + player.state);
 
-                        // Convert coin to a JSON string
+                        StopCorona();
+                        currentPlayer.SetColor("Lime");
 
-                        //-----------
                         Debug.WriteLine("tostring: " + corona.ToString());
                         await connection.SendAsync("SendPickedCorona", corona.ToString());
-                        await connection.SendAsync("SendSpreadCorona", player.ToString());
+                        Debug.WriteLine("sendmove id: " + currentPlayer.GetId());
+                        await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
                     }
                 }
             }
@@ -1093,7 +1158,7 @@ namespace JAKE.client
                         testLabel.Text = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
                         HideDisplay();
                         health = new HealthDecorator(currentPlayer);
-                        healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
+                        healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health; //TODO: erroras: -80 is not valid value for width
                         await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
                         isCollidingWithHealthBoost = false;
                     }

@@ -30,6 +30,13 @@ namespace Server.GameData
                 await clientProxy.SendAsync("UpdateUsers", player);
             }
         }
+        public async Task HandleCoronaUpdate(string player)
+        {
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("UpdateCorona", player);
+            }
+        }
 
         public async Task HandleEnemyUpdate(int id, string color, int health)
         {
@@ -86,13 +93,7 @@ namespace Server.GameData
                 await clientProxy.SendAsync("SendingPickedCorona", id);
             }
         }
-        public async Task HandleSpreadCorona(int id) //player id
-        {
-            if (clientProxy != null)
-            {
-                await clientProxy.SendAsync("SendingSpreadCorona", id);
-            }
-        }
+
         public async Task HandleCoins(List<string> coins)
         {
             if (clientProxy != null)

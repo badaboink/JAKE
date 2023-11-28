@@ -70,6 +70,18 @@ namespace Server.GameData
             Player playerToEdit = players.FirstOrDefault(p => p.GetId() == id);
             playerToEdit.SetCurrentPosition(x, y);
         }
+        public void EditPlayerState(int id, string state, string color)
+        {
+
+            Player playerToEdit = players.FirstOrDefault(p => p.GetId() == id);
+            if (state == "corona")
+            {
+                playerToEdit.state = "alive";
+                playerToEdit.SetColor(color);
+            }
+
+        }
+
 
         public string GetPlayerData(int id)
         {
@@ -83,64 +95,48 @@ namespace Server.GameData
 
             return players.Select(player => player.ToString()).ToList();
         }
-        private DateTime startTime = DateTime.Now;
-        public async Task InfectCorona(int id, double x, double y)
+        public List<Player> InfectCorona(int id, double x, double y)
         {
             PlayerCollection playerNetwork = new PlayerCollection(players);
-            //startTime = DateTime.Now;
-            int toInfectId = -1;
+            List<Player> toInfectPlayers = new List<Player>();
 
             // Assume you have a corona-infected player named 'coronaInfectedPlayer'
             Player coronaInfectedPlayer = players.FirstOrDefault(p => p.GetId() == id);
+
+
             int index = players.FindIndex(p => p.GetId() == id);
+            Console.WriteLine("index: " + index);
 
             // Check if the player is found
+            coronaInfectedPlayer.SetColor("Lime");
+            Console.WriteLine("lime plyz1: " + coronaInfectedPlayer.GetColor());
             if (index != -1)
             {
                 // Modify the state of the found player directly in the list
                 players[index].state = "corona";  // Replace "new_state" with the desired state
+                players[index].SetColor("Lime");
+                Console.WriteLine("lime plyz2: " + players[index].GetColor());
             }
+            
 
             // Use the PlayerNetwork to create an iterator for nearby players
-            //IPlayerIterator nearbyPlayersIterator = playerNetwork.CreateNearbyPlayersIterator(coronaInfectedPlayer);
             IPlayerIterator nearbyPlayersIterator = playerNetwork.CreateNearbyPlayersIterator(coronaInfectedPlayer);
 
-            // Access the start time from the iterator
-            if (nearbyPlayersIterator is NearbyPlayerIterator nearbyPlayerIteratorInstance)
+
+            Player nearbyPlayer;
+            Console.WriteLine("coronaorigin id: " + coronaInfectedPlayer.GetId());
+            while(((nearbyPlayer = nearbyPlayersIterator.GetNext())!=null)) 
             {
-                startTime = nearbyPlayerIteratorInstance.getStartTime();
-                Console.WriteLine("Start Time: " + startTime);
-            }
-            else
-            {
-                Console.WriteLine("Iterator does not support getting start time.");
+                Console.WriteLine("nearbyplayerstate: " + nearbyPlayer.state);
+                if(nearbyPlayer.state != "corona")
+                {
+                    toInfectPlayers.Add(nearbyPlayer);
+                    Console.WriteLine("toinfect color: " + nearbyPlayer.GetColor());
+                }
+
             }
 
-            // Iterate through nearby players using the iterator
-            Player nearbyPlayer;
-            //while ((DateTime.Now - startTime).TotalSeconds < 10)
-            //{
-            //    nearbyPlayer = nearbyPlayersIterator.GetNext();
-            //    // Process or do something with the 'nearbyPlayer'
-            //    Console.WriteLine("Found nearby player: " + nearbyPlayer);
-            //}
-            //TODO: SU LAIKU TIKRINT DAR??
-            Console.WriteLine("corona id: " + coronaInfectedPlayer.GetId());
-            int counter = 0;
-            while(((nearbyPlayer = nearbyPlayersIterator.GetNext())!=null && (DateTime.Now - startTime).TotalSeconds < 3)) //|| counter <= 10
-            {
-                toInfectId = nearbyPlayer.GetId();
-                Console.WriteLine("toinfect coord: " + nearbyPlayer.GetCurrentX() + "  " + nearbyPlayer.GetCurrentY());
-                counter++;
-                foreach (var observerEntry in observers)
-                {
-                    var observer = observerEntry.Value;
-                    Console.WriteLine("toinfect id: " + toInfectId);
-                    await observer.HandleSpreadCorona(toInfectId);
-                }
-                //return toInfectId;
-                //ARBA: kiekvienam rastam iskviecia funkcija? kuri eina i client side ir mazina health, bet jau cia tur4t7 ir eit i ja??
-            }
+            return toInfectPlayers;
            
         }
         public string GetObstacleData()
