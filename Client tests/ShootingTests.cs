@@ -29,13 +29,13 @@ namespace Class_library_tests
 
             // Assert
             Assert.NotNull(shot);
-            Assert.Equal(10, shot.getSize());     // toks dydis #FF0000FF spalvos suvio
-            Assert.Equal("red", shot.getColor().GetColor());
-            Assert.Equal("triangle", shot.getShape());
-            Assert.Equal(10, shot.getX());
-            Assert.Equal(10, shot.getY());
-            Assert.Equal(5, shot.getPoints());
-            Assert.Equal(5, shot.getSpeed());
+            Assert.Equal(10, shot.GetSize());     // toks dydis #FF0000FF spalvos suvio
+            Assert.Equal("red", shot.GetColor().GetColor());
+            Assert.Equal("triangle", shot.GetShape());
+            Assert.Equal(10, shot.GetX());
+            Assert.Equal(10, shot.GetY());
+            Assert.Equal(5, shot.GetPoints());
+            Assert.Equal(5, shot.GetSpeed());
 
             // jeigu testas nepraeina vadinasi nustatyta kitoks shape ir color MainWindow
             // kol kas shape ir color keiciami paciam kode

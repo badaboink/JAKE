@@ -1073,8 +1073,8 @@ namespace JAKE.client
                     SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
                     ShotVisual shotVisual = shotVisualBuilder.New()
                                 .SetColor($"{color},{shape}")
-                                .SetSize(shot.getSize())
-                                .SetPosition(shot.getX(), shot.getY())
+                                .SetSize(shot.GetSize())
+                                .SetPosition(shot.GetX(), shot.GetY())
                                 .Build();
 
                     // Add the shot to the ShotContainer (Canvas)
@@ -1092,8 +1092,8 @@ namespace JAKE.client
                         double currentX = Canvas.GetLeft(shotVisual);
                         double currentY = Canvas.GetTop(shotVisual);
                         double delta = shot.DeltaTime;
-                        double newX = currentX + directionX * shot.getSpeed() * delta;
-                        double newY = currentY + directionY * shot.getSpeed() * delta;
+                        double newX = currentX + directionX * shot.GetSpeed() * delta;
+                        double newY = currentY + directionY * shot.GetSpeed() * delta;
                         // Check for collisions with obstacles
                         // TO-DO: shotvisual does not set width and height for some reason... will fix in future maybe
                         foreach (Obstacle obstacle in obstacles)
@@ -1160,7 +1160,7 @@ namespace JAKE.client
             if (CountKills)
             {
                 GameStats gameStat = GameStats.Instance;
-                enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
+                enemy.SetHealth((int)(enemy.GetHealth() - shot.GetPoints()));  // Reduce the enemy's health
                 gameStat.PlayerScore += 5;
                 scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
                 await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
@@ -1229,7 +1229,7 @@ namespace JAKE.client
             double playerCenterX = playerX + playerWidth / 2;
             double playerCenterY = playerY + playerHeight / 2;
 
-            localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
+            localShot.SetPosition(playerCenterX - localShot.GetSize() / 2, playerCenterY - localShot.GetSize() / 2);
             shot = localShot;
         }
 
