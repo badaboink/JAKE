@@ -132,5 +132,13 @@ namespace Server.GameData
             }
         }
 
+        public async Task SendPlayerMessage(string name, string message)
+        {
+            if(clientProxy != null)
+            {
+                await clientProxy.SendAsync("MessageSent", name, message);
+            }
+        }
+
     }
 }

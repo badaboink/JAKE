@@ -36,6 +36,12 @@ namespace JAKE.client
     public partial class MainWindow : Window
     {
         private const string UrlToGameHub = "https://localhost:7039/gamehub";
+        //---------------------------------------------
+        //Chat
+        private Chat chatWindow;
+        public event EventHandler<string> NameEntered;
+        public event EventHandler<string> MessageGot;
+        //---------------------------------------------
         private Player currentPlayer;
         private bool gamestarted = false;
         private List<Player> playerInfoList = new();
@@ -68,6 +74,7 @@ namespace JAKE.client
         public MainWindow()
         {
             currentPlayer = new();
+            chatWindow = new Chat(this);
             connection = new HubConnectionBuilder()
                 .WithUrl(UrlToGameHub)
                 .Build();
@@ -75,6 +82,7 @@ namespace JAKE.client
             WindowState = WindowState.Maximized;
 
             // Start the SignalR connection when the window loads
+            chatWindow.MessageSent += ChatWindow_SendMessage;
             Loaded += MainWindow_Loaded;
             this.KeyDown += MainWindow_KeyDown;
 
@@ -84,9 +92,12 @@ namespace JAKE.client
             }
         }
 
+        
+
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             await StartSignalRConnection();
+            chatWindow.Show();
             await Task.Run(() => ListenForGameUpdates());
         }
 
@@ -120,7 +131,7 @@ namespace JAKE.client
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
                 SetCurrentPlayer(id, name, color, shotColor, shotShape);
-
+                NameEntered?.Invoke(this, name);
                 gamestarted = true;
                 string[] obstaclemessages = obstacleData.Split(',');
                 foreach (string obs in obstaclemessages)
@@ -210,16 +221,12 @@ namespace JAKE.client
         private Timer? timer;
 #pragma warning restore IDE0052 // Remove unread private members
 #pragma warning restore S4487 // Unread "private" fields should be removed
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         private async Task ListenForGameUpdates()
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             UpdateUsers();
 
-#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
-#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
-
+            GetMessage();
             SendingEnemies();
             UpdateShotsFired();
             UpdateDeadEnemy();
@@ -528,9 +535,7 @@ namespace JAKE.client
                 Player? playerToUpdate = playerInfoList.Find(player => player.MatchesId(playerid));
                 if (playerToUpdate != null)
                 {
-#pragma warning disable CS8604 // Possible null reference argument.
                     CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
-#pragma warning restore CS8604 // Possible null reference argument.
                 }
             });
         }
@@ -635,7 +640,20 @@ namespace JAKE.client
             }));
         }
 
-        private async void CheckElapsedTimeMove(object state)
+        private void GetMessage()
+        {
+            connection.On<string, string>("MessageSent", ((name, message) =>
+            {
+                MessageGot?.Invoke(this, $"{name}: {message}");
+            }));
+        }
+
+        private async void ChatWindow_SendMessage(object? sender, string message)
+        {
+            await connection.SendAsync("SendPlayerMessage", currentPlayer.GetId(), message);
+        }
+
+        private async void CheckElapsedTimeMove(object? state)
         {
             await connection.SendAsync("SendEnemies");
         }
@@ -720,13 +738,12 @@ namespace JAKE.client
             Canvas.SetTop(playerVisual, moveY);
         }
 
-#pragma warning disable S3168 // "async" methods should not return "void"
         private async void Move(double newX, double newY)
-#pragma warning restore S3168 // "async" methods should not return "void"
         {
             UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
             await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
         }
+
 
         sealed class ShootCommand : Command
         {

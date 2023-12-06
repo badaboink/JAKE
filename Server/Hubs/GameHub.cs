@@ -21,9 +21,7 @@ namespace Server.Hubs
     public class GameHub : Hub
     {
         private readonly IGameDataService _gameDataService;
-#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
         public override async Task OnConnectedAsync()
-#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             string connectionId = Context.ConnectionId;
             Observer observer = new(clientProxy: Clients.Client(connectionId));
@@ -288,6 +286,23 @@ namespace Server.Hubs
                     {
                         await observer.HandleDeadEnemy(id, color);
                     }
+                }
+            }
+        }
+
+        public async Task SendPlayerMessage(int id, string message)
+        {
+            Console.WriteLine(message);
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            foreach (var observerEntry in observers)
+            {
+                var connectionId = observerEntry.Key;
+                var observer = observerEntry.Value;
+                if (connectionId != Context.ConnectionId)
+                {
+                    string playerData = _gameDataService.GetPlayerData(id);
+                    string[] parts = playerData.Split(':');
+                    await observer.SendPlayerMessage(parts[1], message);
                 }
             }
         }

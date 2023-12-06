@@ -1,0 +1,18 @@
+﻿<Window x:Class="JAKE.client.Chat"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:JAKE.client"
+      mc:Ignorable="d" 
+      d:DesignHeight="350" d:DesignWidth="500"
+      Title="Chat" Height="350" Width="500">
+
+    <Grid>
+        <ScrollViewer Name="scrollViewer" VerticalScrollBarVisibility="Auto" Margin="0,0,0,35">
+            <StackPanel x:Name="stackPanel" Margin="10,10,10,0"/>
+        </ScrollViewer>
+        <TextBox x:Name="textBoxMessage" VerticalAlignment="Bottom" Margin="10,0,90,10" />
+        <Button x:Name="button" Content="Send" VerticalAlignment="Bottom" Margin="0,0,10,10" Click="buttonSend_Click" HorizontalAlignment="Right" Width="69"/>
+    </Grid>
+</Window>

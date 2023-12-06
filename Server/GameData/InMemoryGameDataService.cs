@@ -56,9 +56,7 @@ namespace Server.GameData
         }
         public Player RemovePlayer(string connectionID)
         {
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player playerToRemove = players.Find(player => player.GetConnectionId() == connectionID);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             _ = usedIds.Remove(item: playerToRemove.GetId());
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -69,9 +67,7 @@ namespace Server.GameData
 
         public void EditPlayerPosition(int id, double x, double y)
         {
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player playerToEdit = players.Find(p => p.GetId() == id);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             playerToEdit.SetCurrentPosition(x, y);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
@@ -79,9 +75,7 @@ namespace Server.GameData
 
         public string GetPlayerData(int id)
         {
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player player = players.Find(p => p.GetId() == id);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             return player.ToString();
@@ -229,9 +223,7 @@ namespace Server.GameData
         }
         public void UpdateDeadPlayer(int id)
         {
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
             Player playerToUpdate = players.Find(p => p.GetId() == id);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetName("DEAD");
@@ -280,7 +272,7 @@ namespace Server.GameData
         {
             lock (coinsListLock)
             {
-                Console.WriteLine("getcoins() inmemory");
+                //Console.WriteLine("getcoins() inmemory");
                 return coins.Select(coin => coin.ToString()).ToList();
             }
         }
@@ -327,7 +319,7 @@ namespace Server.GameData
         {
             lock (healthListLock)
             {
-                Console.WriteLine("HealthBoostget() inmemory");
+                //Console.WriteLine("HealthBoostget() inmemory");
                 return healthBoosts.Select(healthBoost => healthBoost.ToString()).ToList();
             }
         }
@@ -374,7 +366,7 @@ namespace Server.GameData
         {
             lock (speedListLock)
             {
-                Console.WriteLine("speedBoostget() inmemory");
+                //Console.WriteLine("speedBoostget() inmemory");
                 return speedBoosts.Select(speedBoost => speedBoost.ToString()).ToList();
             }
         }
@@ -421,7 +413,7 @@ namespace Server.GameData
         {
             lock (shieldListLock)
             {
-                Console.WriteLine("getshields() inmemory");
+               // Console.WriteLine("getshields() inmemory");
                 return shields.Select(shield => shield.ToString()).ToList();
             }
         }
