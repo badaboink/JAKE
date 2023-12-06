@@ -20,8 +20,8 @@ namespace JAKE.classlibrary
         private readonly Coordinates _currentDirection = new(0, 1);
         private readonly Coordinates _currentCoords = new(0, 0);
         private int _speed;
-        private string? _shotColor;
-        private string? _shotShape;
+        private string _shotColor;
+        private string _shotShape;
         private bool _isShooting = false;
         private double _attackSpeed;
         private string? _lastObjectPicked;
@@ -48,6 +48,8 @@ namespace JAKE.classlibrary
             _color = "red";
             _speed = 10;
             _attackSpeed = 5;
+            _shotColor = "";
+            _shotShape = "";
         }
 
         public int GetId()
@@ -137,12 +139,12 @@ namespace JAKE.classlibrary
             return _currentDirection;
         }
 
-        public string? GetShotColor()
+        public string GetShotColor()
         {
             return _shotColor;
         }
 
-        public string? GetShotShape()
+        public string GetShotShape()
         {
             return _shotShape;
         }

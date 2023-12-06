@@ -48,7 +48,7 @@ namespace Client_tests
             Player player = new Player(1, "petras", "red", "red", "round");
             player.SetCurrentPosition(5, 5);
             int playerSize = 50;
-            bool result = MainWindow.playerTouchesMapObject(player.GetCurrentX(), player.GetCurrentY(), playerSize, coin.X, coin.Y, coin.Height);
+            bool result = MainWindow.PlayerTouchesMapObject(player.GetCurrentX(), player.GetCurrentY(), playerSize, coin.X, coin.Y, coin.Height);
 
             Assert.True(result);
         }
@@ -60,7 +60,7 @@ namespace Client_tests
             Player player = new Player(1, "petras", "red", "red", "round");
             player.SetCurrentPosition(500, 500);
             int playerSize = 50;
-            bool result = MainWindow.playerTouchesMapObject(player.GetCurrentX(), player.GetCurrentY(), playerSize, coin.X, coin.Y, coin.Height);
+            bool result = MainWindow.PlayerTouchesMapObject(player.GetCurrentX(), player.GetCurrentY(), playerSize, coin.X, coin.Y, coin.Height);
 
             Assert.False(result);
         }
