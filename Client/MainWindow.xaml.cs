@@ -720,7 +720,9 @@ namespace JAKE.client
             Canvas.SetTop(playerVisual, moveY);
         }
 
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void Move(double newX, double newY)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
             await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
@@ -827,7 +829,9 @@ namespace JAKE.client
             return coords1.x + width1 >= coords2.x && coords1.x <= coords2.x + width2 && coords1.y + height1 >= coords2.y && coords1.y <= coords2.y + height2;
         }
 
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleEnemyCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
@@ -883,7 +887,9 @@ namespace JAKE.client
         }
 
 
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleCoinsCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
@@ -910,7 +916,9 @@ namespace JAKE.client
             }
         }
         
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleShieldsCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
@@ -940,7 +948,9 @@ namespace JAKE.client
                 await connection.SendAsync("SendPickedShield", shield.ToString());
             }
         }
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleSpeedBoostsCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
@@ -963,7 +973,9 @@ namespace JAKE.client
                 await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
             }
         }
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleHealthBoostsCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             if (isCollidingWithHealthBoost)
             {
@@ -1003,7 +1015,9 @@ namespace JAKE.client
             }
         }
  
+#pragma warning disable S3168 // "async" methods should not return "void"
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             bool CountKills = false;
             if (playerVisual == playerVisuals[currentPlayer])
