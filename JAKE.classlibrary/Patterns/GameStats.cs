@@ -18,6 +18,7 @@ namespace JAKE.classlibrary.Patterns
         private bool shieldOn;
         private double windowHeight;
         private double windowWidth;
+        public string state { get; set; }
 
         public double WindowWidth
         {
@@ -65,6 +66,7 @@ namespace JAKE.classlibrary.Patterns
             playerScore = 0;
             playerSpeed = 10;
             shieldOn = false;
+            state = "alive";
         }
 
         public static GameStats Instance

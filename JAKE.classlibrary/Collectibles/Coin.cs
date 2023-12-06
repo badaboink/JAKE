@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using JAKE.classlibrary.Patterns;
 
+
 namespace JAKE.classlibrary.Collectibles
 {
     [ExcludeFromCodeCoverage]
-    public class Coin : IMapObject
+    public class Coin : IMapObject, IEntity
     {
 
         public int Points { get; set; }
@@ -87,6 +88,15 @@ namespace JAKE.classlibrary.Collectibles
                 serializer.Serialize(stringwriter, this);
                 return stringwriter.ToString();
             }
+        }
+        //public void Accept(IGameEntityVisitor visitor, PlayerVisual playervisual)
+        //{
+        //    visitor.VisitCoin(this, playervisual);
+        //}
+
+        public void Accept(IGameEntityVisitor visitor, Player player)
+        {
+            visitor.VisitCoin(this, player);
         }
     }
 }
