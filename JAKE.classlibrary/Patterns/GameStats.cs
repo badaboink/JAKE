@@ -10,12 +10,6 @@ namespace JAKE.classlibrary.Patterns
     {
         private static GameStats? instance = null;
         private static readonly object lockObject = new();
-
-        private int playersCount;
-        private float playerHealth;
-        private int playerScore;
-        private int playerSpeed;
-        private bool shieldOn;
         private double windowHeight;
         private double windowWidth;
         public string state { get; set; }
@@ -41,11 +35,11 @@ namespace JAKE.classlibrary.Patterns
         public bool ShieldOn { get; set; }
         private GameStats()
         {
-            playersCount = 0;
-            playerHealth = 100f;
-            playerScore = 0;
-            playerSpeed = 10;
-            shieldOn = false;
+            PlayersCount = 0;
+            PlayerHealth = 100f;
+            PlayerScore = 0;
+            PlayerSpeed = 10;
+            ShieldOn = false;
             state = "alive";
         }
 

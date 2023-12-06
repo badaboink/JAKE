@@ -852,7 +852,8 @@ namespace JAKE.client
         {
             GameStats gameStats = GameStats.Instance;
             UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
-            Debug.WriteLine("sendmove Move state: " + gameStats.state + "id: " + currentPlayer.GetId());
+            Debug.WriteLine("sendmove Move state: " + gameStats.state + " id: " + currentPlayer.GetId());
+            Debug.WriteLine($"{newX}, {newY}, {gameStats.PlayerSpeed}");
             await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY, gameStats.state);
         }
 
