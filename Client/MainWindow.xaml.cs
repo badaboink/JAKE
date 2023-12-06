@@ -277,13 +277,15 @@ namespace JAKE.client
                         UpdateDeadPlayer();
                        
                     }
-                    
+
                     //TODO UZDET DECORATOR??
-                    //healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-                   // ChangeHealth();
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                        // ChangeHealth();
+                    });
 
-
-                }
+                    }
             });
             timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
 
