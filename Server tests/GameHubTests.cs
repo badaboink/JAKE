@@ -328,7 +328,7 @@ namespace Server_tests
             var observer1 = new Observer(mockClientProxy1.Object);
             gameDataService.AddObserver("connection_id_1", observer1);
 
-            await gameHub.SendMove(player1.GetId(), newX, newY);
+            await gameHub.SendMove(player1.GetId(), newX, newY, "alive");
 
             Assert.Equal(newX, player1.GetCurrentX());
             Assert.Equal(newY, player1.GetCurrentY());

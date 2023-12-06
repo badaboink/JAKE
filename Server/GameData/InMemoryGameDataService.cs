@@ -29,6 +29,7 @@ namespace Server.GameData
         public ObstacleChecker obstacleChecker;
         public Spawner spawner;
         private int bossId = -1;
+        private int level = 1;
         public InMemoryGameDataService()
         {
             // Generate obstacles when the service is created
@@ -329,7 +330,15 @@ namespace Server.GameData
             }
         }
 
-       
+        public int GetLevel()
+        {
+            return level;
+        }
+
+        public void SetLevel(int level)
+        {
+            this.level = level;
+        }
         public Coin AddCoin(int points)
         {
             lock (coinsListLock)
@@ -354,6 +363,18 @@ namespace Server.GameData
             }
         }
 
+        public void UpdateCoin(int id, int points)
+        {
+            lock (coinsListLock)
+            {
+                Coin coinToUpdate = coins.Find(coin => coin.MatchesId(id));
+                if (coinToUpdate != null)
+                {
+                    coinToUpdate.Points = points;
+                }
+            }
+        }
+
         public void RemoveCoin(int id)
         {
             lock (coinsListLock)
@@ -364,6 +385,8 @@ namespace Server.GameData
                 if (coinToRemove != null)
                 {
                     coins.Remove(coinToRemove);
+                    Console.WriteLine("removed coin");
+                    Console.WriteLine("coins.count: " + coins.Count);
                 }
             }
         }

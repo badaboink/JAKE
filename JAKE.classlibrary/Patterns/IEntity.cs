@@ -8,6 +8,6 @@ namespace JAKE.classlibrary.Patterns
 {
     public interface IEntity
     {
-        void Accept(IGameEntityVisitor visitor, Player player);
+        void Accept(IGameEntityVisitor visitor);
     }
 }

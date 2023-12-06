@@ -10,11 +10,10 @@ namespace JAKE.classlibrary.Patterns
     public interface IGameEntityVisitor
     {
         // Other visit methods for different entities
-        void VisitCoin(Coin coin, Player player);
+        void VisitCoin(Coin coin);
         void VisitSpeedBoost(SpeedBoost speedBoost);
         void VisitHealthBoost(HealthBoost healthBoost);
         void VisitShield(Shield shield);
-        void VisitCorona(Corona corona);
 
     }
 }

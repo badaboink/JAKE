@@ -61,6 +61,47 @@ namespace Server.Hubs
             }
                 
         }
+        public async Task ChangeLevel(int level)
+        {
+            _gameDataService.SetLevel(level);
+        }
+
+        public async Task GetLevel()
+        {
+            int level = _gameDataService.GetLevel();
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            foreach (var observerEntry in observers)
+            {
+                var observer = observerEntry.Value;
+                await observer.HandleGetLevel(level);
+            }
+        }
+
+       // public async Task UpdateCoin(string coin)
+        //{
+        //    string coinString = new ServerString(coin).ConvertedString;
+        //    string[] parts = coinString.Split(':');
+        //    if (parts.Length == 7)
+        //    {
+        //        int id = int.Parse(parts[1]);
+        //        int points = int.Parse(parts[0]);
+        //        Coin coinToUpdate = _gameDataService.ReturnCoin(id);
+        //        if (coinToUpdate != null)
+        //        {
+        //            _gameDataService.UpdateCoin(id, points);
+
+        //            string json = JsonConvert.SerializeObject(coinToUpdate);
+
+        //            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+        //            foreach (var observerEntry in observers)
+        //            {
+        //                var observer = observerEntry.Value;
+        //                await observer.HandleUpdateCoin(json);
+        //            }
+        //        }
+
+        //    }
+        //}
         public async Task SendEnemies()
         {
             lock (syncLock)
@@ -68,7 +109,7 @@ namespace Server.Hubs
                 DateTime startTime = _gameDataService.GetCurrentGameTime();
                 DateTime currentTime = DateTime.Now;
                 TimeSpan elapsedTime = currentTime - startTime;
-
+                int level = _gameDataService.GetLevel();
 
                 _gameDataService.UpdateEnemyPositions();
                 if (elapsedTime.TotalSeconds >= 10 && _gameDataService.GetEnemies().Count <= 10)
@@ -77,8 +118,9 @@ namespace Server.Hubs
                     _gameDataService.SetGameTime(DateTime.Now);
                 }
                 if (_gameDataService.GetCoins().Count <= 10)
-                {
-                    _gameDataService.AddCoin(10);
+                {                  
+                    _gameDataService.AddCoin(level*10);
+                    Console.WriteLine("addcoin: " + level*10);
                 }
                 if (_gameDataService.GetCoronas().Count <= 1)
                 {

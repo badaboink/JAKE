@@ -96,14 +96,10 @@ namespace JAKE.classlibrary.Collectibles
         {
             return this.id.GetHashCode();
         }
-        //public void Accept(IGameEntityVisitor visitor, PlayerVisual playervisual)
-        //{
-        //    visitor.VisitCoin(this, playervisual);
-        //}
 
-        public void Accept(IGameEntityVisitor visitor, Player player)
+        public void Accept(IGameEntityVisitor visitor)
         {
-            visitor.VisitCoin(this, player);
+            visitor.VisitCoin(this);
         }
     }
 }

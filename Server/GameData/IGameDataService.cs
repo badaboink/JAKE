@@ -53,6 +53,9 @@ namespace Server.GameData
         Coin ReturnCoin(int id);
         Enemy AddZombieBoss();
         bool IsBossAlive();
+        int GetLevel();
+        void SetLevel(int level);
+        void UpdateCoin(int id, int points);
 
         List<Player> InfectCorona(int id, double x, double y);
     }

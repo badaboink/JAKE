@@ -55,6 +55,12 @@ namespace JAKE.classlibrary.Collectibles
         {
 
             gameStats.ShieldOn = true;
+            gameStats.ShieldTime = this.Time;
+        }
+
+        public void Accept(IGameEntityVisitor visitor)
+        {
+            visitor.VisitShield(this);
         }
     }
 }

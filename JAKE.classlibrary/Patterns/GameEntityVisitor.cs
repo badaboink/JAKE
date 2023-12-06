@@ -9,48 +9,25 @@ namespace JAKE.classlibrary.Patterns
 {
     public class GameEntityVisitor : IGameEntityVisitor
     {
-        public void VisitCoin(Coin coin, Player player)
-        {          
-            // Logic from HandleCoinsCollisions method goes here
-            //double playerX = currentPlayer.GetCurrentX();
-            //double playerY = currentPlayer.GetCurrentY();
-
-            //double coinX = Canvas.GetLeft(coinVisuals[coin]);
-            //double coinY = Canvas.GetTop(coinVisuals[coin]);
-
-            //if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height))
-            //{
-            //    GameStats gameStat = GameStats.Instance;
-            //    coin.Interact(gameStat);
-            //    scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-            //    Player text = new CoinDecorator(currentPlayer);
-            //    testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-            //    HideDisplay();
-
-            //    string json = JsonConvert.SerializeObject(coin);
-            //    await connection.SendAsync("SendPickedCoin", json);
-            //}
-            
-        }
-
-        public void VisitCorona(Corona corona)
+        public void VisitCoin(Coin coin)
         {
-            throw new NotImplementedException();
+            coin.Points += 10;
+            
         }
 
         public void VisitHealthBoost(HealthBoost healthBoost)
         {
-            throw new NotImplementedException();
+            healthBoost.Health += 10;
         }
 
         public void VisitShield(Shield shield)
         {
-            throw new NotImplementedException();
+            shield.Time += 5;
         }
 
         public void VisitSpeedBoost(SpeedBoost speedBoost)
         {
-            throw new NotImplementedException();
+            speedBoost.Time += 5;
         }
     }
 }

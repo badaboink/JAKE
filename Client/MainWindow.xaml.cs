@@ -75,6 +75,7 @@ namespace JAKE.client
         private GameMediator _gameMediator;
         private string primaryColor = "";
         private DispatcherTimer LevelTimer;
+        private IGameEntityVisitor levelUpVisitor = new GameEntityVisitor();
 
         private bool isCollidingWithHealthBoost = false;
 
@@ -101,27 +102,21 @@ namespace JAKE.client
            // _gameMediator = new GameMediator(this);
         }
 
-        
 
+        public async void GetLevel()
+        {
+            await connection.SendAsync("GetLevel");
+        }
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             await StartSignalRConnection();
             chatWindow.Show();
             await Task.Run(() => ListenForGameUpdates());
-            //while(true)
-            //{
-            //    LevelUp();
-            //}
-            //Timer timer = new Timer(
-            //  _ => LevelUp(),
-            //  null,
-            //  TimeSpan.Zero,
-            //  TimeSpan.FromSeconds(1)); //keist galima
+            //GetLevel();
+            //SetLevel();
             LevelTimer = new DispatcherTimer();
-            LevelTimer.Interval = TimeSpan.FromSeconds(10); // keist galima
+            LevelTimer.Interval = TimeSpan.FromSeconds(10); // TODO: padidint veliau
             LevelTimer.Tick += Timer_Tick; 
-
-            // Start the timer
             LevelTimer.Start();
         }
         private void Timer_Tick(object sender, EventArgs e)
@@ -268,6 +263,8 @@ namespace JAKE.client
             SendingPickedHealthBoost();
             SendingSpeedBoosts();
             SendingPickedSpeedBoost();
+
+            SendingUpdatedCoin();
             connection.On<string>("UpdateCorona", (player) =>
             {
                 string[] parts = player.Split(':');
@@ -369,7 +366,10 @@ namespace JAKE.client
                 });
             });
         }
-
+        private async Task ChangeLevelServer(int level)
+        {
+            await connection.SendAsync("ChangeLevel", level);
+        }
         private void LevelUp()
         {
             GameStats gameStats = GameStats.Instance;
@@ -377,6 +377,7 @@ namespace JAKE.client
             int currentLevel = (int)Math.Ceiling(elapsedTime.TotalSeconds / levelDuration.TotalSeconds);
             if (currentLevel > gameStats.Level)
             {
+                ChangeLevelServer(currentLevel);
                 Application.Current.Dispatcher.Invoke(() =>
                 {
                     deadLabel.Text = "LEVEL " + currentLevel;
@@ -400,9 +401,52 @@ namespace JAKE.client
 
                 //TODO: funkcijos visitor
                 gameStats.Level = currentLevel;
+                foreach (Coin coin in coins)
+                {
+                    coin.Accept(levelUpVisitor);
+                   // string json = JsonConvert.SerializeObject(coin);
+                   //// UpdateCoin(json);
+                   // Debug.WriteLine("coin id: " + coin.id + "   points: " + coin.Points);
+                }
+
+                foreach(HealthBoost healthBoost in healthBoosts)
+                {
+                    healthBoost.Accept(levelUpVisitor);
+
+                }
+
+                foreach (SpeedBoost speedBoost in speedBoosts)
+                {
+                    speedBoost.Accept(levelUpVisitor);
+                   
+                }
+                gameStats.SpeedBoostTime = speedBoosts[0].Time;
+                Debug.WriteLine("speed time: " + gameStats.SpeedBoostTime);
+
+                foreach (Shield shield in shields)
+                {
+                    shield.Accept(levelUpVisitor);
+                    
+                }
+                gameStats.ShieldTime = shields[0].Time;
+                Debug.WriteLine("shield time: " + gameStats.ShieldTime);
+
             }
             
         }
+
+        private void SetLevel()
+        {
+            connection.On<int>("SendingLevel", (level) =>
+            {
+                GameStats gameStat = GameStats.Instance;
+                gameStat.Level = level;
+            });
+        }
+        //private async Task UpdateCoin(string coin)
+        //{
+        //    await connection.SendAsync("UpdateCoin", coin);
+        //}
         private void SendingPickedSpeedBoost()
         {
             connection.On<int>("SendingPickedSpeedBoost", (speedid) =>
@@ -603,6 +647,32 @@ namespace JAKE.client
             });
         }
 
+        private void SendingUpdatedCoin()
+        {
+            connection.On<string>("SendingUpdatedCoin", (coinObj) =>
+            {
+                string coinString = new ServerString(coinObj).ConvertedString;
+                string[] parts = coinString.Split(':');
+                int id = int.Parse(parts[1]);
+                int points = int.Parse(parts[0]);
+                Dispatcher.Invoke(() =>
+                {
+                    foreach (var pair in coinVisuals)
+                    {
+                        Coin coin = pair.Key;
+                        CoinVisual coinVisual = pair.Value;
+
+                        if (coin.id == id)
+                        {
+                            coin.Points = points;
+                            break;
+                        }
+                    }
+
+                });
+            });
+        }
+
         private void SendingCoins()
         {
             connection.On<List<string>>("SendingCoins", (coinsdata) =>
@@ -618,6 +688,11 @@ namespace JAKE.client
                         double coinY = double.Parse(parts[2]);
                         int points = int.Parse(parts[5]);
                         Coin coin = new Coin(coinId, coinX, coinY, points, image);
+                        //Coin targetCoin =  coins.FirstOrDefault(coin => coin.id == coinId);
+                        //if(targetCoin!=null)
+                        //{
+                        //    targetCoin.Points = points;
+                        //}
                         if (!coins.Contains(coin))
                         {
                             coins.Add(coin);
@@ -776,8 +851,8 @@ namespace JAKE.client
                 {
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
-                    int x = int.Parse(parts[3]);
-                    int y = int.Parse(parts[4]);
+                    double x = double.Parse(parts[3]);
+                    double y = double.Parse(parts[4]);
                     Player? playerInfo = playerInfoList.Find(p => p.GetId() == playerId);
                     if (playerInfo == null)
                     {
@@ -976,12 +1051,12 @@ namespace JAKE.client
         }
         private static void StopSpeed()
         {
-            // tekstas dingsta po puse sekundes
+            GameStats gameStat = GameStats.Instance;
             var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Interval = TimeSpan.FromSeconds(gameStat.SpeedBoostTime);
+            Debug.WriteLine("speed time hide: " + gameStat.SpeedBoostTime);
             timer.Tick += (sender, args) =>
-            {
-                GameStats gameStat = GameStats.Instance;
+            {               
                 gameStat.PlayerSpeed = 10;
                 timer.Stop();
             };
@@ -1016,14 +1091,14 @@ namespace JAKE.client
 
         private void HideShieldDisplay()
         {
-            // tekstas dingsta po 10 sekundziu
+            GameStats gameStat = GameStats.Instance;
             var timerT = new DispatcherTimer();
-            timerT.Interval = TimeSpan.FromSeconds(10);
+            timerT.Interval = TimeSpan.FromSeconds(gameStat.ShieldTime);
+            Debug.WriteLine("shield time hide: " + gameStat.ShieldTime);
             timerT.Tick += (sender, args) =>
             {
                 if (true)
-                {
-                    GameStats gameStat = GameStats.Instance;
+                {                   
                     shieldBorder.Visibility = Visibility.Hidden;
                     gameStat.ShieldOn = false;
                     timerT.Stop();
@@ -1105,11 +1180,6 @@ namespace JAKE.client
         private async void HandleCoinsCollisions(PlayerVisual playerVisual)
 #pragma warning restore S3168 // "async" methods should not return "void"
         {
-            //Player player = 
-            //foreach (Coin coin in coins)
-            //{
-            //    coin.Accept(new GameEntityVisitor(), playerVisual);
-            //}
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<Coin> coinsCopy = new List<Coin>(coins);
@@ -1125,12 +1195,11 @@ namespace JAKE.client
                 Debug.WriteLine("singleton " + gameStat.GetHashCode());
                 coin.Interact(gameStat);
                 scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
+                //TODO: NE HARDCODINTUS POINTS PRIDEt turi
                 Player text = new CoinDecorator(currentPlayer);
                 testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
                 HideDisplay();
-                // Convert coin to a JSON string
                 string json = JsonConvert.SerializeObject(coin);
-                //-----------
                 await connection.SendAsync("SendPickedCoin", json);
             }
         }
@@ -1164,11 +1233,8 @@ namespace JAKE.client
                     {
                         GameStats gameStat = GameStats.Instance;
                         corona.Interact(gameStat);
-                        //TODO: PRASIDEDA TIMERIS
                         Debug.WriteLine("AJAJAJAJ CORONA");
                         Debug.WriteLine("gamestats state: " + gameStat.state);
-                        //player.state = "corona";
-                        //Debug.WriteLine("gplayer state: " + player.state);
 
                         StopCorona();
                         currentPlayer.SetColor("Lime");

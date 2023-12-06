@@ -54,5 +54,10 @@ namespace JAKE.classlibrary.Collectibles
         {
             return $"{id}:{X}:{Y}:{Width}:{Height}:{Health}";
         }
+
+        public void Accept(IGameEntityVisitor visitor)
+        {
+            visitor.VisitHealthBoost(this);
+        }
     }
 }

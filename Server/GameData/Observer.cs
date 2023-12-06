@@ -108,6 +108,23 @@ namespace Server.GameData
                 await clientProxy.SendAsync("SendingPickedCoin", id);
             }
         }
+
+        //public async Task HandleUpdateCoin(string coin)
+        //{
+        //    if (clientProxy != null)
+        //    {
+        //        await clientProxy.SendAsync("SendingUpdatedCoin", coin);
+        //    }
+        //}
+
+        public async Task HandleGetLevel(int level)
+        {
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingLevel", level);
+            }
+        }
+
         public async Task HandleShields(List<string> shields)
         {
             if (clientProxy != null)

@@ -41,6 +41,7 @@ namespace JAKE.classlibrary.Collectibles
         public void Interact(GameStats gameStats)
         {
             gameStats.PlayerSpeed += this.Speed;
+            gameStats.SpeedBoostTime = this.Time;
         }
         public bool MatchesId(int id)
         {
@@ -56,6 +57,9 @@ namespace JAKE.classlibrary.Collectibles
         {
             return $"{id}:{X}:{Y}:{Width}:{Height}:{Speed}:{Time}";
         }
-      
+        public void Accept(IGameEntityVisitor visitor)
+        {
+            visitor.VisitSpeedBoost(this);
+        }
     }
 }
