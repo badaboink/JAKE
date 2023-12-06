@@ -33,6 +33,7 @@ namespace JAKE.classlibrary.Patterns
 
         public int PlayerSpeed { get; set; }
         public bool ShieldOn { get; set; }
+        public int Level { get; set; }
         private GameStats()
         {
             PlayersCount = 0;
@@ -41,6 +42,7 @@ namespace JAKE.classlibrary.Patterns
             PlayerSpeed = 10;
             ShieldOn = false;
             state = "alive";
+            Level = 1;
         }
 
         public static GameStats Instance

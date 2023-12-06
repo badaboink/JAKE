@@ -305,7 +305,6 @@ namespace Server.GameData
                 }
 
                 corona.SetPosition(x, y);
-                Console.WriteLine("coronacount: " + coronas.Count);
                 corona.id = coronas.Count + 1;
                 coronas.Add(corona);
                 return corona;

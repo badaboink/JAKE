@@ -53,6 +53,8 @@ namespace JAKE.client
 #pragma warning disable IDE0052 // Remove unread private members
 #pragma warning disable S4487 // Unread "private" fields should be removed
         private DateTime lastGameTime = DateTime.MinValue;
+        private DateTime startTime = DateTime.Now;
+        private TimeSpan levelDuration = TimeSpan.FromSeconds(10); //keist galima
 #pragma warning restore S4487 // Unread "private" fields should be removed
 #pragma warning restore IDE0052 // Remove unread private members
         private Dictionary<Enemy, bool> collisionCheckedEnemies = new();
@@ -72,6 +74,7 @@ namespace JAKE.client
         Controller controller = new Controller();
         private GameMediator _gameMediator;
         private string primaryColor = "";
+        private DispatcherTimer LevelTimer;
 
         private bool isCollidingWithHealthBoost = false;
 
@@ -105,8 +108,26 @@ namespace JAKE.client
             await StartSignalRConnection();
             chatWindow.Show();
             await Task.Run(() => ListenForGameUpdates());
-        }
+            //while(true)
+            //{
+            //    LevelUp();
+            //}
+            //Timer timer = new Timer(
+            //  _ => LevelUp(),
+            //  null,
+            //  TimeSpan.Zero,
+            //  TimeSpan.FromSeconds(1)); //keist galima
+            LevelTimer = new DispatcherTimer();
+            LevelTimer.Interval = TimeSpan.FromSeconds(10); // keist galima
+            LevelTimer.Tick += Timer_Tick; 
 
+            // Start the timer
+            LevelTimer.Start();
+        }
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            LevelUp();
+        }
         private async Task StartSignalRConnection()
         {
             while (connection.State != HubConnectionState.Connected)
@@ -230,8 +251,8 @@ namespace JAKE.client
 #pragma warning restore S4487 // Unread "private" fields should be removed
         private async Task ListenForGameUpdates()
         {
+            
             UpdateUsers();
-
             timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
             GetMessage();
             SendingEnemies();
@@ -279,11 +300,9 @@ namespace JAKE.client
                        
                     }
 
-                    //TODO UZDET DECORATOR??
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-                        // ChangeHealth();
                     });
 
                     }
@@ -351,6 +370,39 @@ namespace JAKE.client
             });
         }
 
+        private void LevelUp()
+        {
+            GameStats gameStats = GameStats.Instance;
+            TimeSpan elapsedTime = DateTime.Now - startTime;
+            int currentLevel = (int)Math.Ceiling(elapsedTime.TotalSeconds / levelDuration.TotalSeconds);
+            if (currentLevel > gameStats.Level)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    deadLabel.Text = "LEVEL " + currentLevel;
+                    levelLabel.Text = "Level: " + currentLevel;
+                    deadLabel.Visibility = Visibility.Visible;
+
+                    // Start a timer to hide the label after 2 seconds
+                    System.Timers.Timer hideTimer = new System.Timers.Timer();
+                    hideTimer.Interval = 2000; 
+                    hideTimer.AutoReset = false; 
+                    hideTimer.Elapsed += (sender, args) =>
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            deadLabel.Visibility = Visibility.Collapsed;
+                        });
+                        hideTimer.Dispose();
+                    };
+                    hideTimer.Start();
+                });
+
+                //TODO: funkcijos visitor
+                gameStats.Level = currentLevel;
+            }
+            
+        }
         private void SendingPickedSpeedBoost()
         {
             connection.On<int>("SendingPickedSpeedBoost", (speedid) =>
@@ -374,6 +426,7 @@ namespace JAKE.client
 
         private void SendingSpeedBoosts()
         {
+
             connection.On<List<string>>("SendingSpeedBoosts", (speeddata) =>
             {
 
@@ -1002,14 +1055,6 @@ namespace JAKE.client
             {
                 await HandleCollision(playerVisual, enemy);
             }
-        }
-        public void ChangeHealth()
-        {
-            GameStats gameStat = GameStats.Instance;
-
-            gameStat.PlayerHealth -= 10;
-            //healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-            //TODO: different thread owns it
         }
 
         public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
