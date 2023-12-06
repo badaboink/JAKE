@@ -11,7 +11,7 @@ namespace JAKE.classlibrary
     {
         protected Player wrapper;
 
-        public Decorator(Player player)
+        protected Decorator(Player player)
         {
             wrapper = player;
         }

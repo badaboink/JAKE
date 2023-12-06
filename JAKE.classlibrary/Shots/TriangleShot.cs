@@ -13,7 +13,7 @@ namespace JAKE.classlibrary.Shots
     {
         public TriangleShot(Shot shot) : base(shot)
         {
-            base.setShape("triangle");
+            base.SetShape("triangle");
         }
     }
 }

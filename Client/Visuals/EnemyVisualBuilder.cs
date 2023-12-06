@@ -12,7 +12,9 @@ namespace JAKE.classlibrary.Patterns
 {
     public class EnemyVisualBuilder : IBuilderVisual<EnemyVisual>
     {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private EnemyVisual enemyVisual;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         public IBuilderVisual<EnemyVisual> New()
         {
@@ -23,13 +25,13 @@ namespace JAKE.classlibrary.Patterns
         public IBuilderVisual<EnemyVisual> SetColor(string color)
         {
             Color enemyColor = (Color)ColorConverter.ConvertFromString(color);
-            SolidColorBrush solidColorBrush = new SolidColorBrush(enemyColor);
+            SolidColorBrush solidColorBrush = new(enemyColor);
             enemyVisual.FillColor = solidColorBrush;
             enemyVisual.UpdateEnemy(solidColorBrush);
             return this;
         }
 
-        public IBuilderVisual<EnemyVisual> SetName(string name)
+        public IBuilderVisual<EnemyVisual> SetName(string color)
         {
             return this;
         }

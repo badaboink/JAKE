@@ -10,7 +10,7 @@ namespace JAKE.classlibrary.Patterns.Strategies
 {
     public class ChaseAndHopStrategy : IMoveStrategy
     {
-        private List<Obstacle> obstacles;
+        private readonly List<Obstacle> obstacles;
         public ChaseAndHopStrategy(List<Obstacle> obstacles)
         {
             this.obstacles = obstacles;
@@ -43,27 +43,20 @@ namespace JAKE.classlibrary.Patterns.Strategies
                 double jumpDistance = 60.0;
 
                 bool needToJump = false;
-                foreach (Obstacle obstacle in obstacles)
+                double jumpX = newX + directionX * jumpDistance;
+                double jumpY = newY + directionY * jumpDistance - jumpHeight;
+                var obstacle = obstacles.Select(ob => ob).FirstOrDefault(ob => ob.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()));
+                if (obstacle != null)
                 {
-                    if (obstacle.WouldOverlap(newX, newY, enemy.GetSize(), enemy.GetSize()))
+                    needToJump = true;
+                    if (!obstacle.WouldOverlap(jumpX, jumpY, enemy.GetSize(), enemy.GetSize()))
                     {
-                        needToJump = true;
-                        bool canJump = true;
-                        double jumpX = newX + directionX * jumpDistance;
-                        double jumpY = newY + directionY * jumpDistance - jumpHeight;
-                        if (obstacle.WouldOverlap(jumpX, jumpY, enemy.GetSize(), enemy.GetSize()))
-                        {
-                            canJump = false;
-                            break;
-                        }
-                        if (canJump)
-                        {
-                            enemy.SetMovementStrategy(new HoppingStrategy(directionX, directionY, obstacle, obstacles));
-                        }
-                        break;
+                        enemy.SetMovementStrategy(new HoppingStrategy(directionX, directionY, obstacle, obstacles));
                     }
                 }
-                if(!needToJump && enemy.GetCurrentMovementStrategy() is ChaseAndHopStrategy)
+                
+
+                if (!needToJump && enemy.GetCurrentMovementStrategy() is ChaseAndHopStrategy)
                 {
                     enemy.SetCurrentPosition(newX, newY);
                 }

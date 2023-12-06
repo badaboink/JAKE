@@ -82,7 +82,6 @@ namespace Class_library_tests
             int points = gameStat.PlayerScore;
 
             Assert.Equal(expectedPoints, points);
-            GameStats.Instance = null;
 
         }
 
@@ -97,7 +96,6 @@ namespace Class_library_tests
             float health = gameStat.PlayerHealth;
 
             Assert.Equal(expectedHealth, health);
-            GameStats.Instance = null;
         }
         //interact speedboost
         [Fact]
@@ -111,7 +109,6 @@ namespace Class_library_tests
             int speed = gameStat.PlayerSpeed;
 
             Assert.Equal(expectedSpeed, speed);
-            GameStats.Instance = null;
 
         }
         //interact shield
@@ -122,7 +119,6 @@ namespace Class_library_tests
             Shield shield = new Shield(10);
             shield.Interact(gameStat);
             Assert.True(gameStat.ShieldOn);
-            GameStats.Instance = null;
 
         }
     }

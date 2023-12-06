@@ -28,7 +28,6 @@ namespace Server.GameData
         void UpdateEnemy(int id, int health);
         List<string> GetEnemies();
         List<string> UpdateEnemyPositions();
-        //Player FindClosestPlayer(Enemy enemy);
         DateTime GetCurrentGameTime();
         void SetGameTime(DateTime gametime);
         void AddObserver(string connectionID, Observer observer);
@@ -50,7 +49,8 @@ namespace Server.GameData
         Corona AddCorona();
         void RemoveCorona(int id);
         List<string> GetCoronas();
-        Coin returnCoin(int id);
+
+        Coin ReturnCoin(int id);
         Enemy AddZombieBoss();
         bool IsBossAlive();
 

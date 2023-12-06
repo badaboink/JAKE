@@ -10,7 +10,7 @@ namespace JAKE.classlibrary
 {
     public class ObstacleChecker
     {
-        List<Obstacle> obstacles;
+        readonly List<Obstacle> obstacles;
 
         public ObstacleChecker(List<Obstacle> obstacles)
         {
@@ -27,34 +27,23 @@ namespace JAKE.classlibrary
         }
         public bool IsPointOverlapping(double x, double y)
         {
-            foreach (Obstacle obstacle in obstacles)
-            {
-                if (obstacle.WouldOverlap(x, y))
-                {
-                    return true;
-                }
-            }
-            return false;
+            var item = obstacles.Select(g => g).FirstOrDefault(g => g.WouldOverlap(x, y));
+            return item != null;
         }
 
         public bool IsRectangleOverlapping(double xStart, double yStart, double xWidth, double yWidth)
         {
-            foreach (Obstacle obstacle in obstacles)
-            {
-                if (obstacle.WouldOverlap(xStart, yStart, xWidth, yWidth))
-                {
-                    return true;
-                }
-            }
-            return false;
+            var item = obstacles.Select(g => g).FirstOrDefault(g => g.WouldOverlap(xStart, yStart, xWidth, yWidth));
+            return item != null;
         }
 
         public bool PositionNextToObstacle(Coordinates current, Coordinates direction, ref Coordinates next)
         {
             bool overlap = false;
             GameStats gameStat = GameStats.Instance;
-            foreach (Obstacle obstacle in obstacles)
+            for (int i = 0; i < obstacles.Count; i++)
             {
+                Obstacle obstacle = obstacles[i];
                 if (obstacle.WouldOverlap(next.x, next.y, 50, 50))
                 {
                     overlap = true;

@@ -20,15 +20,14 @@ namespace Server.Hubs
 {
     public class GameHub : Hub
     {
-        private static readonly Dictionary<string, string> ConnectedClients = new Dictionary<string, string>();
         private readonly IGameDataService _gameDataService;
         public override async Task OnConnectedAsync()
         {
             string connectionId = Context.ConnectionId;
-            Observer observer = new Observer(Clients.Client(connectionId));
+            Observer observer = new(clientProxy: Clients.Client(connectionId));
             _gameDataService.AddObserver(connectionId, observer);
         }
-        public override async Task OnDisconnectedAsync(Exception exception)
+        public override async Task OnDisconnectedAsync(Exception? exception)
         {
             string connectionId = Context.ConnectionId;
             _gameDataService.RemoveObserver(connectionId);
@@ -45,7 +44,7 @@ namespace Server.Hubs
             _gameDataService = gameDataService;
 
         }
-        private object syncLock = new object();
+        private readonly object syncLock = new();
 
         public async Task SendColor(string color, string name, string shotcolor, string shotshape)
         {
@@ -140,7 +139,7 @@ namespace Server.Hubs
             if (parts.Length == 7)
             {
                 int id = int.Parse(parts[1]);
-                Coin coinToRemove = _gameDataService.returnCoin(id);
+                Coin coinToRemove = _gameDataService.ReturnCoin(id);
                 if (coinToRemove != null)
                 {
                     _gameDataService.RemoveCoin(id);
@@ -335,6 +334,23 @@ namespace Server.Hubs
                     {
                         await observer.HandleDeadEnemy(id, color);
                     }
+                }
+            }
+        }
+
+        public async Task SendPlayerMessage(int id, string message)
+        {
+            Console.WriteLine(message);
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            foreach (var observerEntry in observers)
+            {
+                var connectionId = observerEntry.Key;
+                var observer = observerEntry.Value;
+                if (connectionId != Context.ConnectionId)
+                {
+                    string playerData = _gameDataService.GetPlayerData(id);
+                    string[] parts = playerData.Split(':');
+                    await observer.SendPlayerMessage(parts[1], message);
                 }
             }
         }

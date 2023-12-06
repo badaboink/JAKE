@@ -17,7 +17,7 @@ namespace JAKE.classlibrary
         protected double windowHeight;
 
         [ExcludeFromCodeCoverage]
-        public MovementCommand(Player player, List<Obstacle> obstacles) : base(player)
+        protected MovementCommand(Player player, List<Obstacle> obstacles) : base(player)
         {
             this.obstacleChecker = new ObstacleChecker(obstacles);
             this._player = player;

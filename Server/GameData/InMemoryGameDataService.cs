@@ -13,19 +13,19 @@ namespace Server.GameData
     public class InMemoryGameDataService : IGameDataService
     {
 
-        private Dictionary<string, Observer> observers = new Dictionary<string, Observer>();
-        private List<Player> players = new List<Player>();
-        private List<Obstacle> obstacles = new List<Obstacle>();
-        private List<Enemy> enemies = new List<Enemy>();
+        private readonly Dictionary<string, Observer> observers = new();
+        private readonly List<Player> players = new();
+        private readonly List<Obstacle> obstacles;
+        private readonly List<Enemy> enemies = new();
         private DateTime gametime = DateTime.Now;
 
-        private List<Coin> coins = new List<Coin>();
-        private List<HealthBoost> healthBoosts = new List<HealthBoost>();
-        private List<Shield> shields = new List<Shield>();
-        private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
+        private readonly List<Coin> coins = new();
+        private readonly List<HealthBoost> healthBoosts = new();
+        private readonly List<Shield> shields = new();
+        private readonly List<SpeedBoost> speedBoosts = new();
+        public MapObjectFactory objectFactory = new();
+        public ZombieFactory zombieFactory = new();
         private List<Corona> coronas = new List<Corona>();
-        public MapObjectFactory objectFactory = new MapObjectFactory();
-        public ZombieFactory zombieFactory = new ZombieFactory();
         public ObstacleChecker obstacleChecker;
         public Spawner spawner;
         private int bossId = -1;
@@ -36,20 +36,19 @@ namespace Server.GameData
             obstacleChecker = new ObstacleChecker(obstacles);
             spawner = new Spawner(objectFactory, zombieFactory, obstacleChecker);
         }
-        Random random = new Random();
-        int minId = 1;
-        int maxId = Int32.MaxValue;
-        HashSet<int> usedIds = new HashSet<int>();
-        HashSet<int> usedIdsEnemies = new HashSet<int>();
+        readonly Random random = new();
+        readonly int minId = 1;
+        readonly int maxId = Int32.MaxValue;
+        readonly HashSet<int> usedIds = new();
         public Player AddPlayer(string playerName, string playerColor, string connectionID, string shotcolor, string shotshape)
         {
-            int playerId = 0;
+            int playerId;
             do
             {
                 playerId = new Random().Next(minId, maxId);
             } while (usedIds.Contains(playerId));
             usedIds.Add(playerId);
-            Player newPlayer = new Player(playerId, playerName, playerColor, shotcolor, shotshape);
+            Player newPlayer = new(playerId, playerName, playerColor, shotcolor, shotshape);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);
@@ -58,8 +57,10 @@ namespace Server.GameData
         }
         public Player RemovePlayer(string connectionID)
         {
-            Player playerToRemove = players.FirstOrDefault(player => player.GetConnectionId() == connectionID);
-            usedIds.Remove(playerToRemove.GetId());
+            Player playerToRemove = players.Find(player => player.GetConnectionId() == connectionID);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            _ = usedIds.Remove(item: playerToRemove.GetId());
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             players.Remove(playerToRemove);
             return playerToRemove;
         }
@@ -70,6 +71,7 @@ namespace Server.GameData
             Player playerToEdit = players.FirstOrDefault(p => p.GetId() == id);
             playerToEdit.SetCurrentPosition(x, y);
         }
+
         public void EditPlayerState(int id, string state, string color)
         {
 
@@ -82,12 +84,13 @@ namespace Server.GameData
 
         }
 
-
         public string GetPlayerData(int id)
         {
-            Player player = players.FirstOrDefault(p => p.GetId() == id);
+            Player player = players.Find(p => p.GetId() == id);
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             return player.ToString();
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
         }
 
         public List<string> GetPlayerList()
@@ -143,7 +146,7 @@ namespace Server.GameData
         {
             return string.Join(",", obstacles.Select(obstacle => obstacle.ToString()));
         }
-        private readonly object enemyListLock = new object();
+        private readonly object enemyListLock = new();
         public Enemy AddEnemies()
         {
             lock (enemyListLock)
@@ -154,7 +157,7 @@ namespace Server.GameData
                 return newEnemy;
             }
         }
-        List<ZombieMinion> tempminions;
+
         public Enemy AddZombieBoss()
         {
             lock (enemyListLock)
@@ -163,13 +166,14 @@ namespace Server.GameData
                 newEnemy.SetMovementStrategy(new PatrollingStrategy(1920 - 60 - newEnemy.GetSize(), 1080 - 80 - newEnemy.GetSize(), newEnemy.GetSpeed(), obstacles));
                 enemies.Add(newEnemy);
                 List<ZombieMinion> minions = newEnemy.GetMinions();
-                tempminions = newEnemy.GetMinions();
                 foreach (ZombieMinion minion in minions)
                 {
-                    Console.WriteLine("original minion in zombieBoss list hash: " + minion.GetHashCode());
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     Enemy copy = minion.ShallowClone();
-                    Console.WriteLine("shallow copy minion in enemies list hash: " + copy.GetHashCode());
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+#pragma warning disable CS8604 // Possible null reference argument.
                     enemies.Add(copy); //minion.ShallowClone()
+#pragma warning restore CS8604 // Possible null reference argument.
 
                     minion.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
                 }
@@ -186,11 +190,15 @@ namespace Server.GameData
         {
             lock (enemyListLock)
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 Enemy enemyToUpdate = enemies.Find(enemy => enemy.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (enemyToUpdate != null)
                 {
                     enemyToUpdate.SetHealth(health);
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     IMoveStrategy currentStrategy = enemyToUpdate.GetCurrentMovementStrategy();
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                     if (currentStrategy is PatrollingStrategy || currentStrategy is CircleStrategy)
                     {
                         enemyToUpdate.SetMovementStrategy(new ChasePlayerStrategy(obstacles));
@@ -208,7 +216,9 @@ namespace Server.GameData
                 {
                     bossId = -1;
                 }
-                Enemy enemyToRemove = enemies.FirstOrDefault(enemy => enemy.MatchesId(id));
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                Enemy enemyToRemove = enemies.Find(enemy => enemy.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (enemyToRemove != null)
                 {
                     enemies.Remove(enemyToRemove);
@@ -231,16 +241,17 @@ namespace Server.GameData
                 foreach (var enemy in enemies)
                 { 
                     enemy.Move(players);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
                     Debug.WriteLine("{0} {1}", enemy.GetCurrentMovementStrategy().GetType().ToString(), enemy.ToString());
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
                 }
                 return enemies.Select(enemy => enemy.ToString()).ToList();
             }
         }
 
-        public Coin returnCoin(int id)
-        {
-            return coins.FirstOrDefault(coin => coin.id == id);
-        }
+#pragma warning disable CS8603 // Possible null reference return.
+        public Coin ReturnCoin(int id) => coins.Find(coin => coin.id == id);
+#pragma warning restore CS8603 // Possible null reference return.
         public DateTime GetCurrentGameTime()
         {
             return gametime;
@@ -253,11 +264,11 @@ namespace Server.GameData
         {
             observers[connectionID] = observer;
         }
-        public void RemoveObserver(string connectionId)
+        public void RemoveObserver(string connectionID)
         {
-            if (observers.ContainsKey(connectionId))
+            if (observers.ContainsKey(connectionID))
             {
-                observers.Remove(connectionId);
+                observers.Remove(connectionID);
             }
         }
         public Dictionary<string, Observer> GetObservers()
@@ -266,9 +277,11 @@ namespace Server.GameData
         }
         public void UpdateDeadPlayer(int id)
         {
-            Player playerToUpdate = players.FirstOrDefault(p => p.GetId() == id);
+            Player playerToUpdate = players.Find(p => p.GetId() == id);
 
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetName("DEAD");
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetColor("Black");
         }
         private readonly object coinsListLock = new object();
@@ -320,10 +333,8 @@ namespace Server.GameData
        
         public Coin AddCoin(int points)
         {
-            //Console.WriteLine("ADDCOIN inemmory");
             lock (coinsListLock)
             {
-                Random random = new Random();
                 double x = 0, y = 0;
                 bool overlap = true;
                 Coin coin = (Coin)objectFactory.CreateMapObject("coin", points);
@@ -334,7 +345,7 @@ namespace Server.GameData
                     y = random.Next(0, 800);
 
                     // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, coin.Width, coin.Height));
+                    overlap = obstacles.Exists(obstacle => obstacle.WouldOverlap(x, y, coin.Width, coin.Height));
                 }
 
                 coin.SetPosition(x, y);
@@ -348,7 +359,9 @@ namespace Server.GameData
         {
             lock (coinsListLock)
             {
-                Coin coinToRemove = coins.FirstOrDefault(coin => coin.MatchesId(id));
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                Coin coinToRemove = coins.Find(coin => coin.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (coinToRemove != null)
                 {
                     coins.Remove(coinToRemove);
@@ -359,18 +372,16 @@ namespace Server.GameData
         {
             lock (coinsListLock)
             {
-                Console.WriteLine("getcoins() inmemory");
+                //Console.WriteLine("getcoins() inmemory");
                 return coins.Select(coin => coin.ToString()).ToList();
             }
         }
 
-        private readonly object healthListLock = new object();
+        private readonly object healthListLock = new();
         public HealthBoost AddHealthBoost(int health)
         {
-            //Console.WriteLine("ADDCOIN inemmory");
             lock (healthListLock)
             {
-                Random random = new Random();
                 double x = 0, y = 0;
                 bool overlap = true;
                 HealthBoost healthBoost = (HealthBoost)objectFactory.CreateMapObject("healthboost", health);
@@ -381,7 +392,7 @@ namespace Server.GameData
                     y = random.Next(0, 800);
 
                     // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, healthBoost.Width, healthBoost.Height));
+                    overlap = obstacles.Exists(obstacle => obstacle.WouldOverlap(x, y, healthBoost.Width, healthBoost.Height));
                 }
 
                 healthBoost.SetPosition(x, y);
@@ -395,7 +406,9 @@ namespace Server.GameData
         {
             lock (healthListLock)
             {
-                HealthBoost healthToRemove = healthBoosts.FirstOrDefault(health => health.MatchesId(id));
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                HealthBoost healthToRemove = healthBoosts.Find(health => health.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (healthToRemove != null)
                 {
                     healthBoosts.Remove(healthToRemove);
@@ -406,18 +419,16 @@ namespace Server.GameData
         {
             lock (healthListLock)
             {
-                Console.WriteLine("HealthBoostget() inmemory");
+                //Console.WriteLine("HealthBoostget() inmemory");
                 return healthBoosts.Select(healthBoost => healthBoost.ToString()).ToList();
             }
         }
 
-        private readonly object speedListLock = new object();
+        private readonly object speedListLock = new();
         public SpeedBoost AddSpeedBoost(int speed)
         {
-            //Console.WriteLine("ADDCOIN inemmory");
             lock (speedListLock)
             {
-                Random random = new Random();
                 double x = 0, y = 0;
                 bool overlap = true;
                 SpeedBoost speedBoost = (SpeedBoost)objectFactory.CreateMapObject("speedboost", speed);
@@ -428,7 +439,7 @@ namespace Server.GameData
                     y = random.Next(0, 800);
 
                     // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, speedBoost.Width, speedBoost.Height));
+                    overlap = obstacles.Exists(obstacle => obstacle.WouldOverlap(x, y, speedBoost.Width, speedBoost.Height));
                 }
 
                 speedBoost.SetPosition(x, y);
@@ -442,7 +453,9 @@ namespace Server.GameData
         {
             lock (speedListLock)
             {
-                SpeedBoost speedToRemove = speedBoosts.FirstOrDefault(speed => speed.MatchesId(id));
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                SpeedBoost speedToRemove = speedBoosts.Find(speed => speed.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (speedToRemove != null)
                 {
                     speedBoosts.Remove(speedToRemove);
@@ -453,18 +466,16 @@ namespace Server.GameData
         {
             lock (speedListLock)
             {
-                Console.WriteLine("speedBoostget() inmemory");
+                //Console.WriteLine("speedBoostget() inmemory");
                 return speedBoosts.Select(speedBoost => speedBoost.ToString()).ToList();
             }
         }
 
-        private readonly object shieldListLock = new object();
+        private readonly object shieldListLock = new();
         public Shield AddShield(int time)
         {
-            //Console.WriteLine("ADDCOIN inemmory");
             lock (shieldListLock)
             {
-                Random random = new Random();
                 double x = 0, y = 0;
                 bool overlap = true;
                 Shield shield = (Shield)objectFactory.CreateMapObject("shield", time);
@@ -475,7 +486,7 @@ namespace Server.GameData
                     y = random.Next(0, 800);
 
                     // Check for overlap with obstacles
-                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, shield.Width, shield.Height));
+                    overlap = obstacles.Exists(obstacle => obstacle.WouldOverlap(x, y, shield.Width, shield.Height));
                 }
 
                 shield.SetPosition(x, y);
@@ -489,7 +500,9 @@ namespace Server.GameData
         {
             lock (shieldListLock)
             {
-                Shield shieldToRemove = shields.FirstOrDefault(shield => shield.MatchesId(id));
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                Shield shieldToRemove = shields.Find(shield => shield.MatchesId(id));
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (shieldToRemove != null)
                 {
                     shields.Remove(shieldToRemove);
@@ -500,7 +513,7 @@ namespace Server.GameData
         {
             lock (shieldListLock)
             {
-                Console.WriteLine("getshields() inmemory");
+               // Console.WriteLine("getshields() inmemory");
                 return shields.Select(shield => shield.ToString()).ToList();
             }
         }

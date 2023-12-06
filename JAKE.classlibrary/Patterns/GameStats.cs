@@ -9,7 +9,7 @@ namespace JAKE.classlibrary.Patterns
     public class GameStats
     {
         private static GameStats? instance = null;
-        private static readonly object lockObject = new object();
+        private static readonly object lockObject = new();
 
         private int playersCount;
         private float playerHealth;
@@ -31,34 +31,14 @@ namespace JAKE.classlibrary.Patterns
             set { windowHeight = value; }
         }
 
-        public int PlayersCount
-        {
-            get { return playersCount; }
-            set { playersCount = value; }
-        }
+        public int PlayersCount { get; set; }
 
-        public float PlayerHealth
-        {
-            get { return playerHealth; }
-            set { playerHealth = value; }
-        }
+        public float PlayerHealth { get; set; }
 
-        public int PlayerScore
-        {
-            get { return playerScore; }
-            set { playerScore = value; }
-        }
+        public int PlayerScore { get; set; }
 
-        public int PlayerSpeed
-        {
-            get { return playerSpeed; }
-            set { playerSpeed = value; }
-        }
-        public bool ShieldOn
-        {
-            get { return shieldOn; }
-            set { shieldOn = value; }
-        }
+        public int PlayerSpeed { get; set; }
+        public bool ShieldOn { get; set; }
         private GameStats()
         {
             playersCount = 0;
@@ -84,20 +64,6 @@ namespace JAKE.classlibrary.Patterns
                     }
                 }
                 return instance;
-            }
-            set
-            {
-                if (instance != null)
-                {
-                    lock (lockObject)
-                    {
-                        if (instance != null)
-                        {
-                            instance = null;
-                        }
-                    }
-                }
-                
             }
         }
 

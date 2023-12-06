@@ -20,15 +20,12 @@ namespace JAKE.classlibrary.Enemies
 
         public Minion? DeepClone()
         {
-            ZombieMinion clone = new ZombieMinion(this.GetId(), this.GetColor(), this.GetSpeed(), this.GetHealth(), this.GetSize());
+            ZombieMinion clone = new(this.GetId(), this.GetColor(), this.GetSpeed(), this.GetHealth(), this.GetSize());
             clone.SetCurrentPosition(this.GetCurrentX(), this.GetCurrentY());
+#pragma warning disable CS8604 // Possible null reference argument.
             clone.SetMovementStrategy(this.GetCurrentMovementStrategy());
+#pragma warning restore CS8604 // Possible null reference argument.
             return clone;
-        }
-
-        public override Enemy ShallowClone()
-        {
-            return base.ShallowClone();
         }
         
     }

@@ -17,11 +17,11 @@ namespace JAKE.classlibrary
         private int _id;
         private string _name;
         private string _color;
-        private Coordinates _currentDirection = new(0, 1);
-        private Coordinates _currentCoords = new(0, 0);
+        private readonly Coordinates _currentDirection = new(0, 1);
+        private readonly Coordinates _currentCoords = new(0, 0);
         private int _speed;
-        private string? _shotColor;
-        private string? _shotShape;
+        private string _shotColor;
+        private string _shotShape;
         private bool _isShooting = false;
         private double _attackSpeed;
         private string _lastObjectPicked;
@@ -50,6 +50,8 @@ namespace JAKE.classlibrary
             _color = "red";
             _speed = 10;
             _attackSpeed = 5;
+            _shotColor = "";
+            _shotShape = "";
         }
 
         public int GetId()
@@ -101,6 +103,10 @@ namespace JAKE.classlibrary
         }
         public string GetLastObjectPicked()
         {
+            if(_lastObjectPicked == null)
+            {
+                return "";
+            }
             return _lastObjectPicked;
         }
         public void SetLastObjectPicked(string obj)
@@ -135,12 +141,12 @@ namespace JAKE.classlibrary
             return _currentDirection;
         }
 
-        public string? GetShotColor()
+        public string GetShotColor()
         {
             return _shotColor;
         }
 
-        public string? GetShotShape()
+        public string GetShotShape()
         {
             return _shotShape;
         }
@@ -205,12 +211,6 @@ namespace JAKE.classlibrary
         {
             _shotShape = shape;
         }
-        private static readonly Dictionary<string, string> ColorToAbilityMap = new Dictionary<string, string>
-        {
-            { "Green", "heal" },
-            { "Blue", "wall" },
-            { "Red", "strength" },
-        };
         [ExcludeFromCodeCoverage]
         public bool MatchesId(int id)
         {
@@ -239,29 +239,17 @@ namespace JAKE.classlibrary
         {
             return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetShotColor()}:{GetShotShape()}";
         }
-        // :{GetShotColor()}:{GetShotShape()}
-        //public void IncreaseHealth(int health)
-        //{
-        //    //health padidint 
-        //    Debug.WriteLine("padidino health");
-        //}
+
         [ExcludeFromCodeCoverage]
         public void IncreaseSpeed(int speed)
         {
-            //speed padidint ir uzdet laika bet ne cia gal?? laikas default 15s
-            Debug.WriteLine("padidino speed");
+
             _speed += speed;
         }
 
-        //public void IncreasePoints(int points)
-        //{
-        //    //points padidint
-        //    Debug.WriteLine("padidino points");
-        //}
         [ExcludeFromCodeCoverage]
-        public void AddShield(int time)
+        public static void AddShield()
         {
-            //uzdet shield grafika ir laika uzdet??
             Debug.WriteLine("uzdejo shield");
         }
     }

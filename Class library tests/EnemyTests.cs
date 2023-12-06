@@ -32,10 +32,12 @@ namespace Class_library_tests
             player1.SetCurrentPosition(1, 1);
             player2.SetCurrentPosition(1, 0);
             player3.SetCurrentPosition(2, 1);
-            List<Player> list = new List<Player>();
-            list.Add(player1);
-            list.Add(player2);
-            list.Add(player3);
+            List<Player> list = new List<Player>
+            {
+                player1,
+                player2,
+                player3
+            };
             Assert.Equal(player2, enemy.FindClosestPlayer(list));
         }
         [Fact]
@@ -54,9 +56,13 @@ namespace Class_library_tests
             var patrollingStrategy = new PatrollingStrategy(maxX, maxY, enemy.GetSpeed(), obstacles);
 
             var directionXField = typeof(PatrollingStrategy).GetField("directionX", BindingFlags.NonPublic | BindingFlags.Instance);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             directionXField.SetValue(patrollingStrategy, 1);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             var directionYField = typeof(PatrollingStrategy).GetField("directionY", BindingFlags.NonPublic | BindingFlags.Instance);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             directionYField.SetValue(patrollingStrategy, 0);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             var players = new List<Player>();
 
@@ -84,9 +90,13 @@ namespace Class_library_tests
             var patrollingStrategy = new PatrollingStrategy(maxX, maxY, enemy.GetSpeed(), obstacles);
 
             var directionXField = typeof(PatrollingStrategy).GetField("directionX", BindingFlags.NonPublic | BindingFlags.Instance);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             directionXField.SetValue(patrollingStrategy, 1);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
             var directionYField = typeof(PatrollingStrategy).GetField("directionY", BindingFlags.NonPublic | BindingFlags.Instance);
+#pragma warning disable CS8602 // Dereference of a possibly null reference.
             directionYField.SetValue(patrollingStrategy, 0);
+#pragma warning restore CS8602 // Dereference of a possibly null reference.
 
             var players = new List<Player>();
 

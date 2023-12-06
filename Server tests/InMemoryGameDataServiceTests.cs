@@ -10,7 +10,6 @@ namespace Server_tests
     public class InMemoryGameDataServiceTests
     {
         private readonly InMemoryGameDataService gameDataService;
-        private List<Enemy> enemies = new List<Enemy>();
         
         public InMemoryGameDataServiceTests()
         {
@@ -27,9 +26,7 @@ namespace Server_tests
             string shotShape = "round";
             Player player1 = new Player(1, playerName, playerColor, shotColor, shotShape);
             player1.SetConnectionId(connectionID);
-            //int maxInt = gameDataService.MaxId;
             Player player2 = gameDataService.AddPlayer(playerName, playerColor, connectionID, shotColor, shotShape);
-            //Assert.True(player2.GetId() >=1 && player2.GetId() <= maxInt);
             Assert.Equal(player1.GetName(), player2.GetName());
             Assert.Equal(player1.GetColor(), player2.GetColor());
             Assert.Equal(player1.GetConnectionId(), player2.GetConnectionId());
@@ -44,7 +41,9 @@ namespace Server_tests
             string shotColor = "red";
             string shotShape = "round";
             Player player1 = gameDataService.AddPlayer(playerName, playerColor, shotColor, shotShape, connectionID);
+#pragma warning disable CS8604 // Possible null reference argument.
             Player player2 = gameDataService.RemovePlayer(player1.GetConnectionId());
+#pragma warning restore CS8604 // Possible null reference argument.
             Assert.Equal(player1.GetId(), player2.GetId());
             Assert.Equal(player1.GetName(), player2.GetName());
             Assert.Equal(player1.GetColor(), player2.GetColor());
@@ -162,14 +161,12 @@ namespace Server_tests
         [Fact]
         public void Test_Get_Enemies()
         {
-            Enemy enemy = gameDataService.AddEnemies();
+            gameDataService.AddEnemies();
             int actual = gameDataService.GetEnemies().Count;
             int expected = 1;
 
             Assert.Equal(expected, actual);
         }
-
-        //TODO: updateEnemyPosition, observers
 
         [Fact]
         public void Test_Add_Coin()
@@ -187,7 +184,7 @@ namespace Server_tests
             Coin coin = gameDataService.AddCoin(10);
             int id = coin.id;
 
-            Coin returned = gameDataService.returnCoin(id);
+            Coin returned = gameDataService.ReturnCoin(id);
 
             Assert.Equal(coin, returned);
         }
@@ -208,7 +205,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_Coins()
         {
-            Coin coin = gameDataService.AddCoin(10);
+            gameDataService.AddCoin(10);
             int actual = gameDataService.GetCoins().Count;
             int expected = 1;
 
@@ -241,7 +238,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_HealthBoost()
         {
-            HealthBoost healthBoost = gameDataService.AddHealthBoost(10);
+            gameDataService.AddHealthBoost(10);
             int actual = gameDataService.GetHealthBoosts().Count;
             int expected = 1;
 
@@ -274,7 +271,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_SpeedBoost()
         {
-            SpeedBoost speedBoost = gameDataService.AddSpeedBoost(10);
+            gameDataService.AddSpeedBoost(10);
             int actual = gameDataService.GetSpeedBoosts().Count;
             int expected = 1;
 
@@ -307,7 +304,7 @@ namespace Server_tests
         [Fact]
         public void Test_Get_Shield()
         {
-            Shield shield = gameDataService.AddShield(10);
+            gameDataService.AddShield(10);
             int actual = gameDataService.GetShields().Count;
             int expected = 1;
 

@@ -13,7 +13,7 @@ namespace JAKE.classlibrary
     public class Controller
     {
         Command? slot;
-        LinkedList<Command> commands;
+        readonly LinkedList<Command> commands;
 
         public Controller()
         {

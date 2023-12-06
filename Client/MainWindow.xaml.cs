@@ -35,24 +35,33 @@ namespace JAKE.client
 {
     public partial class MainWindow : Window
     {
+        private const string UrlToGameHub = "https://localhost:7039/gamehub";
+        //---------------------------------------------
+        //Chat
+        private Chat chatWindow;
+        public event EventHandler<string> NameEntered;
+        public event EventHandler<string> MessageGot;
+        //---------------------------------------------
         private Player currentPlayer;
-        public bool gamestarted = false;
-        public List<Player> playerInfoList = new List<Player>();
+        private bool gamestarted = false;
+        private List<Player> playerInfoList = new();
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
         private Dictionary<Enemy, EnemyVisual> enemyVisuals = new Dictionary<Enemy, EnemyVisual>();
-        private List<Obstacle> obstacles = new List<Obstacle>();
-        private List<Enemy> enemies = new List<Enemy>();
-        private List<Shot> shots = new List<Shot>();
+        private List<Obstacle> obstacles = new();
+        private List<Enemy> enemies = new();
         private Microsoft.AspNetCore.SignalR.Client.HubConnection connection;
+#pragma warning disable IDE0052 // Remove unread private members
+#pragma warning disable S4487 // Unread "private" fields should be removed
         private DateTime lastGameTime = DateTime.MinValue;
-        //private GameStats gameStat = GameStats.Instance;
-        private Dictionary<Enemy, bool> collisionCheckedEnemies = new Dictionary<Enemy, bool>();
-        private List<Coin> coins = new List<Coin>();
-        private Dictionary<Coin, CoinVisual> coinVisuals = new Dictionary<Coin, CoinVisual>();
-        private List<HealthBoost> healthBoosts = new List<HealthBoost>();
-        private Dictionary<HealthBoost, HealthBoostVisual> healthBoostsVisuals = new Dictionary<HealthBoost, HealthBoostVisual>();
-        private List<Shield> shields = new List<Shield>(); 
-        private Dictionary<Shield, ShieldVisual> shieldVisuals = new Dictionary<Shield, ShieldVisual>();
+#pragma warning restore S4487 // Unread "private" fields should be removed
+#pragma warning restore IDE0052 // Remove unread private members
+        private Dictionary<Enemy, bool> collisionCheckedEnemies = new();
+        private List<Coin> coins = new();
+        private Dictionary<Coin, CoinVisual> coinVisuals = new();
+        private List<HealthBoost> healthBoosts = new();
+        private Dictionary<HealthBoost, HealthBoostVisual> healthBoostsVisuals = new();
+        private List<Shield> shields = new(); 
+        private Dictionary<Shield, ShieldVisual> shieldVisuals = new();
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
         private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
         private List<Weapon> weapons = new List<Weapon>();
@@ -69,13 +78,16 @@ namespace JAKE.client
 
         public MainWindow()
         {
+            currentPlayer = new();
+            chatWindow = new Chat(this);
             connection = new HubConnectionBuilder()
-                .WithUrl("https://localhost:7039/gamehub")
+                .WithUrl(UrlToGameHub)
                 .Build();
             InitializeComponent();
             WindowState = WindowState.Maximized;
 
             // Start the SignalR connection when the window loads
+            chatWindow.MessageSent += ChatWindow_SendMessage;
             Loaded += MainWindow_Loaded;
             this.KeyDown += MainWindow_KeyDown;
 
@@ -86,10 +98,13 @@ namespace JAKE.client
            // _gameMediator = new GameMediator(this);
         }
 
+        
+
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             await StartSignalRConnection();
-            Task.Run(() => ListenForGameUpdates());
+            chatWindow.Show();
+            await Task.Run(() => ListenForGameUpdates());
         }
 
         private async Task StartSignalRConnection()
@@ -123,7 +138,7 @@ namespace JAKE.client
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
                 SetCurrentPlayer(id, name, color, shotColor, shotShape);
-
+                NameEntered?.Invoke(this, name);
                 gamestarted = true;
                 string[] obstaclemessages = obstacleData.Split(',');
                 foreach (string obs in obstaclemessages)
@@ -208,44 +223,30 @@ namespace JAKE.client
                 playersContainer.Items.Add(playerVisual);
             });
         }
+#pragma warning disable S4487 // Unread "private" fields should be removed
+#pragma warning disable IDE0052 // Remove unread private members
         private Timer? timer;
+#pragma warning restore IDE0052 // Remove unread private members
+#pragma warning restore S4487 // Unread "private" fields should be removed
         private async Task ListenForGameUpdates()
         {
-            connection.On<string>("UpdateUsers", (player) =>
-            {
-                string[] parts = player.Split(':');
+            UpdateUsers();
 
-                if (parts.Length == 7)
-                {
-                    int playerId = int.Parse(parts[0]);
-                    string playerName = parts[1];
-                    string playerColor = parts[2];
-                    double x = double.Parse(parts[3]);
-                    double y = double.Parse(parts[4]);
-                    string shotColor = parts[5];
-                    string shotShape = parts[6];
-                    Player? playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
-                    if (playerInfo == null)
-                    {
-                        throw new Exception("PlayerInfo is null");
-                    }
-                    playerInfo.SetCurrentPosition(x, y);
-                    
-                    Dispatcher.Invoke(() =>
-                    {
-                        PlayerVisual playerVisual = playerVisuals[playerInfo];
-
-                        Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
-                        Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
-
-                        if(playerName == "DEAD")
-                        {
-                            HandlePlayerDeath(playerInfo);
-                        }
-                    });
-                }
-            });
-
+            timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
+            GetMessage();
+            SendingEnemies();
+            UpdateShotsFired();
+            UpdateDeadEnemy();
+            UpdateEnemyHealth();
+            DisconnectedPlayer();
+            SendingCoins();
+            SendingPickedCoin();
+            SendingShield();
+            SendingPickedShield();
+            SendingHealthBoosts();
+            SendingPickedHealthBoost();
+            SendingSpeedBoosts();
+            SendingPickedSpeedBoost();
             connection.On<string>("UpdateCorona", (player) =>
             {
                 string[] parts = player.Split(':');
@@ -287,152 +288,6 @@ namespace JAKE.client
 
                     }
             });
-            timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
-
-            connection.On<List<string>>("SendingEnemies", (enemydata) =>
-            {
-                foreach(string enemystring in enemydata)
-                {
-                    string[] parts = enemystring.Split(':');
-                    if (parts.Length == 6)
-                    {
-                        int enemyId = int.Parse(parts[0]);
-                        string enemyColor = parts[1];
-                        double enemyX = double.Parse(parts[2]);
-                        double enemyY = double.Parse(parts[3]);
-                        int health = int.Parse(parts[4]);
-                        int size = int.Parse(parts[5]);
-                        Enemy enemy = new Enemy(enemyId, enemyColor);
-                        enemy.SetHealth(health); enemy.SetSize(size);
-                        if (!enemies.Contains(enemy))
-                        {
-                            enemy.SetCurrentPosition(enemyX, enemyY);
-                            enemies.Add(enemy);
-                            lock(enemyListLock)
-                            {
-                                Dispatcher.Invoke(() =>
-                                {
-                                    
-                                    EnemyVisual enemyVisual = enemyVisualBuilder.New()
-                                    .SetColor(enemyColor)
-                                    .SetSize(size)
-                                    .SetPosition(enemyX, enemyY)
-                                    .Build();
-
-                                    enemyVisuals[enemy] = enemyVisual;
-                                    EnemyContainer.Children.Add(enemyVisual);
-                                    HandleEnemyCollisions(playerVisuals[currentPlayer]);
-                        
-                                });
-                            }
-                        }
-                        else
-                        {
-                            lock(enemyListLock)
-                            {
-                                Dispatcher.Invoke(() =>
-                                {
-                                    EnemyVisual enemyVisual = enemyVisuals[enemy];
-                                    enemy.SetHealth(health);
-                                    enemy.SetCurrentPosition(enemyX, enemyY);
-                                    Canvas.SetLeft(enemyVisual, enemyX);
-                                    Canvas.SetTop(enemyVisual, enemyY);
-
-                                    HandleEnemyCollisions(playerVisuals[currentPlayer]);
-                                });
-                            }
-                        }
-                    }
-                }
-                foreach (Enemy enemy in enemies)
-                {
-                    collisionCheckedEnemies[enemy] = false;
-                }
-            });
-            connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
-            {
-                Player? playerToUpdate = playerInfoList.FirstOrDefault(player => player.MatchesId(playerid));
-                if (playerToUpdate != null)
-                {
-                    CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
-                }
-            });
-            connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
-            {
-                Dispatcher.Invoke((Action)(() =>
-                {
-                    Enemy enemy = new Enemy(enemyid, enemycolor);
-                    EnemyVisual enemyRect = enemyVisuals[enemy];
-                    enemies.Remove(enemy);
-                    enemyVisuals.Remove(enemy);
-                    EnemyContainer.Children.Remove(enemyRect);
-                }));
-            });
-            connection.On<int, string, int>("UpdateEnemyHealth", (enemyid, enemycolor, enemyhealth) =>
-            {
-                Enemy? enemyToUpdate = enemies.FirstOrDefault(enemy => enemy.MatchesId(enemyid));
-                if (enemyToUpdate != null)
-                {
-                    enemyToUpdate.SetHealth(enemyhealth);
-                }
-            });
-            connection.On<string>("DisconnectedPlayer", (player) =>
-            {
-                string[] parts = player.Split(':');
-                if (parts.Length == 7)
-                {
-                    int playerId = int.Parse(parts[0]);
-                    string playerName = parts[1];
-                    string playerColor = parts[2];
-                    int x = int.Parse(parts[3]);
-                    int y = int.Parse(parts[4]);
-                    string shotColor = parts[5];
-                    string shotShape = parts[6];
-                    Player playerToDelete = new Player(playerId, playerName, playerColor , shotColor, shotShape);
-                    Dispatcher.Invoke(() =>
-                    {
-                        PlayerVisual playerVisual = playerVisuals[playerToDelete];
-                        playerVisuals.Remove(playerToDelete);
-                        playerInfoList.Remove(playerToDelete);
-                        playersContainer.Items.Remove(playerVisual);
-                    });
-                }
-            });
-            connection.On<List<string>>("SendingCoins", (coinsdata) =>
-            {
-                string image = "coin.png";
-                foreach (string coinstring in coinsdata)
-                {
-                    string[] parts = coinstring.Split(':');
-                    if (parts.Length == 6)
-                    {
-                        int coinId = int.Parse(parts[0]);
-                        double coinX = double.Parse(parts[1]);
-                        double coinY = double.Parse(parts[2]);
-                        int coinWidth = int.Parse(parts[3]);
-                        int coinHeight = int.Parse(parts[4]);
-                        int points = int.Parse(parts[5]);
-                        Coin coin = new Coin(coinId, coinX, coinY, points, image);
-                        if (!coins.Contains(coin))
-                        {                         
-                            coins.Add(coin);
-                            Dispatcher.Invoke(() =>
-                            {
-                              
-                                CoinVisual coinVisual = new CoinVisual();
-                                Canvas.SetLeft(coinVisual, coinX);
-                                Canvas.SetTop(coinVisual, coinY);
-                                coinVisuals[coin] = coinVisual;
-                                CoinContainer.Children.Add(coinVisual);
-
-                                HandleCoinsCollisions(playerVisuals[currentPlayer]);
-                               // _gameMediator.NotifyCoinsCollision(playerVisuals[currentPlayer], coin);
-                            });
-                        }
-                    }
-                }
-
-            });
             connection.On<List<string>>("SendingCoronas", (coronasdata) =>
             {
                 string image = "corona.png";
@@ -467,30 +322,6 @@ namespace JAKE.client
                 }
 
             });
-
-            connection.On<string>("SendingPickedCoin", (coinObj) =>
-            {
-                string coinString = new ServerString(coinObj).ConvertedString;
-                string[] parts = coinString.Split(':');
-                int id = int.Parse(parts[1]);
-                Dispatcher.Invoke(() =>
-                {
-                    foreach (var pair in coinVisuals)
-                    {
-                        Coin coin = pair.Key;
-                        CoinVisual coinVisual = pair.Value;
-
-                        if (coin.id == id)
-                        {
-                            coins.Remove(coin);
-                            coinVisuals.Remove(coin);
-                            CoinContainer.Children.Remove(coinVisual);
-                            break;
-                        }
-                    }
-                       
-                });
-            });
             connection.On<int>("SendingPickedCorona", (coronaID) =>
             {
                 Dispatcher.Invoke(() =>
@@ -518,43 +349,121 @@ namespace JAKE.client
 
                 });
             });
+        }
 
-
-            connection.On<List<string>>("SendingShields", (shieldsdata) =>
+        private void SendingPickedSpeedBoost()
+        {
+            connection.On<int>("SendingPickedSpeedBoost", (speedid) =>
             {
-                string image = "shield.png";
-                foreach (string shieldstring in shieldsdata)
+                Dispatcher.Invoke(() =>
                 {
-                    string[] parts = shieldstring.Split(':');
-                    if (parts.Length == 6)
+                    foreach (var pair in speedBoostsVisuals)
                     {
-                        int shieldId = int.Parse(parts[0]);
-                        double shieldX = double.Parse(parts[1]);
-                        double shieldY = double.Parse(parts[2]);
-                        int shieldWidth = int.Parse(parts[3]);
-                        int shieldHeight = int.Parse(parts[4]);
-                        int time = int.Parse(parts[5]);
-                        Shield shield = new Shield(shieldId, shieldX, shieldY, time, image);
-                        
-                        if (!shields.Contains(shield))
+                        SpeedBoost speedBoost = pair.Key;
+                        SpeedBoostVisual speedBoostVisual = pair.Value;
+                        if (speedBoost.id == speedid)
                         {
-                            shields.Add(shield);
+                            speedBoosts.Remove(speedBoost);
+                            speedBoostsVisuals.Remove(speedBoost);
+                            SpeedBoostContainer.Children.Remove(speedBoostVisual);
+                        }
+                    }
+                });
+            });
+        }
+
+        private void SendingSpeedBoosts()
+        {
+            connection.On<List<string>>("SendingSpeedBoosts", (speeddata) =>
+            {
+
+                foreach (string speedstring in speeddata)
+                {
+                    string image = "speedboost.png";
+                    string[] parts = speedstring.Split(':');
+                    if (parts.Length == 7)
+                    {
+                        int speedId = int.Parse(parts[0]);
+                        double speedX = double.Parse(parts[1]);
+                        double speedY = double.Parse(parts[2]);
+                        int speedVal = int.Parse(parts[5]);
+                        SpeedBoost speed = new SpeedBoost(speedId, speedX, speedY, speedVal, image);
+                        if (!speedBoosts.Contains(speed))
+                        {
+                            speedBoosts.Add(speed);
                             Dispatcher.Invoke(() =>
                             {
-
-                                ShieldVisual shieldVisual = new ShieldVisual();
-                                Canvas.SetLeft(shieldVisual, shieldX);
-                                Canvas.SetTop(shieldVisual, shieldY);
-                                shieldVisuals[shield] = shieldVisual;
-                                ShieldContainer.Children.Add(shieldVisual);
-                                HandleShieldsCollisions(playerVisuals[currentPlayer]);
+                                SpeedBoostVisual speedVisual = new SpeedBoostVisual();
+                                speedBoostsVisuals[speed] = speedVisual;
+                                Canvas.SetLeft(speedVisual, speedX);
+                                Canvas.SetTop(speedVisual, speedY);
+                                SpeedBoostContainer.Children.Add(speedVisual);
+                                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
                             });
                         }
-                        
                     }
                 }
 
             });
+        }
+
+        private void SendingPickedHealthBoost()
+        {
+            connection.On<int>("SendingPickedHealthBoost", (healthid) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    foreach (var pair in healthBoostsVisuals)
+                    {
+                        HealthBoost healthBoost = pair.Key;
+                        HealthBoostVisual healthBoostVisual = pair.Value;
+                        if (healthBoost.id == healthid)
+                        {
+                            healthBoosts.Remove(healthBoost);
+                            healthBoostsVisuals.Remove(healthBoost);
+                            HealthBoostContainer.Children.Remove(healthBoostVisual);
+                        }
+                    }
+                });
+            });
+        }
+
+        private void SendingHealthBoosts()
+        {
+            connection.On<List<string>>("SendingHealthBoosts", (healthdata) =>
+            {
+                string image = "healthBoost.png";
+                foreach (string healthstring in healthdata)
+                {
+                    string[] parts = healthstring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int healthId = int.Parse(parts[0]);
+                        double healthX = double.Parse(parts[1]);
+                        double healthY = double.Parse(parts[2]);
+                        int healthVal = int.Parse(parts[5]);
+                        HealthBoost health = new HealthBoost(healthId, healthX, healthY, healthVal, image);
+                        if (!healthBoosts.Contains(health))
+                        {
+                            healthBoosts.Add(health);
+                            Dispatcher.Invoke(() =>
+                            {
+                                HealthBoostVisual healthVisual = new HealthBoostVisual();
+                                healthBoostsVisuals[health] = healthVisual;
+                                Canvas.SetLeft(healthVisual, healthX);
+                                Canvas.SetTop(healthVisual, healthY);
+                                HealthBoostContainer.Children.Add(healthVisual);
+                                HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                    }
+                }
+
+            });
+        }
+
+        private void SendingPickedShield()
+        {
             connection.On<int>("SendingPickedShield", (shieldid) =>
             {
                 Dispatcher.Invoke(() =>
@@ -575,109 +484,285 @@ namespace JAKE.client
 
                 });
             });
-            connection.On<List<string>>("SendingHealthBoosts", (healthdata) =>
+        }
+
+        private void SendingShield()
+        {
+            connection.On<List<string>>("SendingShields", (shieldsdata) =>
             {
-                string image = "healthBoost.png";
-                foreach (string healthstring in healthdata)
+                string image = "shield.png";
+                foreach (string shieldstring in shieldsdata)
                 {
-                    string[] parts = healthstring.Split(':');
+                    string[] parts = shieldstring.Split(':');
                     if (parts.Length == 6)
                     {
-                        int healthId = int.Parse(parts[0]);
-                        double healthX = double.Parse(parts[1]);
-                        double healthY = double.Parse(parts[2]);
-                        int healthWidth = int.Parse(parts[3]);
-                        int healthHeight = int.Parse(parts[4]);
-                        int healthVal = int.Parse(parts[5]);
-                        HealthBoost health = new HealthBoost(healthId, healthX, healthY, healthVal, image);
-                        if (!healthBoosts.Contains(health))
+                        int shieldId = int.Parse(parts[0]);
+                        double shieldX = double.Parse(parts[1]);
+                        double shieldY = double.Parse(parts[2]);
+                        int time = int.Parse(parts[5]);
+                        Shield shield = new Shield(shieldId, shieldX, shieldY, time, image);
+
+                        if (!shields.Contains(shield))
                         {
-                            healthBoosts.Add(health);
+                            shields.Add(shield);
                             Dispatcher.Invoke(() =>
                             {
-                                HealthBoostVisual healthVisual = new HealthBoostVisual();
-                                healthBoostsVisuals[health] = healthVisual;
-                                Canvas.SetLeft(healthVisual, healthX);
-                                Canvas.SetTop(healthVisual, healthY);
-                                HealthBoostContainer.Children.Add(healthVisual);
-                                HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
+
+                                ShieldVisual shieldVisual = new ShieldVisual();
+                                Canvas.SetLeft(shieldVisual, shieldX);
+                                Canvas.SetTop(shieldVisual, shieldY);
+                                shieldVisuals[shield] = shieldVisual;
+                                ShieldContainer.Children.Add(shieldVisual);
+                                HandleShieldsCollisions(playerVisuals[currentPlayer]);
                             });
-                        }     
+                        }
+
                     }
                 }
 
             });
-            connection.On<int>("SendingPickedHealthBoost", (healthid) =>
-            {
-                Dispatcher.Invoke(() =>
-                {
-                    foreach (var pair in healthBoostsVisuals)
-                    {
-                        HealthBoost healthBoost = pair.Key;
-                        HealthBoostVisual healthBoostVisual = pair.Value;
-                        if (healthBoost.id == healthid)
-                        {
-                            healthBoosts.Remove(healthBoost);
-                            healthBoostsVisuals.Remove(healthBoost);
-                            HealthBoostContainer.Children.Remove(healthBoostVisual);
-                        }
-                    }
-                });
-            });
-            connection.On<List<string>>("SendingSpeedBoosts", (speeddata) =>
-            {
-              
-                foreach (string speedstring in speeddata)
-                {
-                    string image = "speedboost.png";
-                    string[] parts = speedstring.Split(':');
-                    if (parts.Length == 7)
-                    {
-                        int speedId = int.Parse(parts[0]);
-                        double speedX = double.Parse(parts[1]);
-                        double speedY = double.Parse(parts[2]);
-                        int speedWidth = int.Parse(parts[3]);
-                        int speedHeight = int.Parse(parts[4]);
-                        int speedVal = int.Parse(parts[5]);
-                        int time = int.Parse(parts[6]);
-                        SpeedBoost speed = new SpeedBoost(speedId, speedX, speedY, speedVal, image);
-                        if (!speedBoosts.Contains(speed))
-                        {
-                            speedBoosts.Add(speed);
-                            Dispatcher.Invoke(() =>
-                            {
-                                SpeedBoostVisual speedVisual = new SpeedBoostVisual();
-                                speedBoostsVisuals[speed] = speedVisual;
-                                Canvas.SetLeft(speedVisual, speedX);
-                                Canvas.SetTop(speedVisual, speedY);
-                                SpeedBoostContainer.Children.Add(speedVisual);
-                                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
-                            });
-                        }                      
-                    }
-                }
+        }
 
-            });
-            connection.On<int>("SendingPickedSpeedBoost", (speedid) =>
+        private void SendingPickedCoin()
+        {
+            connection.On<string>("SendingPickedCoin", (coinObj) =>
             {
+                string coinString = new ServerString(coinObj).ConvertedString;
+                string[] parts = coinString.Split(':');
+                int id = int.Parse(parts[1]);
                 Dispatcher.Invoke(() =>
                 {
-                    foreach (var pair in speedBoostsVisuals)
+                    foreach (var pair in coinVisuals)
                     {
-                        SpeedBoost speedBoost = pair.Key;
-                        SpeedBoostVisual speedBoostVisual = pair.Value;
-                        if (speedBoost.id == speedid)
+                        Coin coin = pair.Key;
+                        CoinVisual coinVisual = pair.Value;
+
+                        if (coin.id == id)
                         {
-                            speedBoosts.Remove(speedBoost);
-                            speedBoostsVisuals.Remove(speedBoost);
-                            SpeedBoostContainer.Children.Remove(speedBoostVisual);
+                            coins.Remove(coin);
+                            coinVisuals.Remove(coin);
+                            CoinContainer.Children.Remove(coinVisual);
+                            break;
                         }
-                    }      
+                    }
+
                 });
             });
         }
 
-        private async void CheckElapsedTimeMove(object state)
+        private void SendingCoins()
+        {
+            connection.On<List<string>>("SendingCoins", (coinsdata) =>
+            {
+                string image = "coin.png";
+                foreach (string coinstring in coinsdata)
+                {
+                    string[] parts = coinstring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int coinId = int.Parse(parts[0]);
+                        double coinX = double.Parse(parts[1]);
+                        double coinY = double.Parse(parts[2]);
+                        int points = int.Parse(parts[5]);
+                        Coin coin = new Coin(coinId, coinX, coinY, points, image);
+                        if (!coins.Contains(coin))
+                        {
+                            coins.Add(coin);
+                            Dispatcher.Invoke(() =>
+                            {
+
+                                CoinVisual coinVisual = new CoinVisual();
+                                Canvas.SetLeft(coinVisual, coinX);
+                                Canvas.SetTop(coinVisual, coinY);
+                                coinVisuals[coin] = coinVisual;
+                                CoinContainer.Children.Add(coinVisual);
+
+                                HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                    }
+                }
+
+            });
+        }
+
+        private void DisconnectedPlayer()
+        {
+            connection.On<string>("DisconnectedPlayer", (player) =>
+            {
+                string[] parts = player.Split(':');
+                if (parts.Length == 7)
+                {
+                    int playerId = int.Parse(parts[0]);
+                    string playerName = parts[1];
+                    string playerColor = parts[2];
+                    string shotColor = parts[5];
+                    string shotShape = parts[6];
+                    Player playerToDelete = new Player(playerId, playerName, playerColor, shotColor, shotShape);
+                    Dispatcher.Invoke(() =>
+                    {
+                        PlayerVisual playerVisual = playerVisuals[playerToDelete];
+                        playerVisuals.Remove(playerToDelete);
+                        playerInfoList.Remove(playerToDelete);
+                        playersContainer.Items.Remove(playerVisual);
+                    });
+                }
+            });
+        }
+
+        private void UpdateEnemyHealth()
+        {
+            connection.On<int, string, int>("UpdateEnemyHealth", (enemyid, enemycolor, enemyhealth) =>
+            {
+                Enemy? enemyToUpdate = enemies.Find(enemy => enemy.MatchesId(enemyid));
+                if (enemyToUpdate != null)
+                {
+                    enemyToUpdate.SetHealth(enemyhealth);
+                }
+            });
+        }
+
+        private void UpdateDeadEnemy()
+        {
+            connection.On<int, string>("UpdateDeadEnemy", (enemyid, enemycolor) =>
+            {
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    Enemy enemy = new Enemy(enemyid, enemycolor);
+                    EnemyVisual enemyRect = enemyVisuals[enemy];
+                    enemies.Remove(enemy);
+                    enemyVisuals.Remove(enemy);
+                    EnemyContainer.Children.Remove(enemyRect);
+                }));
+            });
+        }
+
+        private void UpdateShotsFired()
+        {
+            connection.On<int, double, double>("UpdateShotsFired", (playerid, X, Y) =>
+            {
+                Player? playerToUpdate = playerInfoList.Find(player => player.MatchesId(playerid));
+                if (playerToUpdate != null)
+                {
+                    CreateShot(playerVisuals[playerToUpdate], X, Y, playerToUpdate.GetShotColor(), playerToUpdate.GetShotShape());
+                }
+            });
+        }
+
+        private void SendingEnemies()
+        {
+            connection.On<List<string>>("SendingEnemies", (enemydata) =>
+            {
+                foreach (string enemystring in enemydata)
+                {
+                    string[] parts = enemystring.Split(':');
+                    if (parts.Length == 6)
+                    {
+                        int enemyId = int.Parse(parts[0]);
+                        string enemyColor = parts[1];
+                        double enemyX = double.Parse(parts[2]);
+                        double enemyY = double.Parse(parts[3]);
+                        int health = int.Parse(parts[4]);
+                        int size = int.Parse(parts[5]);
+                        Enemy enemy = new Enemy(enemyId, enemyColor);
+                        enemy.SetHealth(health); enemy.SetSize(size);
+                        if (!enemies.Contains(enemy))
+                        {
+                            enemy.SetCurrentPosition(enemyX, enemyY);
+                            enemies.Add(enemy);
+                            lock (enemyListLock)
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+
+                                    EnemyVisual enemyVisual = enemyVisualBuilder.New()
+                                    .SetColor(enemyColor)
+                                    .SetSize(size)
+                                    .SetPosition(enemyX, enemyY)
+                                    .Build();
+
+                                    enemyVisuals[enemy] = enemyVisual;
+                                    EnemyContainer.Children.Add(enemyVisual);
+                                    HandleEnemyCollisions(playerVisuals[currentPlayer]);
+
+                                });
+                            }
+                        }
+                        else
+                        {
+                            lock (enemyListLock)
+                            {
+                                Dispatcher.Invoke(() =>
+                                {
+                                    EnemyVisual enemyVisual = enemyVisuals[enemy];
+                                    enemy.SetHealth(health);
+                                    enemy.SetCurrentPosition(enemyX, enemyY);
+                                    Canvas.SetLeft(enemyVisual, enemyX);
+                                    Canvas.SetTop(enemyVisual, enemyY);
+
+                                    HandleEnemyCollisions(playerVisuals[currentPlayer]);
+                                });
+                            }
+                        }
+                    }
+                }
+                foreach (Enemy enemy in enemies)
+                {
+                    collisionCheckedEnemies[enemy] = false;
+                }
+            });
+        }
+
+        private void UpdateUsers()
+        {
+            connection.On("UpdateUsers", (Action<string>)((player) =>
+            {
+                string[] parts = player.Split(':');
+
+                if (parts.Length == 7)
+                {
+                    int playerId = int.Parse(parts[0]);
+                    string playerName = parts[1];
+                    int x = int.Parse(parts[3]);
+                    int y = int.Parse(parts[4]);
+                    Player? playerInfo = playerInfoList.Find(p => p.GetId() == playerId);
+                    if (playerInfo == null)
+                    {
+                        Exception exception = new("PlayerInfo is null");
+                        throw exception;
+                    }
+                    playerInfo.SetCurrentPosition(x, y);
+
+                    Dispatcher.Invoke(() =>
+                    {
+                        PlayerVisual playerVisual = playerVisuals[playerInfo];
+
+                        Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
+                        Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
+
+                        if (playerName == "DEAD")
+                        {
+                            HandlePlayerDeath(playerInfo);
+                        }
+                    });
+                }
+            }));
+        }
+
+        private void GetMessage()
+        {
+            connection.On<string, string>("MessageSent", ((name, message) =>
+            {
+                MessageGot?.Invoke(this, $"{name}: {message}");
+            }));
+        }
+
+        private async void ChatWindow_SendMessage(object? sender, string message)
+        {
+            await connection.SendAsync("SendPlayerMessage", currentPlayer.GetId(), message);
+        }
+
+        private async void CheckElapsedTimeMove(object? state)
         {
             await connection.SendAsync("SendEnemies");
         }
@@ -710,7 +795,7 @@ namespace JAKE.client
 
         private void MainWindow_KeyDown(object sender, KeyEventArgs e)
         {
-            if (gamestarted)
+            if (gamestarted && currentPlayer != null)
             {
                 // Handle arrow key presses here and update the player's position
                 // based on the arrow key input.
@@ -757,7 +842,7 @@ namespace JAKE.client
             }
         }
 
-        private void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
+        private static void UpdatePlayer(PlayerVisual playerVisual, double moveX, double moveY)
         {
             Canvas.SetLeft(playerVisual, moveX);
             Canvas.SetTop(playerVisual, moveY);
@@ -771,9 +856,11 @@ namespace JAKE.client
             await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY, gameStats.state);
         }
 
-        private class ShootCommand : Command
+
+        sealed class ShootCommand : Command
         {
-            MainWindow window;
+
+            private readonly MainWindow window;
             public ShootCommand(Player player, MainWindow mainWindow) : base(player)
             {
                 this.window = mainWindow;
@@ -823,19 +910,17 @@ namespace JAKE.client
         private void HideDisplay()
         {
             // tekstas dingsta po puse sekundes
-            var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(0.5);
-            timer.Tick += (sender, args) =>
+            var timerT = new DispatcherTimer();
+            timerT.Interval = TimeSpan.FromSeconds(0.5);
+            timerT.Tick += (sender, args) =>
             {
                 testLabel.Text = "";
-                //heartLabel.Visibility = Visibility.Hidden;
-                //shieldBorder.Visibility = Visibility.Hidden;
-                timer.Stop();
+                timerT.Stop();
             };
 
-            timer.Start();
+            timerT.Start();
         }
-        private void StopSpeed()
+        private static void StopSpeed()
         {
             // tekstas dingsta po puse sekundes
             var timer = new DispatcherTimer();
@@ -849,7 +934,7 @@ namespace JAKE.client
 
             timer.Start();
         }
-
+        
         private void StopCorona()
         {
             var timer = new DispatcherTimer();
@@ -878,48 +963,43 @@ namespace JAKE.client
         private void HideShieldDisplay()
         {
             // tekstas dingsta po 10 sekundziu
-            var timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromSeconds(10);
-            timer.Tick += (sender, args) =>
+            var timerT = new DispatcherTimer();
+            timerT.Interval = TimeSpan.FromSeconds(10);
+            timerT.Tick += (sender, args) =>
             {
-                ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
-                bool shieldVisible = false; ;
-                if (!shieldVisible)
+                if (true)
                 {
                     GameStats gameStat = GameStats.Instance;
                     shieldBorder.Visibility = Visibility.Hidden;
                     gameStat.ShieldOn = false;
-                    timer.Stop();
-                }          
+                    timerT.Stop();
+                }
             };
 
-            timer.Start();
+            timerT.Start();
         }
 
-        public static bool CheckCollision(double x1, double y1, double width1, double height1, double x2, double y2, double width2, double height2)
+        public static bool CheckCollision(Coordinates coords1, double width1, double height1, Coordinates coords2, double width2, double height2)
         {
-            return x1 + width1 >= x2 && x1 <= x2 + width2 && y1 + height1 >= y2 && y1 <= y2 + height2;
+            return coords1.x + width1 >= coords2.x && coords1.x <= coords2.x + width2 && coords1.y + height1 >= coords2.y && coords1.y <= coords2.y + height2;
         }
 
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleEnemyCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
-
-            foreach (Enemy enemy in enemies)
+            foreach (var enemy in from Enemy enemy in enemies
+                                  where enemyVisuals.ContainsKey(enemy)
+                                  let enemyRect = enemyVisuals[enemy]
+                                  let enemyX = Canvas.GetLeft(enemyRect)
+                                  let enemyY = Canvas.GetTop(enemyRect)
+                                  where CheckCollision(new Coordinates(playerX, playerY), playerVisual.Width, playerVisual.Height,
+                                                                   new Coordinates(enemyX, enemyY), enemyRect.Width, enemyRect.Height)
+                                  select enemy)
             {
-                if (enemyVisuals.ContainsKey(enemy))
-                {
-                    EnemyVisual enemyRect = enemyVisuals[enemy];
-                    double enemyX = Canvas.GetLeft(enemyRect);
-                    double enemyY = Canvas.GetTop(enemyRect);
-
-                    if (CheckCollision(playerX, playerY, playerVisual.Width, playerVisual.Height,
-                                                       enemyX, enemyY, enemyRect.Width, enemyRect.Height))
-                    {
-                        await HandleCollision(playerVisual, enemy);
-                    }
-                }
+                await HandleCollision(playerVisual, enemy);
             }
         }
         public void ChangeHealth()
@@ -930,7 +1010,7 @@ namespace JAKE.client
             //healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
             //TODO: different thread owns it
         }
-            
+
         public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             GameStats gameStat = GameStats.Instance;
@@ -974,7 +1054,10 @@ namespace JAKE.client
         {
             await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
         }
+
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleCoinsCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             //Player player = 
             //foreach (Coin coin in coins)
@@ -984,29 +1067,25 @@ namespace JAKE.client
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<Coin> coinsCopy = new List<Coin>(coins);
-
-            foreach (Coin coin in coinsCopy)
+            foreach (var (coin, gameStat) in from Coin coin in coinsCopy
+                                             where coinVisuals.ContainsKey(coin)
+                                             let coinRect = coinVisuals[coin]
+                                             let coinX = Canvas.GetLeft(coinRect)
+                                             let coinY = Canvas.GetTop(coinRect)
+                                             where PlayerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height)
+                                             let gameStat = GameStats.Instance
+                                             select (coin, gameStat))
             {
-                if (coinVisuals.ContainsKey(coin))
-                {
-                    CoinVisual coinRect = coinVisuals[coin];
-                    double coinX = Canvas.GetLeft(coinRect);
-                    double coinY = Canvas.GetTop(coinRect);
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coinX, coinY, coinRect.Height))
-                    {
-                        GameStats gameStat = GameStats.Instance;
-                        coin.Interact(gameStat);
-                        scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-                        Player text = new CoinDecorator(currentPlayer);
-                        testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                        HideDisplay();
-
-                        // Convert coin to a JSON string
-                        string json = JsonConvert.SerializeObject(coin);
-                        //-----------
-                        await connection.SendAsync("SendPickedCoin", json);
-                    }
-                }
+                Debug.WriteLine("singleton " + gameStat.GetHashCode());
+                coin.Interact(gameStat);
+                scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
+                Player text = new CoinDecorator(currentPlayer);
+                testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                HideDisplay();
+                // Convert coin to a JSON string
+                string json = JsonConvert.SerializeObject(coin);
+                //-----------
+                await connection.SendAsync("SendPickedCoin", json);
             }
         }
         private Player getPlayer(PlayerVisual playerVisual)
@@ -1057,73 +1136,67 @@ namespace JAKE.client
             }
         }
 
+        
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleShieldsCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<Shield> shieldsCopy = new List<Shield>(shields);
-            foreach (Shield shield in shieldsCopy)
+            foreach (var (shield, gameStat, text) in from Shield shield in shieldsCopy
+                                                     where shieldVisuals.ContainsKey(shield)
+                                                     let shieldRect = shieldVisuals[shield]
+                                                     let shieldX = Canvas.GetLeft(shieldRect)
+                                                     let shieldY = Canvas.GetTop(shieldRect)
+                                                     where PlayerTouchesMapObject(playerX, playerY, playerVisual.Height, shieldX, shieldY, shieldRect.Height)
+                                                     let gameStat = GameStats.Instance
+                                                     let text = new ShieldItemDecorator(currentPlayer)
+                                                     select (shield, gameStat, text))
             {
-                if (shieldVisuals.ContainsKey(shield))
+                testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
+                bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).shieldOn;
+                if (shieldVisible)
                 {
-                    ShieldVisual shieldRect = shieldVisuals[shield];
-                    double shieldX = Canvas.GetLeft(shieldRect);
-                    double shieldY = Canvas.GetTop(shieldRect);
-
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, shieldX, shieldY, shieldRect.Height))
-                    {
-                        //TODO: dingsta kitas shield ne ta kuri paliecia
-                        GameStats gameStat = GameStats.Instance;
-                        Player text = new ShieldItemDecorator(currentPlayer);
-                        testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                        ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
-                        bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).shieldOn;
-                        if (shieldVisible)
-                        {
-                            shieldBorder.Visibility = Visibility.Visible;
-                            gameStat.ShieldOn = true;
-                            shield.Interact(gameStat);
-                        }
-                        HideDisplay();
-                        HideShieldDisplay();
-                        await connection.SendAsync("SendPickedShield", shield.ToString());
-
-                    }
+                    shieldBorder.Visibility = Visibility.Visible;
+                    gameStat.ShieldOn = true;
+                    shield.Interact(gameStat);
                 }
+
+                HideDisplay();
+                HideShieldDisplay();
+                await connection.SendAsync("SendPickedShield", shield.ToString());
             }
         }
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleSpeedBoostsCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<SpeedBoost> speedBoostCopy = new List<SpeedBoost>(speedBoosts);
-            foreach (SpeedBoost speedBoost in speedBoostCopy)
+            foreach (var (speedBoost, gameStat) in from SpeedBoost speedBoost in speedBoostCopy
+                                                   where speedBoostsVisuals.ContainsKey(speedBoost)
+                                                   let speedBoostRect = speedBoostsVisuals[speedBoost]
+                                                   let speedBoostX = Canvas.GetLeft(speedBoostRect)
+                                                   let speedBoostY = Canvas.GetTop(speedBoostRect)
+                                                   where PlayerTouchesMapObject(playerX, playerY, playerVisual.Height, speedBoostX, speedBoostY, speedBoostRect.Height)
+                                                   let gameStat = GameStats.Instance
+                                                   where gameStat.PlayerSpeed < 50
+                                                   select (speedBoost, gameStat))
             {
-                if (speedBoostsVisuals.ContainsKey(speedBoost))
-                {
-                    SpeedBoostVisual speedBoostRect = speedBoostsVisuals[speedBoost];
-                    double speedBoostX = Canvas.GetLeft(speedBoostRect);
-                    double speedBoostY = Canvas.GetTop(speedBoostRect);
-
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, speedBoostX, speedBoostY, speedBoostRect.Height))
-                    {
-                        GameStats gameStat = GameStats.Instance;
-
-                        if (gameStat.PlayerSpeed < 50)
-                        {
-                            speedBoost.Interact(gameStat);
-                            Player text = new SpeedDecorator(currentPlayer);
-                            testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                            HideDisplay();
-                            StopSpeed();
-                            await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
-                        }
-
-                    }
-                }
+                speedBoost.Interact(gameStat);
+                Player text = new SpeedDecorator(player: currentPlayer);
+                testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                HideDisplay();
+                StopSpeed();
+                await connection.SendAsync("SendPickedSpeedBoost", speedBoost.ToString());
             }
         }
+#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleHealthBoostsCollisions(PlayerVisual playerVisual)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             if (isCollidingWithHealthBoost)
             {
@@ -1132,43 +1205,40 @@ namespace JAKE.client
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<HealthBoost> healthBoostCopy = new List<HealthBoost>(healthBoosts);
-            foreach (HealthBoost healthBoost in healthBoostCopy)
+            foreach (var (healthBoost, healthBoostRect) in from HealthBoost healthBoost in healthBoostCopy
+                                                           where healthBoostsVisuals.ContainsKey(healthBoost)
+                                                           let healthBoostRect = healthBoostsVisuals[healthBoost]
+                                                           let healthBoostX = Canvas.GetLeft(healthBoostRect)
+                                                           let healthBoostY = Canvas.GetTop(healthBoostRect)
+                                                           where PlayerTouchesMapObject(playerX, playerY, playerVisual.Height, healthBoostX, healthBoostY, healthBoostRect.Height)
+                                                           select (healthBoost, healthBoostRect))
             {
-                if (healthBoostsVisuals.ContainsKey(healthBoost))
+                isCollidingWithHealthBoost = true;
+                GameStats gameStat = GameStats.Instance;
+                Debug.WriteLine("singleton " + gameStat.GetHashCode());
+                healthBoost.Interact(gameStat);
+                if (gameStat.PlayerHealth > 100)
                 {
-                    HealthBoostVisual healthBoostRect = healthBoostsVisuals[healthBoost];
-                    double healthBoostX = Canvas.GetLeft(healthBoostRect);
-                    double healthBoostY = Canvas.GetTop(healthBoostRect);
-
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, healthBoostX, healthBoostY, healthBoostRect.Height))
-                    {
-                        isCollidingWithHealthBoost = true;
-                        //Player player = playerVisuals.FirstOrDefault(pair => pair.Value == playerVisual).Key;
-                        //healthBoost.Interact(player, healthBoost.Health);
-                        GameStats gameStat = GameStats.Instance;
-                        healthBoost.Interact(gameStat);
-                        if (gameStat.PlayerHealth > 100)
-                        {
-                            gameStat.PlayerHealth = 100;
-                        }
-                        
-                        healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-                        healthBoosts.Remove(healthBoost);
-                        healthBoostsVisuals.Remove(healthBoost);
-                        HealthBoostContainer.Children.Remove(healthBoostRect);
-                        Player health = new HealthBoostDecorator(currentPlayer);
-                        testLabel.Text = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                        HideDisplay();
-                        health = new HealthDecorator(currentPlayer);
-                        healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health; //TODO: erroras: -80 is not valid value for width
-                        await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
-                        isCollidingWithHealthBoost = false;
-                    }
+                    gameStat.PlayerHealth = 100;
                 }
+
+                healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                healthBoosts.Remove(healthBoost);
+                healthBoostsVisuals.Remove(healthBoost);
+                HealthBoostContainer.Children.Remove(healthBoostRect);
+                Player health = new HealthBoostDecorator(currentPlayer);
+                testLabel.Text = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                HideDisplay();
+                health = new HealthDecorator(currentPlayer);
+                healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
+                await connection.SendAsync("SendPickedHealthBoost", healthBoost.ToString());
+                isCollidingWithHealthBoost = false;
             }
         }
  
+#pragma warning disable S3168 // "async" methods should not return "void"
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
+#pragma warning restore S3168 // "async" methods should not return "void"
         {
             bool CountKills = false;
             if (playerVisual == playerVisuals[currentPlayer])
@@ -1176,7 +1246,7 @@ namespace JAKE.client
                 await connection.SendAsync("ShotFired", currentPlayer.GetId(), directionX, directionY);
                 CountKills = true;
             }
-            lock(enemyListLock)
+            lock (enemyListLock)
             {
                 Dispatcher.Invoke(() =>
                 {
@@ -1188,8 +1258,8 @@ namespace JAKE.client
                     SingleShot(playerX, playerY, playerWidth, playerHeight, color, shape, out shot);
                     ShotVisual shotVisual = shotVisualBuilder.New()
                                 .SetColor($"{color},{shape}")
-                                .SetSize(shot.getSize())
-                                .SetPosition(shot.getX(), shot.getY())
+                                .SetSize(shot.GetSize())
+                                .SetPosition(shot.GetX(), shot.GetY())
                                 .Build();
 
                     // Add the shot to the ShotContainer (Canvas)
@@ -1207,8 +1277,8 @@ namespace JAKE.client
                         double currentX = Canvas.GetLeft(shotVisual);
                         double currentY = Canvas.GetTop(shotVisual);
                         double delta = shot.DeltaTime;
-                        double newX = currentX + directionX * shot.getSpeed() * delta;
-                        double newY = currentY + directionY * shot.getSpeed() * delta;
+                        double newX = currentX + directionX * shot.GetSpeed() * delta;
+                        double newY = currentY + directionY * shot.GetSpeed() * delta;
                         // Check for collisions with obstacles
                         // TO-DO: shotvisual does not set width and height for some reason... will fix in future maybe
                         foreach (Obstacle obstacle in obstacles)
@@ -1228,79 +1298,93 @@ namespace JAKE.client
                         List<Enemy> enemiesToRemove = new List<Enemy>(); // Create a list to store enemies to be removed
 
                         bool shotHitEnemy = false;
-                        bool overlapWithEnemy = false;
-
-                        foreach (Enemy enemy in enemies)
+                        foreach (var (enemy, enemyRect) in from Enemy enemy in enemies
+                                                           where enemyVisuals.ContainsKey(enemy)
+                                                           let enemyRect = enemyVisuals[enemy]
+                                                           let enemyX = Canvas.GetLeft(enemyRect)
+                                                           let enemyY = Canvas.GetTop(enemyRect)
+                                                           where newX + shotVisual.EllipseSize >= enemyX &&
+                                                            newX <= enemyX + enemyRect.Width &&
+                                                            newY + shotVisual.EllipseSize >= enemyY &&
+                                                            newY <= enemyY + enemyRect.Height
+                                                           select (enemy, enemyRect))
                         {
-                            if (enemyVisuals.ContainsKey(enemy))
-                            {
-                                EnemyVisual enemyRect = enemyVisuals[enemy];
-                                double enemyX = Canvas.GetLeft(enemyRect);
-                                double enemyY = Canvas.GetTop(enemyRect);
+                            await HandleCountKill(CountKills, shot, enemiesToRemove, enemy, enemyRect);
 
-                                if (newX + shotVisual.EllipseSize >= enemyX &&
-                                    newX <= enemyX + enemyRect.Width &&
-                                    newY + shotVisual.EllipseSize >= enemyY &&
-                                    newY <= enemyY + enemyRect.Height)
-                                {
-
-                                    if (CountKills)
-                                    {
-                                        GameStats gameStat = GameStats.Instance;
-                                        enemy.SetHealth((int)(enemy.GetHealth() - shot.getPoints()));  // Reduce the enemy's health
-                                        gameStat.PlayerScore += 5;
-                                        scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
-                                        await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
-                                        if (enemy.GetHealth() <= 0)
-                                        {
-                                            enemiesToRemove.Add(enemy); // Add the enemy to the removal list
-                                            enemyVisuals.Remove(enemy);
-                                            EnemyContainer.Children.Remove(enemyRect);
-                                            await connection.SendAsync("SendDeadEnemy", enemy.ToString());
-                                        }
-                                    }
-
-                                    ShotContainer.Children.Remove(shotVisual);
-                                    shotHitEnemy = true;
-                                    shouldRender = false;
-                                    break;
-                                }
-                            }
-
+                            ShotContainer.Children.Remove(shotVisual);
+                            shotHitEnemy = true;
+                            shouldRender = false;
+                            break;
                         }
 
-                        foreach (Enemy enemyToRemove in enemiesToRemove)
-                        {
-                            enemies.Remove(enemyToRemove);
-                        }
-
-                        // Update the shot's position
-                        if (!shotHitEnemy)
-                        {
-                            Canvas.SetLeft(shotVisual, newX);
-                            Canvas.SetTop(shotVisual, newY);
-
-                            // Remove the shot if it goes out of bounds
-                            if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
-                            {
-                                ShotContainer.Children.Remove(shotVisual);
-                                shouldRender = false;
-                                return;
-                            }
-                        }
+                        shouldRender = HandleEnemyHits(shotVisual, shouldRender, newX, newY, enemiesToRemove, shotHitEnemy);
                     };
 
                 });
             }
         }
 
+        private bool HandleEnemyHits(ShotVisual shotVisual, bool shouldRender, double newX, double newY, List<Enemy> enemiesToRemove, bool shotHitEnemy)
+        {
+            foreach (Enemy enemyToRemove in enemiesToRemove)
+            {
+                enemies.Remove(enemyToRemove);
+            }
+
+            // Update the shot's position
+            if (!shotHitEnemy)
+            {
+                shouldRender = UpdateShotPosition(shotVisual, shouldRender, newX, newY);
+            }
+
+            return shouldRender;
+        }
+
+        private async Task HandleCountKill(bool CountKills, Shot shot, List<Enemy> enemiesToRemove, Enemy enemy, EnemyVisual? enemyRect)
+        {
+            if (CountKills)
+            {
+                GameStats gameStat = GameStats.Instance;
+                enemy.SetHealth((int)(enemy.GetHealth() - shot.GetPoints()));  // Reduce the enemy's health
+                gameStat.PlayerScore += 5;
+                scoreLabel.Text = $"Score: {gameStat.PlayerScore}";
+                await connection.SendAsync("SendEnemyUpdate", enemy.ToString());
+                if (enemy.GetHealth() <= 0)
+                {
+                    enemiesToRemove.Add(enemy); // Add the enemy to the removal list
+                    enemyVisuals.Remove(enemy);
+                    EnemyContainer.Children.Remove(enemyRect);
+                    await connection.SendAsync("SendDeadEnemy", enemy.ToString());
+                }
+            }
+        }
+
+        private bool UpdateShotPosition(ShotVisual shotVisual, bool shouldRender, double newX, double newY)
+        {
+            Canvas.SetLeft(shotVisual, newX);
+            Canvas.SetTop(shotVisual, newY);
+
+            // Remove the shot if it goes out of bounds
+            if (newX < 0 || newX >= ShotContainer.ActualWidth || newY < 0 || newY >= ShotContainer.ActualHeight)
+            {
+                ShotContainer.Children.Remove(shotVisual);
+                shouldRender = false;
+            }
+
+            return shouldRender;
+        }
+
         public static Shot RemoveShot(Shot shot, double newX, double newY, Obstacle obstacle, double elipse)
         {
             if (obstacle.WouldOverlap(newX, newY, elipse, elipse))
             {
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                 shot = null;
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             }
+#pragma warning disable CS8603 // Possible null reference return.
             return shot;
+#pragma warning restore CS8603 // Possible null reference return.
         }
 
         public static void SingleShot(double playerX, double playerY, double playerWidth, double playerHeight, string color, string shape, out Shot shot)
@@ -1330,11 +1414,11 @@ namespace JAKE.client
             double playerCenterX = playerX + playerWidth / 2;
             double playerCenterY = playerY + playerHeight / 2;
 
-            localShot.setPosition(playerCenterX - localShot.getSize() / 2, playerCenterY - localShot.getSize() / 2);
+            localShot.SetPosition(playerCenterX - localShot.GetSize() / 2, playerCenterY - localShot.GetSize() / 2);
             shot = localShot;
         }
 
-        public static bool playerTouchesMapObject(double playerX, double playerY, double playerSize, double objectX, double objectY, double objectSize)
+        public static bool PlayerTouchesMapObject(double playerX, double playerY, double playerSize, double objectX, double objectY, double objectSize)
         {           
             if (playerX + playerSize >= objectX &&  playerX <= objectX + objectSize &&  playerY + playerSize >= objectY && playerY <= objectY + objectSize) return true;
             else return false;

@@ -12,7 +12,9 @@ namespace JAKE.classlibrary.Patterns
 {
     public class ShotVisualBuilder : IBuilderVisual<ShotVisual>
     {
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         private ShotVisual shotVisual;
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
         public IBuilderVisual<ShotVisual> New()
         {
@@ -20,10 +22,10 @@ namespace JAKE.classlibrary.Patterns
             return this;
         }
 
-        public IBuilderVisual<ShotVisual> SetColor(string colorshape)
+        public IBuilderVisual<ShotVisual> SetColor(string color)
         {
 
-            string[] data = colorshape.Split(',');
+            string[] data = color.Split(',');
             if (data[1] == "")
             {
                 data[1] = "round";
@@ -40,7 +42,7 @@ namespace JAKE.classlibrary.Patterns
             return this;
         }
 
-        public IBuilderVisual<ShotVisual> SetName(string name)
+        public IBuilderVisual<ShotVisual> SetName(string color)
         {
             return this;
         }

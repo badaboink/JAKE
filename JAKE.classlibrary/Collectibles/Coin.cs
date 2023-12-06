@@ -20,7 +20,9 @@ namespace JAKE.classlibrary.Collectibles
         public double Y { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
-        public string Image { get; set; }
+#pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
+        public string? Image { get; set; }
+#pragma warning restore CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes).
         public Coin(int id, double x, double y, int points, string image)
         {
             this.id = id;
@@ -63,7 +65,9 @@ namespace JAKE.classlibrary.Collectibles
             X = x;
             Y = y;
         }
+#pragma warning disable CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
         public override bool Equals(object obj)
+#pragma warning restore CS8765 // Nullability of type of parameter doesn't match overridden member (possibly because of nullability attributes).
         {
             if (obj is Coin otherCoin)
             {
@@ -82,12 +86,15 @@ namespace JAKE.classlibrary.Collectibles
         }
         public string ToXML()
         {
-            using (var stringwriter = new System.IO.StringWriter())
-            {
-                var serializer = new XmlSerializer(this.GetType());
-                serializer.Serialize(stringwriter, this);
-                return stringwriter.ToString();
-            }
+            using var stringwriter = new System.IO.StringWriter();
+            var serializer = new XmlSerializer(this.GetType());
+            serializer.Serialize(stringwriter, this);
+            return stringwriter.ToString();
+        }
+
+        public override int GetHashCode()
+        {
+            return this.id.GetHashCode();
         }
         //public void Accept(IGameEntityVisitor visitor, PlayerVisual playervisual)
         //{

@@ -20,7 +20,9 @@ namespace JAKE.classlibrary.Collectibles
         public int Width { get; set; }
         public int Height { get; set; }
         public string Image { get; set; }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public Weapon(int time, int speed, int strength, int width = 20, int heught = 20)
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             Time = time;
             ShootingSpeed = speed;
