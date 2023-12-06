@@ -1114,7 +1114,7 @@ namespace JAKE.client
                     CoronaVisual coronaRect = coronaVisuals[corona];
                     double coronaX = Canvas.GetLeft(coronaRect);
                     double coronaY = Canvas.GetTop(coronaRect);
-                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coronaX, coronaY, coronaRect.Height))
+                    if (PlayerTouchesMapObject(playerX, playerY, playerVisual.Height, coronaX, coronaY, coronaRect.Height))
                     {
                         GameStats gameStat = GameStats.Instance;
                         corona.Interact(gameStat);

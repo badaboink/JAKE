@@ -245,11 +245,11 @@ namespace Server.Hubs
         }
         public async Task SendMove(int id, double x, double y, string state)
         {
-            
+
             bool corona = state == "corona";
             _gameDataService.EditPlayerPosition(id, x, y);
-            
-            Dictionary<string, Observer> observers = _gameDataService.GetObservers();           
+
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {
                 var connectionId = observerEntry.Key;
@@ -269,7 +269,7 @@ namespace Server.Hubs
                         {
                             await observer.HandleCoronaUpdate(_gameDataService.GetPlayerData(players[i].GetId()));
                         }
-                    }                  
+                    }
 
                 }
             }

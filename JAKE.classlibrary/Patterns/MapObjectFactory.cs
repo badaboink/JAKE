@@ -20,6 +20,7 @@ namespace JAKE.classlibrary.Patterns
                 "weapon" => new Weapon(value, weapsp, weapstr),
                 "shield" => new Shield(value),
                 "speedboost" => new SpeedBoost(value),
+                "corona" => new Corona(),
                 _ => throw new ArgumentException("Invalid object type"),
             };
         }
