@@ -15,6 +15,7 @@
         <Canvas x:Name="MiniZombieContainer" Background="Transparent"/>
         <Canvas x:Name="EnemyContainer" Background="Transparent"/>
         <Canvas x:Name="CoinContainer" Background="Transparent"/>
+        <Canvas x:Name="CoronaContainer" Background="Transparent"/>
         <Canvas x:Name="ShieldContainer" Background="Transparent"/>
         <Canvas x:Name="HealthBoostContainer" Background="Transparent"/>
         <Canvas x:Name="SpeedBoostContainer" Background="Transparent"/>

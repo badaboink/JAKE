@@ -80,6 +80,10 @@ namespace Server.Hubs
                 {
                     _gameDataService.AddCoin(10);
                 }
+                if (_gameDataService.GetCoronas().Count <= 1)
+                {
+                    _gameDataService.AddCorona();
+                }
                 if (_gameDataService.GetShields().Count <= 2)
                 {
                     _gameDataService.AddShield(30);
@@ -106,6 +110,11 @@ namespace Server.Hubs
             if (coins.Count > 0)
             {
                 await _gameDataService.GetObservers()[Context.ConnectionId].HandleCoins(coins);
+            }
+            List<string> coronas = _gameDataService.GetCoronas();
+            if (coronas.Count > 0)
+            {
+                await _gameDataService.GetObservers()[Context.ConnectionId].HandleCoronas(coronas);
             }
             List<string> shields = _gameDataService.GetShields();
             if (shields.Count > 0)
@@ -143,6 +152,24 @@ namespace Server.Hubs
                         var observer = observerEntry.Value;
                         await observer.HandlePickedCoin(json);
                     }
+                }
+
+            }
+        }
+        public async Task SendPickedCorona(string corona)
+        {
+            string[] parts = corona.Split(':');
+            if (parts.Length == 5)
+            {
+                int id = int.Parse(parts[0]);
+                _gameDataService.RemoveCorona(id);
+
+
+                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                foreach (var observerEntry in observers)
+                {
+                    var observer = observerEntry.Value;
+                    await observer.HandlePickedCorona(id);
                 }
 
             }
@@ -216,10 +243,13 @@ namespace Server.Hubs
                 }
             }
         }
-        public async Task SendMove(int id, double x, double y)
+        public async Task SendMove(int id, double x, double y, string state)
         {
+            
+            bool corona = state == "corona";
             _gameDataService.EditPlayerPosition(id, x, y);
-            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+            
+            Dictionary<string, Observer> observers = _gameDataService.GetObservers();           
             foreach (var observerEntry in observers)
             {
                 var connectionId = observerEntry.Key;
@@ -228,8 +258,26 @@ namespace Server.Hubs
                 if (connectionId != Context.ConnectionId)
                 {
                     await observer.HandleMoveUpdate(_gameDataService.GetPlayerData(id));
+                    //eina per visus rastus artimus zaidejus ir siuncia ju id i client, ten paima id, patikrina ar to kuris prisijunges
+                    //ir tada jei jo, tuomet numazinan jam health
+                    if (corona)
+                    {
+                        Console.WriteLine("sendmove corona");
+                        List<Player> players = _gameDataService.InfectCorona(id, x, y);
+                        Console.WriteLine("to infect players count: " + players.Count);
+                        for (int i = 0; i < players.Count; i++)
+                        {
+                            await observer.HandleCoronaUpdate(_gameDataService.GetPlayerData(players[i].GetId()));
+                        }
+                    }                  
+
                 }
             }
+        }
+        public async Task StopCorona(int id, string color)
+        {
+            _gameDataService.EditPlayerState(id, "corona", color);
+
         }
 
         public async Task SendEnemyUpdate(string enemy)

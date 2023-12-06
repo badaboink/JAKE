@@ -30,6 +30,13 @@ namespace Server.GameData
                 await clientProxy.SendAsync("UpdateUsers", player);
             }
         }
+        public async Task HandleCoronaUpdate(string player)
+        {
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("UpdateCorona", player);
+            }
+        }
 
         public async Task HandleEnemyUpdate(int id, string color, int health)
         {
@@ -70,6 +77,20 @@ namespace Server.GameData
             if (clientProxy != null)
             {
                 await clientProxy.SendAsync("DisconnectedPlayer", player);
+            }
+        }
+        public async Task HandleCoronas(List<string> coronas)
+        {
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingCoronas", coronas);
+            }
+        }
+        public async Task HandlePickedCorona(int id)
+        {
+            if (clientProxy != null)
+            {
+                await clientProxy.SendAsync("SendingPickedCorona", id);
             }
         }
 

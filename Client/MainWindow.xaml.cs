@@ -63,10 +63,15 @@ namespace JAKE.client
         private List<Shield> shields = new(); 
         private Dictionary<Shield, ShieldVisual> shieldVisuals = new();
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
-        private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new();
-        private readonly object enemyListLock = new();
-        Controller controller = new();
-
+        private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
+        private List<Weapon> weapons = new List<Weapon>();
+        private List<Corona> coronas = new List<Corona>();
+        private Dictionary<Corona, CoronaVisual> coronaVisuals = new Dictionary<Corona, CoronaVisual>();
+        private readonly object enemyListLock = new object();
+        //private Dictionary<Weapon, WeaponVisual> weaponVisuals = new Dictionary<Weapon, WeaponVisual>();
+        Controller controller = new Controller();
+        private GameMediator _gameMediator;
+        private string primaryColor = "";
 
         private bool isCollidingWithHealthBoost = false;
 
@@ -90,6 +95,7 @@ namespace JAKE.client
             {
                 collisionCheckedEnemies[enemy] = false;
             }
+           // _gameMediator = new GameMediator(this);
         }
 
         
@@ -120,6 +126,7 @@ namespace JAKE.client
             ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
             colorChoiceForm.ShowDialog();
             string selectedColor = colorChoiceForm.SelectedColor;
+            primaryColor = selectedColor;
             string name = colorChoiceForm.Name;
             string shotColor = colorChoiceForm.ShotColor;
             string shotShape = colorChoiceForm.ShotShape;
@@ -240,6 +247,108 @@ namespace JAKE.client
             SendingPickedHealthBoost();
             SendingSpeedBoosts();
             SendingPickedSpeedBoost();
+            connection.On<string>("UpdateCorona", (player) =>
+            {
+                string[] parts = player.Split(':');
+
+                if (parts.Length == 7)
+                {
+                    int playerId = int.Parse(parts[0]);
+                    string playerName = parts[1];
+                    string playerColor = parts[2];
+                    int x = int.Parse(parts[3]);
+                    int y = int.Parse(parts[4]);
+                    string shotColor = parts[5];
+                    string shotShape = parts[6];
+                    Player? playerInfo = playerInfoList.FirstOrDefault(p => p.GetId() == playerId);
+                    if (playerInfo == null)
+                    {
+                        throw new Exception("PlayerInfo is null");
+                    }
+                    GameStats gameStat = GameStats.Instance;
+                    if (gameStat.PlayerHealth > 0)
+                    {
+                        gameStat.PlayerHealth -= 1;
+                        Debug.WriteLine("playercolor: " + currentPlayer.GetColor());
+                        Debug.WriteLine("playerhealth: " + gameStat.PlayerHealth);
+                    }
+                    else
+                    {
+                        HandlePlayerDeath(currentPlayer);
+                        UpdateDeadPlayer();
+                       
+                    }
+
+                    //TODO UZDET DECORATOR??
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+                        // ChangeHealth();
+                    });
+
+                    }
+            });
+            connection.On<List<string>>("SendingCoronas", (coronasdata) =>
+            {
+                string image = "corona.png";
+                foreach (string coronastring in coronasdata)
+                {
+                    string[] parts = coronastring.Split(':');
+                    if (parts.Length == 5)
+                    {
+                        int coronaId = int.Parse(parts[0]);
+                        double coronaX = double.Parse(parts[1]);
+                        double coronaY = double.Parse(parts[2]);
+                        int coronaWidth = int.Parse(parts[3]);
+                        int coronaHeight = int.Parse(parts[4]);
+                        
+                        Corona corona = new Corona(coronaId, coronaX, coronaY, image);
+                        if (!coronas.Contains(corona))
+                        {
+                            coronas.Add(corona);
+                            Dispatcher.Invoke(() =>
+                            {
+
+                                CoronaVisual coronaVisual = new CoronaVisual();
+                                Canvas.SetLeft(coronaVisual, coronaX);
+                                Canvas.SetTop(coronaVisual, coronaY);
+                                coronaVisuals[corona] = coronaVisual;
+                                CoronaContainer.Children.Add(coronaVisual);
+
+                                HandleCoronaCollisions(playerVisuals[currentPlayer]);
+                            });
+                        }
+                    }
+                }
+
+            });
+            connection.On<int>("SendingPickedCorona", (coronaID) =>
+            {
+                Dispatcher.Invoke(() =>
+                {
+                    foreach (var pair in coronaVisuals)
+                    {
+                        Debug.WriteLine("ieina i pickedcorona");
+                        Corona corona = pair.Key;
+                        CoronaVisual coronaVisual = pair.Value;
+                        Debug.WriteLine("key id: " + corona.id);
+                        Debug.WriteLine("server  id: " + coronaID);
+                        if (corona.id == coronaID)
+                        {
+                            Debug.WriteLine("removina corona pries");
+                            Debug.WriteLine("coroniukiu pries: " + coronas.Count);
+                            Debug.WriteLine("coroniukiu visulas pries: " + coronaVisuals.Count);
+                            coronas.Remove(corona);
+                            coronaVisuals.Remove(corona);
+                            CoronaContainer.Children.Remove(coronaVisual);
+                            Debug.WriteLine("coroniukiu po: " + coronas.Count);
+                            Debug.WriteLine("coroniukiu visulas po: " + coronaVisuals.Count);
+                            break;
+                        }
+                    }
+
+                });
+            });
         }
 
         private void SendingPickedSpeedBoost()
@@ -726,6 +835,7 @@ namespace JAKE.client
                 UpdateTextLabelPosition();
                 HandleEnemyCollisions(playerVisuals[currentPlayer]);
                 HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                HandleCoronaCollisions(playerVisuals[currentPlayer]);
                 HandleShieldsCollisions(playerVisuals[currentPlayer]);
                 HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
                 HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
@@ -740,8 +850,10 @@ namespace JAKE.client
 
         private async void Move(double newX, double newY)
         {
+            GameStats gameStats = GameStats.Instance;
             UpdatePlayer(playerVisuals[currentPlayer], newX, newY);
-            await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY);
+            Debug.WriteLine("sendmove Move state: " + gameStats.state + "id: " + currentPlayer.GetId());
+            await connection.SendAsync("SendMove", currentPlayer.GetId(), newX, newY, gameStats.state);
         }
 
 
@@ -811,17 +923,43 @@ namespace JAKE.client
         private static void StopSpeed()
         {
             // tekstas dingsta po puse sekundes
-            var timerT = new DispatcherTimer();
-            timerT.Interval = TimeSpan.FromSeconds(10);
-            timerT.Tick += (sender, args) =>
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Tick += (sender, args) =>
             {
                 GameStats gameStat = GameStats.Instance;
                 gameStat.PlayerSpeed = 10;
-                timerT.Stop();
+                timer.Stop();
             };
 
-            timerT.Start();
+            timer.Start();
         }
+        
+        private void StopCorona()
+        {
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(10);
+            timer.Tick += (sender, args) =>
+            {
+                GameStats gameStat = GameStats.Instance;
+                gameStat.state = "alive";
+                Debug.WriteLine("YEYYYY VEL ALIVE");
+                timer.Stop();
+                //NUSIUST I SERVERI KAD PAKEISTU STATE I ALIVE
+                ChangeServerState();               
+                Debug.WriteLine("pakeite state servery i alive");
+                currentPlayer.SetColor(primaryColor);
+
+            };
+
+            timer.Start();
+        }
+
+        private async Task ChangeServerState()
+        {
+            await connection.SendAsync("StopCorona", currentPlayer.GetId(), primaryColor);
+        }
+
         private void HideShieldDisplay()
         {
             // tekstas dingsta po 10 sekundziu
@@ -864,6 +1002,15 @@ namespace JAKE.client
                 await HandleCollision(playerVisual, enemy);
             }
         }
+        public void ChangeHealth()
+        {
+            GameStats gameStat = GameStats.Instance;
+
+            gameStat.PlayerHealth -= 10;
+            //healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+            //TODO: different thread owns it
+        }
+
         public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             GameStats gameStat = GameStats.Instance;
@@ -903,11 +1050,20 @@ namespace JAKE.client
             playerVisuals[player].UpdateColor(solidColorBrush);
         }
 
+        public async void UpdateDeadPlayer()
+        {
+            await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
+        }
 
 #pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleCoinsCollisions(PlayerVisual playerVisual)
 #pragma warning restore S3168 // "async" methods should not return "void"
         {
+            //Player player = 
+            //foreach (Coin coin in coins)
+            //{
+            //    coin.Accept(new GameEntityVisitor(), playerVisual);
+            //}
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);
             List<Coin> coinsCopy = new List<Coin>(coins);
@@ -932,6 +1088,54 @@ namespace JAKE.client
                 await connection.SendAsync("SendPickedCoin", json);
             }
         }
+        private Player getPlayer(PlayerVisual playerVisual)
+        {
+            Player player = new Player();
+            foreach (var pair in playerVisuals)
+            {
+                if (pair.Value == playerVisual)
+                {
+                    player = pair.Key;
+                }
+            }
+            return player;
+        }
+        private async void HandleCoronaCollisions(PlayerVisual playerVisual)
+        {
+            double playerX = Canvas.GetLeft(playerVisual);
+            double playerY = Canvas.GetTop(playerVisual);
+            Player player = getPlayer(playerVisual);
+            List<Corona> coronasCopy = new List<Corona>(coronas);
+
+            foreach (Corona corona in coronasCopy)
+            {
+                if (coronaVisuals.ContainsKey(corona))
+                {
+                    CoronaVisual coronaRect = coronaVisuals[corona];
+                    double coronaX = Canvas.GetLeft(coronaRect);
+                    double coronaY = Canvas.GetTop(coronaRect);
+                    if (playerTouchesMapObject(playerX, playerY, playerVisual.Height, coronaX, coronaY, coronaRect.Height))
+                    {
+                        GameStats gameStat = GameStats.Instance;
+                        corona.Interact(gameStat);
+                        //TODO: PRASIDEDA TIMERIS
+                        Debug.WriteLine("AJAJAJAJ CORONA");
+                        Debug.WriteLine("gamestats state: " + gameStat.state);
+                        //player.state = "corona";
+                        //Debug.WriteLine("gplayer state: " + player.state);
+
+                        StopCorona();
+                        currentPlayer.SetColor("Lime");
+
+                        Debug.WriteLine("tostring: " + corona.ToString());
+                        await connection.SendAsync("SendPickedCorona", corona.ToString());
+                        Debug.WriteLine("sendmove id: " + currentPlayer.GetId());
+                        await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
+                    }
+                }
+            }
+        }
+
         
 #pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleShieldsCollisions(PlayerVisual playerVisual)

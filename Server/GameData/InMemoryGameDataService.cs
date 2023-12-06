@@ -25,6 +25,7 @@ namespace Server.GameData
         private readonly List<SpeedBoost> speedBoosts = new();
         public MapObjectFactory objectFactory = new();
         public ZombieFactory zombieFactory = new();
+        private List<Corona> coronas = new List<Corona>();
         public ObstacleChecker obstacleChecker;
         public Spawner spawner;
         private int bossId = -1;
@@ -67,10 +68,20 @@ namespace Server.GameData
 
         public void EditPlayerPosition(int id, double x, double y)
         {
-            Player playerToEdit = players.Find(p => p.GetId() == id);
-#pragma warning disable CS8602 // Dereference of a possibly null reference.
+            Player playerToEdit = players.FirstOrDefault(p => p.GetId() == id);
             playerToEdit.SetCurrentPosition(x, y);
-#pragma warning restore CS8602 // Dereference of a possibly null reference.
+        }
+
+        public void EditPlayerState(int id, string state, string color)
+        {
+
+            Player playerToEdit = players.FirstOrDefault(p => p.GetId() == id);
+            if (state == "corona")
+            {
+                playerToEdit.state = "alive";
+                playerToEdit.SetColor(color);
+            }
+
         }
 
         public string GetPlayerData(int id)
@@ -87,7 +98,50 @@ namespace Server.GameData
 
             return players.Select(player => player.ToString()).ToList();
         }
+        public List<Player> InfectCorona(int id, double x, double y)
+        {
+            PlayerCollection playerNetwork = new PlayerCollection(players);
+            List<Player> toInfectPlayers = new List<Player>();
 
+            // Assume you have a corona-infected player named 'coronaInfectedPlayer'
+            Player coronaInfectedPlayer = players.FirstOrDefault(p => p.GetId() == id);
+
+
+            int index = players.FindIndex(p => p.GetId() == id);
+            Console.WriteLine("index: " + index);
+
+            // Check if the player is found
+            coronaInfectedPlayer.SetColor("Lime");
+            Console.WriteLine("lime plyz1: " + coronaInfectedPlayer.GetColor());
+            if (index != -1)
+            {
+                // Modify the state of the found player directly in the list
+                players[index].state = "corona";  // Replace "new_state" with the desired state
+                players[index].SetColor("Lime");
+                Console.WriteLine("lime plyz2: " + players[index].GetColor());
+            }
+            
+
+            // Use the PlayerNetwork to create an iterator for nearby players
+            IPlayerIterator nearbyPlayersIterator = playerNetwork.CreateNearbyPlayersIterator(coronaInfectedPlayer);
+
+
+            Player nearbyPlayer;
+            Console.WriteLine("coronaorigin id: " + coronaInfectedPlayer.GetId());
+            while(((nearbyPlayer = nearbyPlayersIterator.GetNext())!=null)) 
+            {
+                Console.WriteLine("nearbyplayerstate: " + nearbyPlayer.state);
+                if(nearbyPlayer.state != "corona")
+                {
+                    toInfectPlayers.Add(nearbyPlayer);
+                    Console.WriteLine("toinfect color: " + nearbyPlayer.GetColor());
+                }
+
+            }
+
+            return toInfectPlayers;
+           
+        }
         public string GetObstacleData()
         {
             return string.Join(",", obstacles.Select(obstacle => obstacle.ToString()));
@@ -230,7 +284,53 @@ namespace Server.GameData
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetColor("Black");
         }
-        private readonly object coinsListLock = new();
+        private readonly object coinsListLock = new object();
+        private readonly object coronalock = new object();
+        public Corona AddCorona()
+        {
+            lock (coronalock)
+            {
+                Random random = new Random();
+                double x = 0, y = 0;
+                bool overlap = true;
+                Corona corona = (Corona)objectFactory.CreateMapObject("corona", 0);
+
+                while (overlap)
+                {
+                    x = random.Next(0, 1536);
+                    y = random.Next(0, 800);
+
+                    // Check for overlap with obstacles
+                    overlap = obstacles.Any(obstacle => obstacle.WouldOverlap(x, y, corona.Width, corona.Height));
+                }
+
+                corona.SetPosition(x, y);
+                Console.WriteLine("coronacount: " + coronas.Count);
+                corona.id = coronas.Count + 1;
+                coronas.Add(corona);
+                return corona;
+            }
+        }
+        public void RemoveCorona(int id)
+        {
+            lock (coronalock)
+            {
+                Corona coronaToRemove = coronas.FirstOrDefault(corona => corona.MatchesId(id));
+                if (coronaToRemove != null)
+                {
+                    coronas.Remove(coronaToRemove);
+                }
+            }
+        }
+        public List<string> GetCoronas()
+        {
+            lock (coronalock)
+            {
+                return coronas.Select(corona => corona.ToString()).ToList();
+            }
+        }
+
+       
         public Coin AddCoin(int points)
         {
             lock (coinsListLock)

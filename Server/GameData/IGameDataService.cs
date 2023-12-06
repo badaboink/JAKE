@@ -17,6 +17,7 @@ namespace Server.GameData
 
         string GetPlayerData(int id);
         void EditPlayerPosition(int id, double x, double y);
+        void EditPlayerState(int id, string state, string color);
 
         void UpdateDeadPlayer(int id);
 
@@ -45,9 +46,14 @@ namespace Server.GameData
         SpeedBoost AddSpeedBoost(int speed);
         void RemoveSpeedBoost(int id);
         List<string> GetSpeedBoosts();
+        Corona AddCorona();
+        void RemoveCorona(int id);
+        List<string> GetCoronas();
 
         Coin ReturnCoin(int id);
         Enemy AddZombieBoss();
         bool IsBossAlive();
+
+        List<Player> InfectCorona(int id, double x, double y);
     }
 }
