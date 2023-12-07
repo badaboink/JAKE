@@ -1,7 +1,7 @@
 ﻿using JAKE.classlibrary;
 using JAKE.classlibrary.Enemies;
 using JAKE.classlibrary.Collectibles;
-
+using JAKE.classlibrary.Patterns;
 
 namespace Server.GameData
 {
@@ -19,7 +19,7 @@ namespace Server.GameData
         void EditPlayerPosition(int id, double x, double y);
         void EditPlayerState(int id, string state, string color);
 
-        void UpdateDeadPlayer(int id);
+        void UpdateStatePlayer(int id, string state);
 
         // Get obstacle data as a list of strings
         string GetObstacleData();
