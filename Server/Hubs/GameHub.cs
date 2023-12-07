@@ -77,31 +77,6 @@ namespace Server.Hubs
             }
         }
 
-       // public async Task UpdateCoin(string coin)
-        //{
-        //    string coinString = new ServerString(coin).ConvertedString;
-        //    string[] parts = coinString.Split(':');
-        //    if (parts.Length == 7)
-        //    {
-        //        int id = int.Parse(parts[1]);
-        //        int points = int.Parse(parts[0]);
-        //        Coin coinToUpdate = _gameDataService.ReturnCoin(id);
-        //        if (coinToUpdate != null)
-        //        {
-        //            _gameDataService.UpdateCoin(id, points);
-
-        //            string json = JsonConvert.SerializeObject(coinToUpdate);
-
-        //            Dictionary<string, Observer> observers = _gameDataService.GetObservers();
-        //            foreach (var observerEntry in observers)
-        //            {
-        //                var observer = observerEntry.Value;
-        //                await observer.HandleUpdateCoin(json);
-        //            }
-        //        }
-
-        //    }
-        //}
         public async Task SendEnemies()
         {
             lock (syncLock)
@@ -120,7 +95,6 @@ namespace Server.Hubs
                 if (_gameDataService.GetCoins().Count <= 10)
                 {                  
                     _gameDataService.AddCoin(level*10);
-                    Console.WriteLine("addcoin: " + level*10);
                 }
                 if (_gameDataService.GetCoronas().Count <= 1)
                 {
@@ -205,8 +179,6 @@ namespace Server.Hubs
             {
                 int id = int.Parse(parts[0]);
                 _gameDataService.RemoveCorona(id);
-
-
                 Dictionary<string, Observer> observers = _gameDataService.GetObservers();
                 foreach (var observerEntry in observers)
                 {
@@ -222,14 +194,19 @@ namespace Server.Hubs
             string[] parts = shield.Split(':');
             if (parts.Length == 6)
             {
+                
                 int id = int.Parse(parts[0]);
-                _gameDataService.RemoveShield(id);
-                Dictionary<string, Observer> observers = _gameDataService.GetObservers();
-                foreach (var observerEntry in observers)
-                {
-                    var observer = observerEntry.Value;
-                    await observer.HandlePickedShield(id);
-                }
+                //Shield shieldToRemove = _gameDataService.ReturnShield(id);
+                //if (shieldToRemove != null)
+                //{
+                    _gameDataService.RemoveShield(id);
+                    Dictionary<string, Observer> observers = _gameDataService.GetObservers();
+                    foreach (var observerEntry in observers)
+                    {
+                        var observer = observerEntry.Value;
+                        await observer.HandlePickedShield(id);
+                    }
+               //}
             }
         }
 
@@ -304,9 +281,7 @@ namespace Server.Hubs
                     //ir tada jei jo, tuomet numazinan jam health
                     if (corona)
                     {
-                        Console.WriteLine("sendmove corona");
                         List<Player> players = _gameDataService.InfectCorona(id, x, y);
-                        Console.WriteLine("to infect players count: " + players.Count);
                         for (int i = 0; i < players.Count; i++)
                         {
                             await observer.HandleCoronaUpdate(_gameDataService.GetPlayerData(players[i].GetId()));

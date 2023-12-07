@@ -103,43 +103,28 @@ namespace Server.GameData
         {
             PlayerCollection playerNetwork = new PlayerCollection(players);
             List<Player> toInfectPlayers = new List<Player>();
-
-            // Assume you have a corona-infected player named 'coronaInfectedPlayer'
             Player coronaInfectedPlayer = players.FirstOrDefault(p => p.GetId() == id);
-
-
             int index = players.FindIndex(p => p.GetId() == id);
-            Console.WriteLine("index: " + index);
 
             // Check if the player is found
             coronaInfectedPlayer.SetColor("Lime");
-            Console.WriteLine("lime plyz1: " + coronaInfectedPlayer.GetColor());
             if (index != -1)
             {
-                // Modify the state of the found player directly in the list
-                players[index].state = "corona";  // Replace "new_state" with the desired state
+                players[index].state = "corona";
                 players[index].SetColor("Lime");
-                Console.WriteLine("lime plyz2: " + players[index].GetColor());
             }
             
-
             // Use the PlayerNetwork to create an iterator for nearby players
             IPlayerIterator nearbyPlayersIterator = playerNetwork.CreateNearbyPlayersIterator(coronaInfectedPlayer);
 
-
             Player nearbyPlayer;
-            Console.WriteLine("coronaorigin id: " + coronaInfectedPlayer.GetId());
             while(((nearbyPlayer = nearbyPlayersIterator.GetNext())!=null)) 
             {
-                Console.WriteLine("nearbyplayerstate: " + nearbyPlayer.state);
                 if(nearbyPlayer.state != "corona")
                 {
                     toInfectPlayers.Add(nearbyPlayer);
-                    Console.WriteLine("toinfect color: " + nearbyPlayer.GetColor());
                 }
-
             }
-
             return toInfectPlayers;
            
         }
@@ -158,7 +143,6 @@ namespace Server.GameData
                 return newEnemy;
             }
         }
-
         public Enemy AddZombieBoss()
         {
             lock (enemyListLock)
@@ -252,6 +236,7 @@ namespace Server.GameData
 
 #pragma warning disable CS8603 // Possible null reference return.
         public Coin ReturnCoin(int id) => coins.Find(coin => coin.id == id);
+        public Shield ReturnShield(int id) => shields.Find(shield => shield.id == id);
 #pragma warning restore CS8603 // Possible null reference return.
         public DateTime GetCurrentGameTime()
         {
@@ -362,31 +347,14 @@ namespace Server.GameData
                 return coin;
             }
         }
-
-        public void UpdateCoin(int id, int points)
-        {
-            lock (coinsListLock)
-            {
-                Coin coinToUpdate = coins.Find(coin => coin.MatchesId(id));
-                if (coinToUpdate != null)
-                {
-                    coinToUpdate.Points = points;
-                }
-            }
-        }
-
         public void RemoveCoin(int id)
         {
             lock (coinsListLock)
             {
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-                Coin coinToRemove = coins.Find(coin => coin.MatchesId(id));
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                Coin coinToRemove = coins.FirstOrDefault(coin => coin.MatchesId(id));
                 if (coinToRemove != null)
                 {
                     coins.Remove(coinToRemove);
-                    Console.WriteLine("removed coin");
-                    Console.WriteLine("coins.count: " + coins.Count);
                 }
             }
         }
@@ -394,7 +362,6 @@ namespace Server.GameData
         {
             lock (coinsListLock)
             {
-                //Console.WriteLine("getcoins() inmemory");
                 return coins.Select(coin => coin.ToString()).ToList();
             }
         }
@@ -441,7 +408,6 @@ namespace Server.GameData
         {
             lock (healthListLock)
             {
-                //Console.WriteLine("HealthBoostget() inmemory");
                 return healthBoosts.Select(healthBoost => healthBoost.ToString()).ToList();
             }
         }
@@ -488,7 +454,6 @@ namespace Server.GameData
         {
             lock (speedListLock)
             {
-                //Console.WriteLine("speedBoostget() inmemory");
                 return speedBoosts.Select(speedBoost => speedBoost.ToString()).ToList();
             }
         }
@@ -512,7 +477,7 @@ namespace Server.GameData
                 }
 
                 shield.SetPosition(x, y);
-                shield.id = shields.Count + 1;
+                shield.id = shields.Count + 1; // Math.Abs(random.Next());
                 shields.Add(shield);
                 return shield;
             }
@@ -527,7 +492,10 @@ namespace Server.GameData
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
                 if (shieldToRemove != null)
                 {
+                    Console.WriteLine("shieldscountbefore: " + shields.Count);
                     shields.Remove(shieldToRemove);
+                    Console.WriteLine("shieldscountafter: " + shields.Count);
+                    Console.WriteLine("removedshield");
                 }
             }
         }
@@ -535,7 +503,6 @@ namespace Server.GameData
         {
             lock (shieldListLock)
             {
-               // Console.WriteLine("getshields() inmemory");
                 return shields.Select(shield => shield.ToString()).ToList();
             }
         }

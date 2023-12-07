@@ -10,8 +10,6 @@ namespace JAKE.classlibrary.Patterns
 {
     public interface IMediator
     {
-        //void NotifyEnemiesCollision(PlayerVisual playerVisual, Enemy enemy);
-        //void NotifyCoinsCollision(PlayerVisual playerVisual, Coin coin);
-        ////TODO: kiti visi
+        void SendMessage(string message, string sender = null, string receiver = null);
     }
 }

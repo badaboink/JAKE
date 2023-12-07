@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JAKE.classlibrary.Patterns;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -22,9 +23,13 @@ namespace JAKE.client
     {
         private string username = "You";
         public event EventHandler<string> MessageSent;
-        public Chat(MainWindow mainWindow)
+        private readonly ChatMediator mediator;
+        public Chat(MainWindow mainWindow, ChatMediator mediator)
         {
             InitializeComponent();
+            this.mediator = mediator;
+            this.mediator.MessageSent += GetMessage; 
+
             textBoxMessage.PreviewKeyDown += textBoxMessage_PreviewKeyDown;
             mainWindow.NameEntered += MainWindow_NameEntered;
             mainWindow.MessageGot += GetMessage;
@@ -41,24 +46,7 @@ namespace JAKE.client
 
             if (!string.IsNullOrWhiteSpace(message))
             {
-                // Create a new TextBlock for the message
-                TextBlock messageTextBlock = new TextBlock();
-                messageTextBlock.Text = $"{username}: {message}";
-                messageTextBlock.TextWrapping = TextWrapping.Wrap; // Set text wrapping
-
-                // Create a Border for the message
-                Border messageBorder = new Border();
-                messageBorder.Child = messageTextBlock;
-                messageBorder.BorderBrush = Brushes.Black; // Set border color
-                messageBorder.BorderThickness = new Thickness(1); // Set border thickness
-                messageBorder.Margin = new Thickness(0, 0, 0, 5); // Set margin
-
-                // Add the Border to the StackPanel
-                stackPanel.Children.Add(messageBorder);
-
-                // Scroll to the bottom
-                scrollViewer.ScrollToBottom();
-                MessageSent?.Invoke(this, message);
+                mediator.SendMessage(message, username, null);
                 // Clear the message input
                 textBoxMessage.Clear();
             }

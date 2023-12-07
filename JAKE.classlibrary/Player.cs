@@ -247,10 +247,6 @@ namespace JAKE.classlibrary
             _speed += speed;
         }
 
-        [ExcludeFromCodeCoverage]
-        public static void AddShield()
-        {
-            Debug.WriteLine("uzdejo shield");
-        }
+        
     }
 }
