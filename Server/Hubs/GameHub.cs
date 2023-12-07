@@ -270,9 +270,9 @@ namespace Server.Hubs
             }
         }
 
-        public async Task UpdateDeadPlayer(int id)
+        public async Task UpdateStatePlayer(int id, string state)
         {
-            _gameDataService.UpdateDeadPlayer(id);
+            _gameDataService.UpdateStatePlayer(id, state);
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {

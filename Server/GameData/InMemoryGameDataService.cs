@@ -276,14 +276,14 @@ namespace Server.GameData
         {
             return observers;
         }
-        public void UpdateDeadPlayer(int id)
+        public void UpdateStatePlayer(int id, string state)
         {
             Player playerToUpdate = players.Find(p => p.GetId() == id);
 
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
-            playerToUpdate.SetName("DEAD");
+            playerToUpdate.SetName(state);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-            playerToUpdate.SetColor("Black");
+            playerToUpdate.SetColor(playerToUpdate.GetColor());
         }
         private readonly object coinsListLock = new object();
         private readonly object coronalock = new object();

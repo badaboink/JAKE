@@ -293,7 +293,7 @@ namespace JAKE.client
                     else
                     {
                         HandlePlayerDeath(currentPlayer);
-                        UpdateDeadPlayer();
+                        UpdateStatePlayer("dead");
                        
                     }
 
@@ -868,9 +868,20 @@ namespace JAKE.client
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
 
-                        if (playerName == "DEAD")
+                        if (playerName == "dead")
                         {
+                            Debug.WriteLine("IEJO");
                             HandlePlayerDeath(playerInfo);
+                        }
+                        if (playerName == "corona")
+                        {
+                            Debug.WriteLine("IEJO");
+                            HandleCoronaState(playerInfo);
+                        }
+                        if (playerName == "alive")
+                        {
+                            Debug.WriteLine("IEJO");
+                            HandleAliveState(playerInfo);
                         }
                     });
                 }
@@ -1009,6 +1020,7 @@ namespace JAKE.client
 
         protected void Shoot()
         {
+            Debug.WriteLine(currentPlayer.GetState());
             if (!currentPlayer.IsShooting)
             {
                 currentPlayer.SetShooting(true);
@@ -1084,6 +1096,20 @@ namespace JAKE.client
             timer.Start();
         }
 
+        private void StopCorona2()
+        {
+            var timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(5);
+            timer.Tick += (sender, args) =>
+            {
+                HandleAliveState(currentPlayer);
+                UpdateStatePlayer("alive");
+
+            };
+
+            timer.Start();
+        }
+
         private async Task ChangeServerState()
         {
             await connection.SendAsync("StopCorona", currentPlayer.GetId(), primaryColor);
@@ -1148,7 +1174,7 @@ namespace JAKE.client
                 if (gameStat.PlayerHealth <= 0)
                 {
                     HandlePlayerDeath(currentPlayer);
-                    await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
+                    await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "dead");
                 }
             }
 
@@ -1162,18 +1188,48 @@ namespace JAKE.client
                 gamestarted = false;
                 deadLabel.Text = "DEAD!";
                 healthLabel.Text = $"Health: {0}";
+             
             }
-            
-            playerVisuals[player].PlayerName = "DEAD";
-            Color shotColor = (Color)ColorConverter.ConvertFromString("black");
+            player.SetState(new DeadState(player));
+            player.UpdateState();
+            playerVisuals[player].PlayerName = player.GetName();
+            Color shotColor = (Color)ColorConverter.ConvertFromString(player.GetColor()); 
             SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
             playerVisuals[player].PlayerColor = solidColorBrush;
             playerVisuals[player].UpdateColor(solidColorBrush);
+            Debug.WriteLine("PADEK"+player.GetState());
+            
         }
 
-        public async void UpdateDeadPlayer()
+        public void HandleCoronaState(Player player)
         {
-            await connection.SendAsync("UpdateDeadPlayer", currentPlayer.GetId());
+            player.SetState(new CoronaState(player));
+            player.UpdateState();
+            playerVisuals[player].PlayerName = player.GetName();
+            Color shotColor = (Color)ColorConverter.ConvertFromString(player.GetColor());
+            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
+            playerVisuals[player].PlayerColor = solidColorBrush;
+            playerVisuals[player].UpdateColor(solidColorBrush);
+            Debug.WriteLine("PADEK" + player.GetState());
+
+        }
+
+        public void HandleAliveState(Player player)
+        {
+            player.SetState(new AliveState(player));
+            player.UpdateState();
+            playerVisuals[player].PlayerName = player.GetName();
+            Color shotColor = (Color)ColorConverter.ConvertFromString(player.GetColor());
+            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
+            playerVisuals[player].PlayerColor = solidColorBrush;
+            playerVisuals[player].UpdateColor(solidColorBrush);
+            Debug.WriteLine("PADEK" + player.GetState());
+
+        }
+
+        public async void UpdateStatePlayer(string state)
+        {
+            await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), state);
         }
 
 #pragma warning disable S3168 // "async" methods should not return "void"
@@ -1243,6 +1299,16 @@ namespace JAKE.client
                         await connection.SendAsync("SendPickedCorona", corona.ToString());
                         Debug.WriteLine("sendmove id: " + currentPlayer.GetId());
                         await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
+
+                        player.SetState(new CoronaState(player));
+                        player.UpdateState();
+                        //StopCorona2();
+
+                        UpdateStatePlayer("corona");
+                        HandleCoronaState(player);
+                        StopCorona2();
+                        
+
                     }
                 }
             }

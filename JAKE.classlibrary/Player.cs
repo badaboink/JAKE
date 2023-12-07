@@ -1,4 +1,5 @@
-﻿using System;
+﻿using JAKE.classlibrary.Patterns;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -15,7 +16,9 @@ namespace JAKE.classlibrary
     {
         private string? _connectionid;
         private int _id;
+        private string _primaryName;
         private string _name;
+        private string _primaryColor;
         private string _color;
         private readonly Coordinates _currentDirection = new(0, 1);
         private readonly Coordinates _currentCoords = new(0, 0);
@@ -27,6 +30,8 @@ namespace JAKE.classlibrary
         private string _lastObjectPicked;
         public string state { get; set; }
 
+        private IState currentState;
+
         public string? Ability { get; set; }
         
 
@@ -34,11 +39,14 @@ namespace JAKE.classlibrary
         {
             _id = id;
             _name = name;
+            _primaryName = name;
             _color = color;
+            _primaryColor = color;
             _attackSpeed = 5;
             _speed = 10;
             _shotColor = shotColor;
             _shotShape = shotShape;
+            currentState = new AliveState(this);
             SetCurrentPosition(0, 0);
              
         }
@@ -79,6 +87,15 @@ namespace JAKE.classlibrary
             return _color;
         }
 
+        public string GetPrimaryColor()
+        {
+            return _primaryColor;
+        }
+        public string GetPrimaryName()
+        {
+            return _primaryName;
+        }
+
         public double GetCurrentX()
         {
             return _currentCoords.x;
@@ -100,6 +117,18 @@ namespace JAKE.classlibrary
             double newX = _currentCoords.x + _currentDirection.x * stepSize;
             double newY = _currentCoords.y + _currentDirection.y * stepSize;
             return new Coordinates(newX, newY);
+        }
+        public IState GetState()
+        {
+            return currentState;
+        }
+        public void SetState(IState newState)
+        {
+            currentState = newState;
+        }
+        public void UpdateState()
+        {
+            currentState.setCurrentLook();
         }
         public string GetLastObjectPicked()
         {
