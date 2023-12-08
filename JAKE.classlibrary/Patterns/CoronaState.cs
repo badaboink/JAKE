@@ -18,7 +18,8 @@ namespace JAKE.classlibrary.Patterns
         public void setCurrentLook()
         {
             player.SetColor("olive");
-            player.SetName("Kovidas!");
+            player.SetName("Kovidas");
+            player.SetCurrentPosition(player.GetCurrentX(), player.GetCurrentY());
         }
     }
 }

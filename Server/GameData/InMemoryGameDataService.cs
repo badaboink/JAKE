@@ -264,7 +264,7 @@ namespace Server.GameData
         public void UpdateStatePlayer(int id, string state)
         {
             Player playerToUpdate = players.Find(p => p.GetId() == id);
-
+           
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetName(state);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.

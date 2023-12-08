@@ -62,7 +62,7 @@ namespace JAKE.client
         private Dictionary<Coin, CoinVisual> coinVisuals = new();
         private List<HealthBoost> healthBoosts = new();
         private Dictionary<HealthBoost, HealthBoostVisual> healthBoostsVisuals = new();
-        private List<Shield> shields = new(); 
+        private List<Shield> shields = new();
         private Dictionary<Shield, ShieldVisual> shieldVisuals = new();
         private List<SpeedBoost> speedBoosts = new List<SpeedBoost>();
         private Dictionary<SpeedBoost, SpeedBoostVisual> speedBoostsVisuals = new Dictionary<SpeedBoost, SpeedBoostVisual>();
@@ -110,7 +110,7 @@ namespace JAKE.client
             //SetLevel();
             LevelTimer = new DispatcherTimer();
             LevelTimer.Interval = TimeSpan.FromSeconds(10); // TODO: padidint veliau
-            LevelTimer.Tick += Timer_Tick; 
+            LevelTimer.Tick += Timer_Tick;
             LevelTimer.Start();
         }
         private void Timer_Tick(object sender, EventArgs e)
@@ -131,7 +131,7 @@ namespace JAKE.client
         IBuilderVisual<EnemyVisual> enemyVisualBuilder = new EnemyVisualBuilder();
         IBuilderVisual<ShotVisual> shotVisualBuilder = new ShotVisualBuilder();
         public async Task GameStart()
-        {            
+        {
             // Create and show the ColorChoiceForm as a pop-up
             ColorChoiceForm colorChoiceForm = new ColorChoiceForm();
             colorChoiceForm.ShowDialog();
@@ -240,7 +240,7 @@ namespace JAKE.client
 #pragma warning restore S4487 // Unread "private" fields should be removed
         private async Task ListenForGameUpdates()
         {
-            
+
             UpdateUsers();
             timer = new Timer(CheckElapsedTimeMove, null, 0, 1000);
             GetMessage();
@@ -259,7 +259,7 @@ namespace JAKE.client
             SendingPickedSpeedBoost();
             UpdateCorona();
             SendingCoronas();
-            SendingPickedCorona();           
+            SendingPickedCorona();
         }
         private async Task ChangeLevelServer(int level)
         {
@@ -281,8 +281,8 @@ namespace JAKE.client
 
                     // Start a timer to hide the label after 2 seconds
                     System.Timers.Timer hideTimer = new System.Timers.Timer();
-                    hideTimer.Interval = 2000; 
-                    hideTimer.AutoReset = false; 
+                    hideTimer.Interval = 2000;
+                    hideTimer.AutoReset = false;
                     hideTimer.Elapsed += (sender, args) =>
                     {
                         Application.Current.Dispatcher.Invoke(() =>
@@ -300,25 +300,25 @@ namespace JAKE.client
                     coin.Accept(levelUpVisitor);
                 }
 
-                foreach(HealthBoost healthBoost in healthBoosts)
+                foreach (HealthBoost healthBoost in healthBoosts)
                 {
                     healthBoost.Accept(levelUpVisitor);
                 }
 
                 foreach (SpeedBoost speedBoost in speedBoosts)
                 {
-                    speedBoost.Accept(levelUpVisitor);                  
+                    speedBoost.Accept(levelUpVisitor);
                 }
                 gameStats.SpeedBoostTime = speedBoosts[0].Time;
 
                 foreach (Shield shield in shields)
                 {
                     shield.Accept(levelUpVisitor);
-                    
+
                 }
                 gameStats.ShieldTime = shields[0].Time;
             }
-            
+
         }
         public async void GetLevel()
         {
@@ -344,7 +344,7 @@ namespace JAKE.client
                         Corona corona = pair.Key;
                         CoronaVisual coronaVisual = pair.Value;
                         if (corona.id == coronaID)
-                        {                        
+                        {
                             coronas.Remove(corona);
                             coronaVisuals.Remove(corona);
                             CoronaContainer.Children.Remove(coronaVisual);
@@ -561,7 +561,7 @@ namespace JAKE.client
 
                         if (shield.id == shieldid)
                         {
-                            
+
                             shields.Remove(shield);
                             shieldVisuals.Remove(shield);
                             ShieldContainer.Children.Remove(shieldVisual);
@@ -927,7 +927,7 @@ namespace JAKE.client
                         execute = false;
                         break;
                 }
-                
+
                 if (execute)
                 {
                     controller.Execute();
@@ -975,7 +975,7 @@ namespace JAKE.client
 
             public override void Undo()
             {
-                
+
             }
         }
 
@@ -1027,14 +1027,14 @@ namespace JAKE.client
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(gameStat.SpeedBoostTime);
             timer.Tick += (sender, args) =>
-            {               
+            {
                 gameStat.PlayerSpeed = 10;
                 timer.Stop();
             };
 
             timer.Start();
         }
-        
+
         private void StopCorona()
         {
             var timer = new DispatcherTimer();
@@ -1045,7 +1045,7 @@ namespace JAKE.client
                 gameStat.state = "alive";
                 timer.Stop();
                 //NUSIUST I SERVERI KAD PAKEISTU STATE I ALIVE
-                ChangeServerState();               
+                ChangeServerState();
                 currentPlayer.SetColor(primaryColor);
 
             };
@@ -1080,7 +1080,7 @@ namespace JAKE.client
             timerT.Tick += (sender, args) =>
             {
                 if (true)
-                {                   
+                {
                     shieldBorder.Visibility = Visibility.Hidden;
                     gameStat.ShieldOn = false;
                     timerT.Stop();
@@ -1126,7 +1126,7 @@ namespace JAKE.client
         public async Task HandleCollision(PlayerVisual playerVisual, Enemy enemy)
         {
             GameStats gameStat = GameStats.Instance;
-            if (!gameStat.ShieldOn)
+            if (!gameStat.ShieldOn && (currentPlayer.GetState().GetType() != typeof(DeadState)))
             {
                 gameStat.PlayerHealth -= 5;
                 healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
@@ -1149,7 +1149,7 @@ namespace JAKE.client
 
         public void HandlePlayerDeath(Player player)
         {
-            if(player.Equals(currentPlayer))
+            if (player.Equals(currentPlayer))
             {
                 gamestarted = false;
                 deadLabel.Text = "DEAD!";
@@ -1160,7 +1160,7 @@ namespace JAKE.client
             player.UpdateState();
             player.SaveState();
             PlayerAppereanceUpdate(player);
-          
+
         }
 
         public void HandleCoronaState(Player player)
@@ -1190,13 +1190,15 @@ namespace JAKE.client
             GameStats gameStat = GameStats.Instance;
             gameStat.PlayerHealth = 100;
             healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
-            Player health = new HealthDecorator(currentPlayer);
+            Player health = new HealthDecorator(player);
             healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
             player.RestoreState(0);
-            gamestarted = true;
+            player.UpdateState();
+            player.SaveState();
+            PlayerAppereanceUpdate(player);
             UpdateStatePlayer("alive");
-            HandleAliveState(player);
-       
+            gamestarted = true;
+
         }
 
         private void ContinueButtonClick(object sender, RoutedEventArgs e)
@@ -1233,7 +1235,7 @@ namespace JAKE.client
                 testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
                 HideDisplay();
                 //-----mediatoriuscoin
-                mediator.SendMessage("Coin picked", "System", currentPlayer.GetId().ToString()); 
+                mediator.SendMessage("Coin picked", "System", currentPlayer.GetId().ToString());
 
                 string json = JsonConvert.SerializeObject(coin);
                 await connection.SendAsync("SendPickedCoin", json);
@@ -1271,7 +1273,7 @@ namespace JAKE.client
                         //StopCorona();
 
                         ////currentPlayer.SetColor("Lime");
-                        
+
                         //await connection.SendAsync("SendPickedCorona", corona.ToString());                      
                         //mediator.SendMessage("AJAJAJAJ CORONA", "System", currentPlayer.GetId().ToString());
                         //await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
@@ -1279,18 +1281,18 @@ namespace JAKE.client
                         //currentPlayer.SetState(new CoronaState(currentPlayer));
                         //currentPlayer.UpdateState();
                         ////StopCorona2();
-
-                        UpdateStatePlayer("corona");
+                      
                         HandleCoronaState(currentPlayer);
-                        StopCorona2();
-                        
+                        UpdateStatePlayer("corona");
+                        //StopCorona2();
+
 
                     }
                 }
             }
         }
 
-        
+
 #pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleShieldsCollisions(PlayerVisual playerVisual)
 #pragma warning restore S3168 // "async" methods should not return "void"
@@ -1372,6 +1374,11 @@ namespace JAKE.client
                 isCollidingWithHealthBoost = true;
                 GameStats gameStat = GameStats.Instance;
                 healthBoost.Interact(gameStat);
+                currentPlayer.RestoreState(0);
+                currentPlayer.UpdateState();
+                currentPlayer.SaveState();
+                PlayerAppereanceUpdate(currentPlayer);
+                UpdateStatePlayer("alive");
                 if (gameStat.PlayerHealth > 100)
                 {
                     gameStat.PlayerHealth = 100;
@@ -1391,7 +1398,7 @@ namespace JAKE.client
                 isCollidingWithHealthBoost = false;
             }
         }
- 
+
 #pragma warning disable S3168 // "async" methods should not return "void"
         public async void CreateShot(PlayerVisual playerVisual, double directionX, double directionY, string color, string shape)
 #pragma warning restore S3168 // "async" methods should not return "void"
@@ -1565,7 +1572,7 @@ namespace JAKE.client
             else
             {
                 localShot = new RoundShot(localShot);
-            }     
+            }
 
             double playerCenterX = playerX + playerWidth / 2;
             double playerCenterY = playerY + playerHeight / 2;
@@ -1575,8 +1582,8 @@ namespace JAKE.client
         }
 
         public static bool PlayerTouchesMapObject(double playerX, double playerY, double playerSize, double objectX, double objectY, double objectSize)
-        {           
-            if (playerX + playerSize >= objectX &&  playerX <= objectX + objectSize &&  playerY + playerSize >= objectY && playerY <= objectY + objectSize) return true;
+        {
+            if (playerX + playerSize >= objectX && playerX <= objectX + objectSize && playerY + playerSize >= objectY && playerY <= objectY + objectSize) return true;
             else return false;
         }
     }
