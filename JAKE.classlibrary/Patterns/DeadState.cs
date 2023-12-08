@@ -18,7 +18,7 @@ namespace JAKE.classlibrary.Patterns
         public void setCurrentLook()
         {
             player.SetColor("Black");
-            player.SetName("DEAD :(");
+            player.SetName("dead");
         }
     }
 }

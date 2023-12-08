@@ -835,17 +835,15 @@ namespace JAKE.client
 
                         if (playerName == "dead")
                         {
-                            Debug.WriteLine("IEJO");
+                            Debug.WriteLine("wtf");
                             HandlePlayerDeath(playerInfo);
                         }
                         if (playerName == "corona")
                         {
-                            Debug.WriteLine("IEJO");
                             HandleCoronaState(playerInfo);
                         }
                         if (playerName == "alive")
                         {
-                            Debug.WriteLine("IEJO");
                             HandleAliveState(playerInfo);
                         }
                     });
@@ -983,7 +981,6 @@ namespace JAKE.client
 
         protected void Shoot()
         {
-            Debug.WriteLine(currentPlayer.GetState());
             if (!currentPlayer.IsShooting)
             {
                 currentPlayer.SetShooting(true);
@@ -1093,6 +1090,15 @@ namespace JAKE.client
             timerT.Start();
         }
 
+        public void PlayerAppereanceUpdate(Player player)
+        {
+            playerVisuals[player].PlayerName = player.GetName();
+            Color shotColor = (Color)ColorConverter.ConvertFromString(player.GetColor());
+            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
+            playerVisuals[player].PlayerColor = solidColorBrush;
+            playerVisuals[player].UpdateColor(solidColorBrush);
+        }
+
         public static bool CheckCollision(Coordinates coords1, double width1, double height1, Coordinates coords2, double width2, double height2)
         {
             return coords1.x + width1 >= coords2.x && coords1.x <= coords2.x + width2 && coords1.y + height1 >= coords2.y && coords1.y <= coords2.y + height2;
@@ -1130,8 +1136,9 @@ namespace JAKE.client
                                     ? healthObj.Display(0, gameStat.ShieldOn).health
                                     : healthObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
 
-                if (gameStat.PlayerHealth <= 0)
+                if ((gameStat.PlayerHealth <= 0) && (currentPlayer.GetState().GetType() != typeof(DeadState)))
                 {
+                    Debug.WriteLine("iejo");
                     HandlePlayerDeath(currentPlayer);
                     await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "dead");
                 }
@@ -1147,29 +1154,21 @@ namespace JAKE.client
                 gamestarted = false;
                 deadLabel.Text = "DEAD!";
                 healthLabel.Text = $"Health: {0}";
-             
+                continueButton.Visibility = Visibility.Visible;
             }
             player.SetState(new DeadState(player));
             player.UpdateState();
-            playerVisuals[player].PlayerName = player.GetName();
-            Color shotColor = (Color)ColorConverter.ConvertFromString(player.GetColor()); 
-            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
-            playerVisuals[player].PlayerColor = solidColorBrush;
-            playerVisuals[player].UpdateColor(solidColorBrush);
-            Debug.WriteLine("PADEK"+player.GetState());
-            
+            player.SaveState();
+            PlayerAppereanceUpdate(player);
+          
         }
 
         public void HandleCoronaState(Player player)
         {
             player.SetState(new CoronaState(player));
             player.UpdateState();
-            playerVisuals[player].PlayerName = player.GetName();
-            Color shotColor = (Color)ColorConverter.ConvertFromString(player.GetColor());
-            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
-            playerVisuals[player].PlayerColor = solidColorBrush;
-            playerVisuals[player].UpdateColor(solidColorBrush);
-            Debug.WriteLine("PADEK" + player.GetState());
+            player.SaveState();
+            PlayerAppereanceUpdate(player);
 
         }
 
@@ -1177,13 +1176,33 @@ namespace JAKE.client
         {
             player.SetState(new AliveState(player));
             player.UpdateState();
-            playerVisuals[player].PlayerName = player.GetName();
-            Color shotColor = (Color)ColorConverter.ConvertFromString(player.GetColor());
-            SolidColorBrush solidColorBrush = new SolidColorBrush(shotColor);
-            playerVisuals[player].PlayerColor = solidColorBrush;
-            playerVisuals[player].UpdateColor(solidColorBrush);
-            Debug.WriteLine("PADEK" + player.GetState());
+            player.SaveState();
+            PlayerAppereanceUpdate(player);
 
+        }
+
+        public void HandleRebornState(Player player)
+        {
+            if (player.Equals(currentPlayer))
+            {
+                continueButton.Visibility = Visibility.Collapsed;
+            }
+            GameStats gameStat = GameStats.Instance;
+            gameStat.PlayerHealth = 100;
+            healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
+            Player health = new HealthDecorator(currentPlayer);
+            healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
+            player.RestoreState(0);
+            gamestarted = true;
+            UpdateStatePlayer("alive");
+            HandleAliveState(player);
+       
+        }
+
+        private void ContinueButtonClick(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("MYGTUKAS");
+            HandleRebornState(currentPlayer);
         }
 
         public async void UpdateStatePlayer(string state)
@@ -1247,19 +1266,19 @@ namespace JAKE.client
                     double coronaY = Canvas.GetTop(coronaRect);
                     if (PlayerTouchesMapObject(playerX, playerY, playerVisual.Height, coronaX, coronaY, coronaRect.Height))
                     {
-                        GameStats gameStat = GameStats.Instance;
-                        corona.Interact(gameStat);
-                        StopCorona();
+                        //GameStats gameStat = GameStats.Instance;
+                        //corona.Interact(gameStat);
+                        //StopCorona();
 
-                        //currentPlayer.SetColor("Lime");
+                        ////currentPlayer.SetColor("Lime");
                         
-                        await connection.SendAsync("SendPickedCorona", corona.ToString());                      
-                        mediator.SendMessage("AJAJAJAJ CORONA", "System", currentPlayer.GetId().ToString());
-                        await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
+                        //await connection.SendAsync("SendPickedCorona", corona.ToString());                      
+                        //mediator.SendMessage("AJAJAJAJ CORONA", "System", currentPlayer.GetId().ToString());
+                        //await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
 
-                        currentPlayer.SetState(new CoronaState(currentPlayer));
-                        currentPlayer.UpdateState();
-                        //StopCorona2();
+                        //currentPlayer.SetState(new CoronaState(currentPlayer));
+                        //currentPlayer.UpdateState();
+                        ////StopCorona2();
 
                         UpdateStatePlayer("corona");
                         HandleCoronaState(currentPlayer);

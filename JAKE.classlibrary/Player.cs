@@ -33,7 +33,9 @@ namespace JAKE.classlibrary
         private IState currentState;
 
         public string? Ability { get; set; }
-        
+
+        private Caretaker caretaker = new Caretaker();
+
 
         public Player(int id, string name, string color, string shotColor, string shotShape)
         {
@@ -48,6 +50,7 @@ namespace JAKE.classlibrary
             _shotShape = shotShape;
             currentState = new AliveState(this);
             SetCurrentPosition(0, 0);
+            SaveInitialState();
              
         }
            
@@ -129,6 +132,36 @@ namespace JAKE.classlibrary
         public void UpdateState()
         {
             currentState.setCurrentLook();
+        }
+        public IMemento CreateMemento()
+        {
+            return new PlayerMemento(currentState);
+        }
+
+        public void RestoreMemento(IMemento memento)
+        {
+            currentState = memento.GetState();
+        }
+
+        public void SaveState()
+        {
+            IMemento memento = new PlayerMemento(currentState);
+            caretaker.AddMemento(memento);
+        }
+
+        public void RestoreState(int index)
+        {
+            if (index >= 0 && index < caretaker.GetMementosCount())
+            {
+                IMemento memento = caretaker.GetMemento(index);
+                RestoreMemento(memento);
+            }
+        }
+
+        public void SaveInitialState()
+        {
+            IMemento memento = new PlayerMemento(new AliveState(this));
+            caretaker.AddMemento(memento);
         }
         public string GetLastObjectPicked()
         {

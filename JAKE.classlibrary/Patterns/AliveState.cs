@@ -18,6 +18,7 @@ namespace JAKE.classlibrary.Patterns
         {
             player.SetColor(player.GetPrimaryColor());
             player.SetName(player.GetPrimaryName());
+            player.SetCurrentPosition(player.GetCurrentX(), player.GetCurrentY());
         }
     }
 }

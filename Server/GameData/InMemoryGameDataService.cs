@@ -268,7 +268,7 @@ namespace Server.GameData
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
             playerToUpdate.SetName(state);
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
-            playerToUpdate.SetColor(playerToUpdate.GetColor());
+            playerToUpdate.SetColor("Black");
         }
         private readonly object coinsListLock = new object();
         private readonly object coronalock = new object();
