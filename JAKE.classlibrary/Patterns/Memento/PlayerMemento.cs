@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using JAKE.classlibrary.Patterns.State;
 
-namespace JAKE.classlibrary.Patterns
+namespace JAKE.classlibrary.Patterns.Memento
 {
     public class PlayerMemento : IMemento
     {
@@ -20,9 +21,5 @@ namespace JAKE.classlibrary.Patterns
             return state;
         }
 
-        public void SetState(IState state)
-        {
-            this.state = state;
-        }
     }
 }

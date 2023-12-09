@@ -5,20 +5,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JAKE.classlibrary.Patterns
+namespace JAKE.classlibrary.Patterns.State
 {
-    public class DeadState :IState
+    public class CoronaState : IState
     {
         private Player player;
 
-        public DeadState(Player player)
+        public CoronaState(Player player)
         {
             this.player = player;
         }
         public void setCurrentLook()
         {
-            player.SetColor("Black");
-            player.SetName("DEAD :(");
+            player.SetColor("olive");
+            player.SetName("Kovidas!");
             player.SetCurrentPosition(player.GetCurrentX(), player.GetCurrentY());
         }
     }

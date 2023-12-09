@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JAKE.classlibrary.Patterns
+namespace JAKE.classlibrary.Patterns.State
 {
-    public class AliveState : IState
+    public class DeadState : IState
     {
         private Player player;
 
-        public AliveState(Player player)
+        public DeadState(Player player)
         {
             this.player = player;
         }
         public void setCurrentLook()
         {
-            player.SetColor(player.GetPrimaryColor());
-            player.SetName(player.GetPrimaryName());
+            player.SetColor("Black");
+            player.SetName("DEAD :(");
             player.SetCurrentPosition(player.GetCurrentX(), player.GetCurrentY());
         }
     }

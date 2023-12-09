@@ -1,4 +1,6 @@
 ﻿using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Patterns.Memento;
+using JAKE.classlibrary.Patterns.State;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -133,11 +135,6 @@ namespace JAKE.classlibrary
         {
             currentState.setCurrentLook();
         }
-        public IMemento CreateMemento()
-        {
-            return new PlayerMemento(currentState);
-        }
-
         public void RestoreMemento(IMemento memento)
         {
             currentState = memento.GetState();
@@ -149,11 +146,12 @@ namespace JAKE.classlibrary
             caretaker.AddMemento(memento);
         }
 
-        public void RestoreState(int index)
+        public void RestoreState()
         {
-            if (index >= 0 && index < caretaker.GetMementosCount())
+            int lastIndex = caretaker.GetMementosCount() - 2;
+            if (lastIndex >= 0)
             {
-                IMemento memento = caretaker.GetMemento(index);
+                IMemento memento = caretaker.GetMemento(lastIndex);
                 RestoreMemento(memento);
             }
         }
@@ -299,7 +297,7 @@ namespace JAKE.classlibrary
         }
         public override string ToString()
         {
-            return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetShotColor()}:{GetShotShape()}";
+            return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetShotColor()}:{GetShotShape()}:{this.state}";
         }
 
         [ExcludeFromCodeCoverage]

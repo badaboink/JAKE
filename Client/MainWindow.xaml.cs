@@ -31,6 +31,8 @@ using JAKE.classlibrary.Enemies;
 using JAKE.classlibrary.Shots;
 using JAKE.classlibrary.Colors;
 using JAKE.classlibrary.Collectibles;
+using JAKE.classlibrary.Patterns.State;
+
 namespace JAKE.client
 {
     public partial class MainWindow : Window
@@ -173,7 +175,7 @@ namespace JAKE.client
                 {
                     string[] parts = playerEntry.Split(':');
 
-                    if (parts.Length == 7)
+                    if (parts.Length == 8)
                     {
                         int playerId = int.Parse(parts[0]);
                         string playerName = parts[1];
@@ -398,7 +400,7 @@ namespace JAKE.client
             {
                 string[] parts = player.Split(':');
 
-                if (parts.Length == 7)
+                if (parts.Length == 8)
                 {
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
@@ -684,7 +686,7 @@ namespace JAKE.client
             connection.On<string>("DisconnectedPlayer", (player) =>
             {
                 string[] parts = player.Split(':');
-                if (parts.Length == 7)
+                if (parts.Length == 8)
                 {
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
@@ -808,16 +810,17 @@ namespace JAKE.client
 
         private void UpdateUsers()
         {
-            connection.On("UpdateUsers", (Action<string>)((player) =>
+            _ = connection.On("UpdateUsers", (Action<string>)((player) =>
             {
                 string[] parts = player.Split(':');
 
-                if (parts.Length == 7)
+                if (parts.Length == 8)
                 {
                     int playerId = int.Parse(parts[0]);
                     string playerName = parts[1];
                     double x = double.Parse(parts[3]);
                     double y = double.Parse(parts[4]);
+                    string state = parts[7];
                     Player? playerInfo = playerInfoList.Find(p => p.GetId() == playerId);
                     if (playerInfo == null)
                     {
@@ -833,16 +836,15 @@ namespace JAKE.client
                         Canvas.SetLeft(playerVisual, playerInfo.GetCurrentX());
                         Canvas.SetTop(playerVisual, playerInfo.GetCurrentY());
 
-                        if (playerName == "dead")
+                        if (state == "dead")
                         {
-                            Debug.WriteLine("wtf");
                             HandlePlayerDeath(playerInfo);
                         }
-                        if (playerName == "corona")
+                        if (state == "corona")
                         {
                             HandleCoronaState(playerInfo);
                         }
-                        if (playerName == "alive")
+                        if (state == "alive")
                         {
                             HandleAliveState(playerInfo);
                         }
@@ -1057,10 +1059,10 @@ namespace JAKE.client
         {
             var timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(5);
-            timer.Tick += (sender, args) =>
+            timer.Tick += async (sender, args) =>
             {
                 HandleAliveState(currentPlayer);
-                UpdateStatePlayer("alive");
+                await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "alive");
 
             };
 
@@ -1157,8 +1159,8 @@ namespace JAKE.client
                 continueButton.Visibility = Visibility.Visible;
             }
             player.SetState(new DeadState(player));
-            player.UpdateState();
-            player.SaveState();
+            player.UpdateState();  // pakeicia savybes pagal state
+            player.SaveState();    // issaugo state i memento array
             PlayerAppereanceUpdate(player);
 
         }
@@ -1166,8 +1168,8 @@ namespace JAKE.client
         public void HandleCoronaState(Player player)
         {
             player.SetState(new CoronaState(player));
-            player.UpdateState();
-            player.SaveState();
+            player.UpdateState();  // pakeicia savybes pagal state
+            player.SaveState();    // issaugo state i memento array
             PlayerAppereanceUpdate(player);
 
         }
@@ -1175,13 +1177,13 @@ namespace JAKE.client
         public void HandleAliveState(Player player)
         {
             player.SetState(new AliveState(player));
-            player.UpdateState();
-            player.SaveState();
+            player.UpdateState(); // pakeicia savybes pagal state
+            player.SaveState();  // issaugo state i memento array
             PlayerAppereanceUpdate(player);
 
         }
 
-        public void HandleRebornState(Player player)
+        public async Task HandleRebornStateAsync(Player player)
         {
             if (player.Equals(currentPlayer))
             {
@@ -1192,11 +1194,18 @@ namespace JAKE.client
             healthLabel.Text = $"Health: {gameStat.PlayerHealth}";
             Player health = new HealthDecorator(player);
             healthBar.Width = health.Display(gameStat.PlayerHealth, gameStat.ShieldOn).health;
-            player.RestoreState(0);
-            player.UpdateState();
-            player.SaveState();
+            player.RestoreState(); // grizta i paskutine buvusia state (tai jei sirgo kovidu ir mire tai gime kovidu vel)
+            player.UpdateState();  // pakeicia savybes pagal state
+            player.SaveState();    // issaugo state i memento array
             PlayerAppereanceUpdate(player);
-            UpdateStatePlayer("alive");
+            if (player.GetState().GetType() == typeof(AliveState))
+            {
+                await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "alive");
+            }
+            else if (player.GetState().GetType() == typeof(CoronaState))
+            {
+                await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "corona"); 
+            }           
             gamestarted = true;
 
         }
@@ -1204,7 +1213,7 @@ namespace JAKE.client
         private void ContinueButtonClick(object sender, RoutedEventArgs e)
         {
             Debug.WriteLine("MYGTUKAS");
-            HandleRebornState(currentPlayer);
+            _ = HandleRebornStateAsync(currentPlayer);
         }
 
         public async void UpdateStatePlayer(string state)
@@ -1283,7 +1292,7 @@ namespace JAKE.client
                         ////StopCorona2();
                       
                         HandleCoronaState(currentPlayer);
-                        UpdateStatePlayer("corona");
+                        await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "corona");
                         //StopCorona2();
 
 
@@ -1374,11 +1383,11 @@ namespace JAKE.client
                 isCollidingWithHealthBoost = true;
                 GameStats gameStat = GameStats.Instance;
                 healthBoost.Interact(gameStat);
-                currentPlayer.RestoreState(0);
-                currentPlayer.UpdateState();
-                currentPlayer.SaveState();
+                currentPlayer.SetState(new AliveState(currentPlayer));
+                currentPlayer.UpdateState();   // pakeicia savybes pagal state
+                currentPlayer.SaveState();     // issaugo state i memento array
                 PlayerAppereanceUpdate(currentPlayer);
-                UpdateStatePlayer("alive");
+                await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "alive");
                 if (gameStat.PlayerHealth > 100)
                 {
                     gameStat.PlayerHealth = 100;

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace JAKE.classlibrary.Patterns
+namespace JAKE.classlibrary.Patterns.State
 {
     public interface IState
     {
