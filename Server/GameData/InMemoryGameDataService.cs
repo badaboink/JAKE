@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.SignalR;
 using Server.Hubs;
 using System.Reflection.Emit;
 using System.Diagnostics;
+using JAKE.classlibrary.Patterns.Interpreter;
 
 namespace Server.GameData
 {
@@ -30,12 +31,14 @@ namespace Server.GameData
         public Spawner spawner;
         private int bossId = -1;
         private int level = 1;
+        private IMessageInterpreter nameInterpreter;
         public InMemoryGameDataService()
         {
             // Generate obstacles when the service is created
             obstacles = GameFunctions.GenerateObstacles();
             obstacleChecker = new ObstacleChecker(obstacles);
             spawner = new Spawner(objectFactory, zombieFactory, obstacleChecker);
+            nameInterpreter = new ProfanityFilterInterpreter();
         }
         readonly Random random = new();
         readonly int minId = 1;
@@ -50,6 +53,7 @@ namespace Server.GameData
             } while (usedIds.Contains(playerId));
             usedIds.Add(playerId);
             Player newPlayer = new(playerId, playerName, playerColor, shotcolor, shotshape);
+            playerName = nameInterpreter.Interpret(playerName);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);

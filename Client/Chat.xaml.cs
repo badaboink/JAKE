@@ -1,4 +1,5 @@
 ﻿using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Patterns.Interpreter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,11 +25,17 @@ namespace JAKE.client
         private string username = "You";
         public event EventHandler<string> MessageSent;
         private readonly ChatMediator mediator;
+        private readonly IMessageInterpreter specialSymbolInterpreter;
+        private readonly IMessageInterpreter profanityFilterInterpreter;
+        private readonly IMessageInterpreter commandFilterInterpreter;
         public Chat(MainWindow mainWindow, ChatMediator mediator)
         {
             InitializeComponent();
             this.mediator = mediator;
-            this.mediator.MessageSent += GetMessage; 
+            this.mediator.MessageSent += GetMessage;
+            specialSymbolInterpreter = new SpecialSymbolInterpreter();
+            profanityFilterInterpreter = new ProfanityFilterInterpreter();
+            commandFilterInterpreter = new CommandInterpreter();
 
             textBoxMessage.PreviewKeyDown += textBoxMessage_PreviewKeyDown;
             mainWindow.NameEntered += MainWindow_NameEntered;
@@ -46,7 +53,17 @@ namespace JAKE.client
 
             if (!string.IsNullOrWhiteSpace(message))
             {
-                mediator.SendMessage(message, username, null);
+                string help = commandFilterInterpreter.Interpret(message);
+                if(help != null)
+                {
+                    mediator.SendMessage(help, "System", username);
+                }
+                else
+                {
+                    message = specialSymbolInterpreter.Interpret(message);
+                    message = profanityFilterInterpreter.Interpret(message);
+                    mediator.SendMessage(message, username, null);
+                }
                 // Clear the message input
                 textBoxMessage.Clear();
             }
