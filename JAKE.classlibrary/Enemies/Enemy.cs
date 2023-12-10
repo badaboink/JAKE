@@ -13,7 +13,7 @@ namespace JAKE.classlibrary.Enemies
     {
         private int _id;
         private double _speed;
-        private readonly string _color;
+        private string _color;
         private readonly Coordinates coordinates;
         private readonly Trigger trigger = new();
         private int _health;
@@ -103,6 +103,14 @@ namespace JAKE.classlibrary.Enemies
         public void SetSize(int size)
         {
             _size = size;
+        }
+        public void SetColor(string color)
+        {
+            _color = color;
+        }
+        public void SetPoints(int points)
+        {
+            _points = points;
         }
         public void SetSpeed(double speed)
         {

@@ -27,6 +27,6 @@ namespace JAKE.classlibrary.Enemies
 #pragma warning restore CS8604 // Possible null reference argument.
             return clone;
         }
-        
+
     }
 }

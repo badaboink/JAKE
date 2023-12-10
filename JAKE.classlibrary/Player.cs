@@ -1,5 +1,4 @@
 ﻿using JAKE.classlibrary.Patterns;
-using JAKE.classlibrary.Patterns.Memento;
 using JAKE.classlibrary.Patterns.State;
 using System;
 using System.Collections.Generic;
@@ -307,6 +306,51 @@ namespace JAKE.classlibrary
             _speed += speed;
         }
 
-        
+        private sealed class Caretaker
+        {
+            private List<IMemento> mementos = new List<IMemento>();
+
+            public void AddMemento(IMemento memento)
+            {
+                mementos.Add(memento);
+            }
+
+            public IMemento GetMemento(int index)
+            {
+                if (index >= 0 && index < mementos.Count)
+                {
+                    return mementos[index];
+                }
+
+                return null;
+            }
+
+            public int GetMementosCount()
+            {
+                return mementos.Count;
+            }
+        }
+
+        public interface IMemento
+        {
+            IState GetState();
+        }
+
+        private sealed class PlayerMemento : IMemento
+        {
+            private IState state;
+
+            public PlayerMemento(IState state)
+            {
+                this.state = state;
+            }
+
+            public IState GetState()
+            {
+                return state;
+            }
+
+        }
+
     }
 }

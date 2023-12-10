@@ -1281,16 +1281,16 @@ namespace JAKE.client
                         //corona.Interact(gameStat);
                         //StopCorona();
 
-                        ////currentPlayer.SetColor("Lime");
+                        //currentPlayer.SetColor("Lime");
 
-                        //await connection.SendAsync("SendPickedCorona", corona.ToString());                      
-                        //mediator.SendMessage("AJAJAJAJ CORONA", "System", currentPlayer.GetId().ToString());
+                        await connection.SendAsync("SendPickedCorona", corona.ToString());
+                        mediator.SendMessage("AJAJAJAJ CORONA", "System", currentPlayer.GetId().ToString());
                         //await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
 
                         //currentPlayer.SetState(new CoronaState(currentPlayer));
                         //currentPlayer.UpdateState();
                         ////StopCorona2();
-                      
+
                         HandleCoronaState(currentPlayer);
                         await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "corona");
                         //StopCorona2();
