@@ -15,28 +15,35 @@ namespace JAKE.classlibrary
         protected ObstacleChecker obstacleChecker;
         protected double windowWidth;
         protected double windowHeight;
+        protected double stepSize;
 
         [ExcludeFromCodeCoverage]
         protected MovementCommand(Player player, List<Obstacle> obstacles) : base(player)
         {
             this.obstacleChecker = new ObstacleChecker(obstacles);
             this._player = player;
+            GameStats gameStat = GameStats.Instance;
+            this.stepSize = gameStat.PlayerSpeed;
         }
 
         public override bool Execute()
         {
+            player.SetCurrentDirection(GetDirectionX(), GetDirectionY());
             return Move();
         }
 
         public override void Undo()
         {
+            player.SetCurrentDirection(-GetDirectionX(), -GetDirectionY());
             Move();
         }
 
+        protected abstract double GetDirectionX();
+        protected abstract double GetDirectionY();
+
+        // Template method
         public bool Move()
         {
-            GameStats gameStat = GameStats.Instance;
-            double stepSize = gameStat.PlayerSpeed;
             Coordinates playerCurrent = player.GetCurrentCoords();
             Coordinates playerDirection = player.GetDirectionCoords();
             Coordinates nextCoords = player.GetNextCoords(stepSize);
@@ -53,17 +60,8 @@ namespace JAKE.classlibrary
         {
         }
 
-        public override bool Execute()
-        {
-            player.SetCurrentDirection(0, -1);
-            return base.Execute();
-        }
-
-        public override void Undo()
-        {
-            player.SetCurrentDirection(0, 1);
-            base.Undo();
-        }
+        protected override double GetDirectionX() => 0;
+        protected override double GetDirectionY() => -1;
 
     }
 
@@ -73,17 +71,8 @@ namespace JAKE.classlibrary
         {
         }
 
-        public override bool Execute()
-        {
-            player.SetCurrentDirection(0, 1);
-            return base.Execute();
-        }
-
-        public override void Undo()
-        {
-            player.SetCurrentDirection(0, -1);
-            base.Execute();
-        }
+        protected override double GetDirectionX() => 0;
+        protected override double GetDirectionY() => 1;
     }
 
     public class MoveLeft : MovementCommand
@@ -92,17 +81,8 @@ namespace JAKE.classlibrary
         {
         }
 
-        public override bool Execute()
-        {
-            player.SetCurrentDirection(-1, 0);
-            return base.Execute();
-        }
-
-        public override void Undo()
-        {
-            player.SetCurrentDirection(1, 0);
-            base.Execute();
-        }
+        protected override double GetDirectionX() => -1;
+        protected override double GetDirectionY() => 0;
     }
 
     public class MoveRight : MovementCommand
@@ -111,18 +91,7 @@ namespace JAKE.classlibrary
         {
         }
 
-        public override bool Execute()
-        {
-            player.SetCurrentDirection(1, 0);
-            return base.Execute();
-        }
-
-        public override void Undo()
-        {
-            player.SetCurrentDirection(-1, 0);
-            base.Undo();
-        }
+        protected override double GetDirectionX() => 1;
+        protected override double GetDirectionY() => 0;
     }
-
-
 }

@@ -1277,15 +1277,15 @@ namespace JAKE.client
                     double coronaY = Canvas.GetTop(coronaRect);
                     if (PlayerTouchesMapObject(playerX, playerY, playerVisual.Height, coronaX, coronaY, coronaRect.Height))
                     {
-                        //GameStats gameStat = GameStats.Instance;
-                        //corona.Interact(gameStat);
+                        GameStats gameStat = GameStats.Instance;
+                        corona.Interact(gameStat);
                         //StopCorona();
 
                         //currentPlayer.SetColor("Lime");
 
                         await connection.SendAsync("SendPickedCorona", corona.ToString());
                         mediator.SendMessage("AJAJAJAJ CORONA", "System", currentPlayer.GetId().ToString());
-                        //await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
+                        await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
 
                         //currentPlayer.SetState(new CoronaState(currentPlayer));
                         //currentPlayer.UpdateState();

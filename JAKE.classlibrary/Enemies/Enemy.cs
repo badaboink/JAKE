@@ -9,7 +9,7 @@ using JAKE.classlibrary.Patterns.Strategies;
 
 namespace JAKE.classlibrary.Enemies
 {
-    public class Enemy //: IPrototype
+    public class Enemy
     {
         private int _id;
         private double _speed;
