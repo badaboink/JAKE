@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace JAKE.classlibrary
 {
 
-    public abstract class MovementCommand : Command
+    public abstract class Movement : Command
     {
         protected Player _player;
         protected ObstacleChecker obstacleChecker;
@@ -18,7 +18,7 @@ namespace JAKE.classlibrary
         protected double stepSize;
 
         [ExcludeFromCodeCoverage]
-        protected MovementCommand(Player player, List<Obstacle> obstacles) : base(player)
+        protected Movement(Player player, List<Obstacle> obstacles) : base(player)
         {
             this.obstacleChecker = new ObstacleChecker(obstacles);
             this._player = player;
@@ -54,7 +54,7 @@ namespace JAKE.classlibrary
         }
     }
     
-    public class MoveUp : MovementCommand
+    public class MoveUp : Movement
     {
         public MoveUp(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
@@ -65,7 +65,7 @@ namespace JAKE.classlibrary
 
     }
 
-    public class MoveDown : MovementCommand
+    public class MoveDown : Movement
     {
         public MoveDown(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
@@ -75,7 +75,7 @@ namespace JAKE.classlibrary
         protected override double GetDirectionY() => 1;
     }
 
-    public class MoveLeft : MovementCommand
+    public class MoveLeft : Movement
     {
         public MoveLeft(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
@@ -85,7 +85,7 @@ namespace JAKE.classlibrary
         protected override double GetDirectionY() => 0;
     }
 
-    public class MoveRight : MovementCommand
+    public class MoveRight : Movement
     {
         public MoveRight(Player player, List<Obstacle> obstacles) : base(player, obstacles)
         {
