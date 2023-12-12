@@ -14,6 +14,7 @@ namespace JAKE.classlibrary.Patterns.Interpreter
             {
                 return "\nUse arrow buttons to move, space button to shoot.\nAvoid and shoot enemies - blue circles, green circles, as well as corona" +
                     "elements.\nPick up power ups - coins, health, shields.\nScore and health are displayed in the left most corner of the game screen.\n" +
+                    "To access settings click escape button.\n" +
                     "Try out various chat emoticons by typing: #heart, #star, #happy, #sad...\n" +
                     "If someone is being abusive in game - log off and close your eyes.";
             }
