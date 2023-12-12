@@ -1278,23 +1278,25 @@ namespace JAKE.client
                     if (PlayerTouchesMapObject(playerX, playerY, playerVisual.Height, coronaX, coronaY, coronaRect.Height))
                     {
                         GameStats gameStat = GameStats.Instance;
-                        corona.Interact(gameStat);
-                        //StopCorona();
+                        if(!gameStat.ShieldOn)
+                        {
+                            corona.Interact(gameStat);
+                            //StopCorona();
 
-                        //currentPlayer.SetColor("Lime");
+                            //currentPlayer.SetColor("Lime");
 
-                        await connection.SendAsync("SendPickedCorona", corona.ToString());
-                        mediator.SendMessage("AJAJAJAJ CORONA", "System", currentPlayer.GetId().ToString());
-                        await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
+                            await connection.SendAsync("SendPickedCorona", corona.ToString());
+                            mediator.SendMessage("AJAJAJAJ CORONA", "System", currentPlayer.GetId().ToString());
+                            await connection.SendAsync("SendMove", currentPlayer.GetId(), playerX, playerY, gameStat.state);
 
-                        //currentPlayer.SetState(new CoronaState(currentPlayer));
-                        //currentPlayer.UpdateState();
-                        ////StopCorona2();
+                            //currentPlayer.SetState(new CoronaState(currentPlayer));
+                            //currentPlayer.UpdateState();
+                            ////StopCorona2();
 
-                        HandleCoronaState(currentPlayer);
-                        await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "corona");
-                        //StopCorona2();
-
+                            HandleCoronaState(currentPlayer);
+                            await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), "corona");
+                            //StopCorona2();
+                        }
 
                     }
                 }
@@ -1319,20 +1321,23 @@ namespace JAKE.client
                                                      let text = new ShieldItemDecorator(currentPlayer)
                                                      select (shield, gameStat, text))
             {
-                testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
-                ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
-                bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).shieldOn;
-                if (shieldVisible)
+                if(currentPlayer.GetState().GetType() != typeof(CoronaState))
                 {
-                    shieldBorder.Visibility = Visibility.Visible;
-                    gameStat.ShieldOn = true;
-                    shield.Interact(gameStat);
-                }
+                    testLabel.Text = text.Display(gameStat.PlayerHealth, gameStat.ShieldOn).text;
+                    ShieldDecorator shieldObj = new ShieldDecorator(currentPlayer);
+                    bool shieldVisible = shieldObj.Display(gameStat.PlayerHealth, gameStat.ShieldOn).shieldOn;
+                    if (shieldVisible)
+                    {
+                        shieldBorder.Visibility = Visibility.Visible;
+                        gameStat.ShieldOn = true;
+                        shield.Interact(gameStat);
+                    }
 
-                HideDisplay();
-                HideShieldDisplay();
-                mediator.SendMessage("Shield picked", "System", currentPlayer.GetId().ToString());
-                await connection.SendAsync("SendPickedShield", shield.ToString());
+                    HideDisplay();
+                    HideShieldDisplay();
+                    mediator.SendMessage("Shield picked", "System", currentPlayer.GetId().ToString());
+                    await connection.SendAsync("SendPickedShield", shield.ToString());
+                }          
             }
         }
 #pragma warning disable S3168 // "async" methods should not return "void"
