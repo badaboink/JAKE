@@ -12,7 +12,7 @@ namespace JAKE.classlibrary.Patterns.Interpreter
         private readonly List<string> profanities = new List<string> { "fuck", "nx", "bitch", "krw", "kurva", 
             "kurwa", "zertva", "debile", "daunas", "die", "padla", "dalbajobe", "kekse" };
 
-        public string Interpret(string message)
+        public string interpret(string message)
         {
             foreach (var profanity in profanities)
             {

@@ -24,17 +24,17 @@ namespace JAKE.client.Composite
         }
         public void Execute(MainWindow mainWindow)
         {
-            foreach (var menuItem in menuItems)
+            while (HasMore())
             {
+                var menuItem = GetNext();
+
                 if (menuItem is BackgroundColorMenuItem backgroundColorMenuItem &&
                     backgroundColorMenuItem.backgroundColor == selectedColor)
                 {
-                    // Execute the found menu item
                     menuItem.Execute(mainWindow);
                     break;
                 }
             }
-            currentIndex = 0;
         }
 
         public IMenuItem GetNext()

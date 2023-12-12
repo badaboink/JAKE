@@ -53,7 +53,7 @@ namespace Server.GameData
             } while (usedIds.Contains(playerId));
             usedIds.Add(playerId);
             Player newPlayer = new(playerId, playerName, playerColor, shotcolor, shotshape);
-            playerName = nameInterpreter.Interpret(playerName);
+            playerName = nameInterpreter.interpret(playerName);
             newPlayer.SetName(playerName);
             newPlayer.SetConnectionId(connectionID);
             players.Add(newPlayer);

@@ -8,6 +8,6 @@ namespace JAKE.classlibrary.Patterns.Interpreter
 {
     public interface IMessageInterpreter
     {
-        string Interpret(string message);
+        string interpret(string message);
     }
 }

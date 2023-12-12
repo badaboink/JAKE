@@ -57,15 +57,15 @@ namespace JAKE.client
 
             if (!string.IsNullOrWhiteSpace(message))
             {
-                string help = commandFilterInterpreter.Interpret(message);
+                string help = commandFilterInterpreter.interpret(message);
                 if(help != null)
                 {
                     mediator.SendMessage(help, "System", username);
                 }
                 else
                 {
-                    message = specialSymbolInterpreter.Interpret(message);
-                    message = profanityFilterInterpreter.Interpret(message);
+                    message = specialSymbolInterpreter.interpret(message);
+                    message = profanityFilterInterpreter.interpret(message);
                     mediator.SendMessage(message, username, null);
                 }
                 // Clear the message input

@@ -8,7 +8,7 @@ namespace JAKE.classlibrary.Patterns.Interpreter
 {
     public class CommandInterpreter : IMessageInterpreter
     {
-        public string Interpret(string message)
+        public string interpret(string message)
         {
             if (message.ToLower() == "/help")
             {

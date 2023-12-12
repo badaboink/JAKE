@@ -11,8 +11,6 @@ namespace JAKE.client.Composite
         protected readonly List<IMenuItem> menuItems = new List<IMenuItem>();
         private int currentIndex = 0;
 
-        public string Name { get; set; }
-
         public void AddMenuItem(IMenuItem menuItem)
         {
             menuItems.Add(menuItem);
@@ -41,15 +39,6 @@ namespace JAKE.client.Composite
         public bool HasMore()
         {
             return currentIndex < menuItems.Count;
-        }
-        public void ShowMenuWindow()
-        {
-            Menu menuWindow = new Menu(this);
-            menuWindow.Show();
-        }
-        public IIterator CreateIterator()
-        {
-            return this;
         }
     }
 }

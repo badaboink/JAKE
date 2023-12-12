@@ -8,7 +8,7 @@ namespace JAKE.classlibrary.Patterns.Interpreter
 {
     public class SpecialSymbolInterpreter : IMessageInterpreter
     {
-        public string Interpret(string message)
+        public string interpret(string message)
         {
             return message.Replace("#heart", " ♥ ").Replace("#star", " ★ ").Replace("#happy", " ☺ ")
                 .Replace("#sad", " ☹ ").Replace("#good", " 👍 ").Replace("#bad", " 👎 ");
