@@ -6,7 +6,7 @@
         <ItemsControl x:Name="playersContainer" x:FieldModifier="public">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <Canvas x:Name="GameMap" Background="Gray" />
+                    <Canvas x:Name="GameMap" Background="{Binding CurrentBackgroundColor}" />
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>

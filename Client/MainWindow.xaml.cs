@@ -32,19 +32,27 @@ using JAKE.classlibrary.Shots;
 using JAKE.classlibrary.Colors;
 using JAKE.classlibrary.Collectibles;
 using JAKE.classlibrary.Patterns.State;
+using JAKE.client.Composite;
+using System.ComponentModel;
 
 namespace JAKE.client
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private const string UrlToGameHub = "https://localhost:7039/gamehub";
         //---------------------------------------------
         //Chat
-        private Chat chatWindow;
+        public Chat chatWindow;
         public event EventHandler<string> NameEntered;
         public event EventHandler<string> MessageGot;
+        public ChatMediator mediator = new ChatMediator();
+        //---------------------------------------------
+        private Menu menu;
+        private MainMenu mainMenu;
+        public event PropertyChangedEventHandler PropertyChanged;
         //---------------------------------------------
         private Player currentPlayer;
+        public string username;
         private bool gamestarted = false;
         private List<Player> playerInfoList = new();
         private Dictionary<Player, PlayerVisual> playerVisuals = new Dictionary<Player, PlayerVisual>();
@@ -77,15 +85,16 @@ namespace JAKE.client
         private string primaryColor = "";
         private DispatcherTimer LevelTimer;
         private IGameEntityVisitor levelUpVisitor = new GameEntityVisitor();
-        private ChatMediator mediator = new ChatMediator();
 
         private bool isCollidingWithHealthBoost = false;
 
 
         public MainWindow()
         {
+            DataContext = this;
             currentPlayer = new();
             chatWindow = new Chat(this, mediator);
+            mainMenu = new MainMenu();
             connection = new HubConnectionBuilder()
                 .WithUrl(UrlToGameHub)
                 .Build();
@@ -103,6 +112,10 @@ namespace JAKE.client
                 collisionCheckedEnemies[enemy] = false;
             }
         }
+        private void MusicPlayer_MediaFailed(object sender, ExceptionRoutedEventArgs e)
+        {
+            MessageBox.Show($"Media failed: {e.ErrorException.Message}");
+        }
         private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
             await StartSignalRConnection();
@@ -110,14 +123,20 @@ namespace JAKE.client
             await Task.Run(() => ListenForGameUpdates());
             //GetLevel();
             //SetLevel();
-            LevelTimer = new DispatcherTimer();
-            LevelTimer.Interval = TimeSpan.FromSeconds(10); // TODO: padidint veliau
-            LevelTimer.Tick += Timer_Tick;
-            LevelTimer.Start();
+            if (GameStats.Instance.Level < 10)
+            {
+                LevelTimer = new DispatcherTimer();
+                LevelTimer.Interval = TimeSpan.FromSeconds(10); // TODO: padidint veliau
+                LevelTimer.Tick += Timer_Tick;
+                LevelTimer.Start();
+            }
         }
         private void Timer_Tick(object sender, EventArgs e)
         {
-            LevelUp();
+            if(GameStats.Instance.Level < 10)
+            {
+                LevelUp();
+            }
         }
         private async Task StartSignalRConnection()
         {
@@ -150,6 +169,7 @@ namespace JAKE.client
             connection.On<int, string, string, string>("GameStart", (id, name, color, obstacleData) =>
             {
                 SetCurrentPlayer(id, name, color, shotColor, shotShape);
+                username = name ?? string.Empty;
                 NameEntered?.Invoke(this, name);
                 gamestarted = true;
                 string[] obstaclemessages = obstacleData.Split(',');
@@ -234,6 +254,29 @@ namespace JAKE.client
 
                 playersContainer.Items.Add(playerVisual);
             });
+        }
+        private Color _currentBackgroundColor = Colors.Red;
+        public Color CurrentBackgroundColor
+        {
+            get { return _currentBackgroundColor; }
+            set
+            {
+                if (_currentBackgroundColor != value)
+                {
+                    _currentBackgroundColor = value;
+                    OnPropertyChanged(nameof(CurrentBackgroundColor));
+                }
+            }
+        }
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+        public void SetBackgroundColor(Color color)
+        {
+            // Implement logic to set the background color
+            CurrentBackgroundColor = color;
+            this.Background = new SolidColorBrush(CurrentBackgroundColor);
         }
 #pragma warning disable S4487 // Unread "private" fields should be removed
 #pragma warning disable IDE0052 // Remove unread private members
@@ -924,6 +967,11 @@ namespace JAKE.client
                         break;
                     case Key.Space:
                         controller.SetCommand(new ShootCommand(currentPlayer, this));
+                        break;
+                    case Key.Escape:
+                        execute = true;
+                        menu = new Menu(mainMenu);
+                        menu.Show();
                         break;
                     default:
                         execute = false;
