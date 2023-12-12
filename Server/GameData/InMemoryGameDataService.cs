@@ -328,7 +328,10 @@ namespace Server.GameData
 
         public void SetLevel(int level)
         {
-            this.level = level;
+            if(this.level < level)
+            {
+                this.level = level;
+            }
         }
         public Coin AddCoin(int points)
         {

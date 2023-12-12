@@ -1,0 +1,22 @@
+﻿<Window x:Class="JAKE.client.Menu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:JAKE.client"
+        mc:Ignorable="d"
+        Title="Menu" Height="200" Width="400">
+    <Grid>
+        <StackPanel>
+            <Button Height="40" Content="Change Background Color" Click="ChangeBackgroundColorButton_Click" Background="LightGray"/>
+            <StackPanel x:Name="SubMenu" Visibility="Collapsed">
+                <Button Height="24" Content="Gray" Click="ChangeBackground_Click" Background="White"/>
+                <Button Height="24" Content="Dark Gray" Click="ChangeBackground_Click" Background="White"/>
+                <Button Height="24" Content="Black" Click="ChangeBackground_Click" Background="White"/>
+                <Button Height="24" Content="White" Click="ChangeBackground_Click" Background="White"/>
+                <Button Height="24" Content="Back" Click="BackButton_Click" Background="White"/>
+            </StackPanel>
+            <Button Height="40" Content="Toggle chat (if off)" Click="ShowChatButton_Click" Background="LightGray"/>
+        </StackPanel>
+    </Grid>
+</Window>

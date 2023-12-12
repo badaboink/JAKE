@@ -46,6 +46,10 @@ namespace JAKE.client
         {
             username = e;
         }
+        public void SetUsername(string newName)
+        {
+            username = newName;
+        }
 
         private void SendMessage()
         {
