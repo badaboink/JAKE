@@ -35,6 +35,7 @@ namespace JAKE.client.Composite
                     break;
                 }
             }
+            currentIndex = 0;
         }
 
         public IMenuItem GetNext()
