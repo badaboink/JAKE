@@ -1,6 +1,8 @@
 ﻿using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Patterns.Flyweight;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
@@ -8,19 +10,22 @@ using System.Threading.Tasks;
 
 namespace JAKE.classlibrary
 {
-    public class Obstacle
+    public class Obstacle : Flyweight
     {
+        public string Material;
         public double Width { get; set; }
         public double Height { get; set; }
         public double PositionX { get; set; }
         public double PositionY { get; set; }
 
-        public Obstacle(double width, double height, double positionX, double positionY)
+        public Obstacle(double width, double height, double positionX, double positionY, string material = "default", string color = "gray")
         {
             Width = width;
             Height = height;
             PositionX = positionX;
             PositionY = positionY;
+            this.Material = material;
+            this.color = color;
         }
 
         public bool WouldOverlap(double newX, double newY, double playerWidth, double playerHeight)
@@ -310,7 +315,12 @@ namespace JAKE.classlibrary
         [ExcludeFromCodeCoverage]
         public override string ToString()
         {
-            return $"{Width}:{Height}:{PositionX}:{PositionY}";
+            return $"{Width}:{Height}:{PositionX}:{PositionY}:{Material}";
+        }
+
+        public override void Display(string text)
+        {
+            Debug.WriteLine(Material + " " + text);
         }
     }
 }

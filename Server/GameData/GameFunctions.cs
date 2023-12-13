@@ -19,7 +19,7 @@ namespace Server.GameData
                 double xtemp = random.Next(60, (int)(1920 - widthTemp));
                 double ytemp = random.Next(60, (int)(1080 - heightTemp));
 
-                Obstacle obstacle = new(widthTemp, heightTemp, xtemp, ytemp);
+                Obstacle obstacle = new(widthTemp, heightTemp, xtemp, ytemp, "material"+(i%5).ToString());
                 obstacles.Add(obstacle);
             }
             return obstacles;

@@ -35,6 +35,7 @@ using JAKE.classlibrary.Patterns.State;
 using JAKE.client.Composite;
 using System.ComponentModel;
 using JAKE.classlibrary.Patterns.ChainOfResponsibility;
+using JAKE.classlibrary.Patterns.Flyweight;
 
 namespace JAKE.client
 {
@@ -86,7 +87,7 @@ namespace JAKE.client
         private string primaryColor = "";
         private DispatcherTimer LevelTimer;
         private IGameEntityVisitor levelUpVisitor = new GameEntityVisitor();
-
+        private FlyweightFactory flyweightFactory = new FlyweightFactory();
         private bool isCollidingWithHealthBoost = false;
 
 
@@ -177,14 +178,22 @@ namespace JAKE.client
                 foreach (string obs in obstaclemessages)
                 {
                     string[] parts = obs.Split(':');
-                    if (parts.Length == 4)
+                    if (parts.Length == 5)
                     {
                         double width = double.Parse(parts[0]);
                         double height = double.Parse(parts[1]);
                         double posX = double.Parse(parts[2]);
                         double posY = double.Parse(parts[3]);
-
-                        Obstacle obstacle = new Obstacle(width, height, posX, posY);
+                        string material = parts[4];
+                        string[] colors = { "red", "gray", "black", "blue", "green", "white", "pink", "red", "gray", "black" };
+                        int k = 0;
+                        Obstacle obstacle = (Obstacle)flyweightFactory.GetFlyweight(material);
+                        if(obstacle == null)
+                        {
+                            obstacle = new Obstacle(width, height, posX, posY, material, colors[k++]);
+                            flyweightFactory.SetFlyweight(obstacle, material);
+                            obstacle.Display("");
+                        }
                         obstacles.Add(obstacle);
                         LoadGameMap();
                     }

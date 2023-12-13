@@ -5,6 +5,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 using JAKE.classlibrary.Patterns;
+using JAKE.classlibrary.Patterns.Flyweight;
 using JAKE.classlibrary.Patterns.Strategies;
 
 namespace JAKE.classlibrary.Enemies
