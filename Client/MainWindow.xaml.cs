@@ -185,16 +185,17 @@ namespace JAKE.client
                         double posX = double.Parse(parts[2]);
                         double posY = double.Parse(parts[3]);
                         string material = parts[4];
-                        string[] colors = { "red", "gray", "black", "blue", "green", "white", "pink", "red", "gray", "black" };
-                        int k = 0;
-                        Obstacle obstacle = (Obstacle)flyweightFactory.GetFlyweight(material);
-                        if(obstacle == null)
-                        {
-                            obstacle = new Obstacle(width, height, posX, posY, material, colors[k++]);
-                            flyweightFactory.SetFlyweight(obstacle, material);
-                            obstacle.Display("");
-                        }
-                        obstacles.Add(obstacle);
+                        //string[] colors = { "red", "gray", "black", "blue", "green", "white", "pink", "red", "gray", "black" };
+                        //int k = 0;
+                        //Obstacle obstacle = (Obstacle)flyweightFactory.GetFlyweight(material);
+                        //if (obstacle == null)
+                        //{
+                        //    obstacle = new Obstacle(width, height, posX, posY, material, colors[k++]);
+                        //    flyweightFactory.SetFlyweight(obstacle, material);
+                        //    obstacle.Display("");
+                        //}
+                        //obstacles.Add(obstacle);
+                        Obstacle obstacle = new Obstacle(width, height, posX, posY);
                         LoadGameMap();
                     }
                 }
@@ -1007,12 +1008,6 @@ namespace JAKE.client
                 var healthBoostsHandler = new HealthBoostsCollisionHandler(this);
                 enemyHandler.SetNext(coinHandler).SetNext(coronaHandler).SetNext(shieldsHandler).SetNext(speedBoostsHandler).SetNext(healthBoostsHandler);
                 enemyHandler.Handle(playerVisuals[currentPlayer]);
-                //HandleEnemyCollisions(playerVisuals[currentPlayer]);
-                //HandleCoinsCollisions(playerVisuals[currentPlayer]);
-                //HandleCoronaCollisions(playerVisuals[currentPlayer]);
-                //HandleShieldsCollisions(playerVisuals[currentPlayer]);
-                //HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
-                //HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
             }
         }
 

@@ -19,8 +19,12 @@ namespace JAKE.classlibrary.Patterns.Flyweight
 
         public Flyweight GetFlyweight(string key)
         {
+            Flyweight flyweight;
             if (_flyweightMap.ContainsKey(key))
-                return _flyweightMap[key];
+            {
+                flyweight = _flyweightMap[key];
+                return flyweight;
+            }
             return null;
         }
 
