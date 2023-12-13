@@ -34,6 +34,7 @@ using JAKE.classlibrary.Collectibles;
 using JAKE.classlibrary.Patterns.State;
 using JAKE.client.Composite;
 using System.ComponentModel;
+using JAKE.classlibrary.Patterns.ChainOfResponsibility;
 
 namespace JAKE.client
 {
@@ -973,7 +974,7 @@ namespace JAKE.client
                         controller.SetCommand(new ShootCommand(currentPlayer, this));
                         break;
                     case Key.Escape:
-                        execute = true;
+                        execute = false;
                         menu = new Menu(mainMenu);
                         menu.Show();
                         break;
@@ -989,12 +990,106 @@ namespace JAKE.client
 
                 Move(currentPlayer.GetCurrentX(), currentPlayer.GetCurrentY());
                 UpdateTextLabelPosition();
-                HandleEnemyCollisions(playerVisuals[currentPlayer]);
-                HandleCoinsCollisions(playerVisuals[currentPlayer]);
-                HandleCoronaCollisions(playerVisuals[currentPlayer]);
-                HandleShieldsCollisions(playerVisuals[currentPlayer]);
-                HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
-                HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
+                var enemyHandler = new EnemyCollisionHandler(this);
+                var coinHandler = new CoinCollisionHandler(this);
+                var coronaHandler = new CoronaCollisionHandler(this);
+                var shieldsHandler = new ShieldsCollisionHandler(this);
+                var speedBoostsHandler = new SpeedBoostsCollisionHandler(this);
+                var healthBoostsHandler = new HealthBoostsCollisionHandler(this);
+                enemyHandler.SetNext(coinHandler).SetNext(coronaHandler).SetNext(shieldsHandler).SetNext(speedBoostsHandler).SetNext(healthBoostsHandler);
+                enemyHandler.Handle(playerVisuals[currentPlayer]);
+                //HandleEnemyCollisions(playerVisuals[currentPlayer]);
+                //HandleCoinsCollisions(playerVisuals[currentPlayer]);
+                //HandleCoronaCollisions(playerVisuals[currentPlayer]);
+                //HandleShieldsCollisions(playerVisuals[currentPlayer]);
+                //HandleSpeedBoostsCollisions(playerVisuals[currentPlayer]);
+                //HandleHealthBoostsCollisions(playerVisuals[currentPlayer]);
+            }
+        }
+
+        class EnemyCollisionHandler : Handler
+        {
+            private MainWindow mainWindow;
+
+            public EnemyCollisionHandler(MainWindow mainWindow)
+            {
+                this.mainWindow = mainWindow;
+            }
+
+            public override void Handle(object request)
+            {
+                mainWindow.HandleEnemyCollisions((PlayerVisual)request);
+                base.Handle(request);
+            }
+        }
+        class CoinCollisionHandler : Handler
+        {
+            private MainWindow mainWindow;
+
+            public CoinCollisionHandler(MainWindow mainWindow)
+            {
+                this.mainWindow = mainWindow;
+            }
+            public override void Handle(object request)
+            {
+                mainWindow.HandleCoinsCollisions((PlayerVisual)request);
+                base.Handle(request);
+            }
+        }
+        class CoronaCollisionHandler : Handler
+        {
+            private MainWindow mainWindow;
+
+            public CoronaCollisionHandler(MainWindow mainWindow)
+            {
+                this.mainWindow = mainWindow;
+            }
+            public override void Handle(object request)
+            {
+                mainWindow.HandleCoronaCollisions((PlayerVisual)request);
+                base.Handle(request);
+            }
+        }
+        class ShieldsCollisionHandler : Handler
+        {
+            private MainWindow mainWindow;
+
+            public ShieldsCollisionHandler(MainWindow mainWindow)
+            {
+                this.mainWindow = mainWindow;
+            }
+            public override void Handle(object request)
+            {
+                mainWindow.HandleShieldsCollisions((PlayerVisual)request);
+                base.Handle(request);
+            }
+        }
+        class SpeedBoostsCollisionHandler : Handler
+        {
+            private MainWindow mainWindow;
+
+            public SpeedBoostsCollisionHandler(MainWindow mainWindow)
+            {
+                this.mainWindow = mainWindow;
+            }
+            public override void Handle(object request)
+            {
+                mainWindow.HandleSpeedBoostsCollisions((PlayerVisual)request);
+                base.Handle(request);
+            }
+        }
+        class HealthBoostsCollisionHandler : Handler
+        {
+            private MainWindow mainWindow;
+
+            public HealthBoostsCollisionHandler(MainWindow mainWindow)
+            {
+                this.mainWindow = mainWindow;
+            }
+            public override void Handle(object request)
+            {
+                mainWindow.HandleHealthBoostsCollisions((PlayerVisual)request);
+                base.Handle(request);
             }
         }
 
@@ -1271,9 +1366,7 @@ namespace JAKE.client
             await connection.SendAsync("UpdateStatePlayer", currentPlayer.GetId(), state);
         }
 
-#pragma warning disable S3168 // "async" methods should not return "void"
         private async void HandleCoinsCollisions(PlayerVisual playerVisual)
-#pragma warning restore S3168 // "async" methods should not return "void"
         {
             double playerX = Canvas.GetLeft(playerVisual);
             double playerY = Canvas.GetTop(playerVisual);

@@ -296,7 +296,7 @@ namespace JAKE.classlibrary
         }
         public override string ToString()
         {
-            return $"{GetId()}:{GetName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetShotColor()}:{GetShotShape()}:{this.state}";
+            return $"{GetId()}:{GetPrimaryName()}:{GetColor()}:{GetCurrentX()}:{GetCurrentY()}:{GetShotColor()}:{GetShotShape()}:{this.state}";
         }
 
         [ExcludeFromCodeCoverage]
