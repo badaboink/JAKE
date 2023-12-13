@@ -194,8 +194,8 @@ namespace JAKE.client
                         //    flyweightFactory.SetFlyweight(obstacle, material);
                         //    obstacle.Display("");
                         //}
-                        //obstacles.Add(obstacle);
                         Obstacle obstacle = new Obstacle(width, height, posX, posY);
+                        obstacles.Add(obstacle);
                         LoadGameMap();
                     }
                 }
