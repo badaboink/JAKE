@@ -1,4 +1,5 @@
 ﻿using JAKE.classlibrary;
+using JAKE.classlibrary.Patterns.Proxy;
 using Microsoft.AspNetCore.SignalR;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -8,7 +9,7 @@ using System.Xml.Linq;
 namespace Server.GameData
 {
     [ExcludeFromCodeCoverage]
-    public class Observer
+    public class Observer : IObserverLogger
     {
         private readonly IClientProxy clientProxy;
 

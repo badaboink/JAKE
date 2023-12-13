@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Xml.Linq;
 using JAKE.classlibrary.Collectibles;
 using System.Diagnostics.CodeAnalysis;
+using JAKE.classlibrary.Patterns.Proxy;
 
 namespace Server.Hubs
 {
@@ -357,17 +358,22 @@ namespace Server.Hubs
 
         public async Task SendPlayerMessage(int id, string message)
         {
-            Console.WriteLine(message);
             Dictionary<string, Observer> observers = _gameDataService.GetObservers();
             foreach (var observerEntry in observers)
             {
+                Console.WriteLine(message);
                 var connectionId = observerEntry.Key;
                 var observer = observerEntry.Value;
+                string playerData = _gameDataService.GetPlayerData(id);
+                string[] parts = playerData.Split(':');
                 if (connectionId != Context.ConnectionId)
                 {
-                    string playerData = _gameDataService.GetPlayerData(id);
-                    string[] parts = playerData.Split(':');
                     await observer.SendPlayerMessage(parts[1], message);
+                }
+                else
+                {
+                    ObserverLogger chatLogger = new ObserverLogger(observer);
+                    await chatLogger.SendPlayerMessage(parts[1], message);
                 }
             }
         }

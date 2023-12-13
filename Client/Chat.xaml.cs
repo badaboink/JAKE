@@ -32,14 +32,14 @@ namespace JAKE.client
         {
             InitializeComponent();
             this.mediator = mediator;
-            this.mediator.MessageSent += GetMessage;
+            this.mediator.MessageGot += GetMessage;
             specialSymbolInterpreter = new SpecialSymbolInterpreter();
             profanityFilterInterpreter = new ProfanityFilterInterpreter();
             commandFilterInterpreter = new CommandInterpreter();
 
             textBoxMessage.PreviewKeyDown += textBoxMessage_PreviewKeyDown;
             mainWindow.NameEntered += MainWindow_NameEntered;
-            mainWindow.MessageGot += GetMessage;
+            //mainWindow.MessageGot += GetMessage;
         }
 
         private void MainWindow_NameEntered(object sender, string e)
@@ -73,13 +73,13 @@ namespace JAKE.client
             }
         }
 
-        private void GetMessage(object sender, string e)
+        private void GetMessage(object sender, ChatEvent chatEvent)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 // Your existing code for updating the UI goes here
                 TextBlock messageTextBlock = new TextBlock();
-                messageTextBlock.Text = $"{e}";
+                messageTextBlock.Text = $"{chatEvent.sender}: {chatEvent.message}";
                 messageTextBlock.TextWrapping = TextWrapping.Wrap;
 
                 Border messageBorder = new Border();
